@@ -11,8 +11,8 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-11 |
-| **Current phase** | Phase 0 — Not started |
-| **Backend** | Not initialized |
+| **Current phase** | Phase 0 — Step 0.3 complete |
+| **Backend** | Initialized (FastAPI + health endpoint + config) |
 | **Frontend** | Not initialized |
 | **Database** | Not created |
 | **LLM connectivity** | Not tested |
@@ -206,17 +206,17 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **0.1** Initialize `backend/` with `uv init`, install FastAPI + uvicorn + pydantic + pydantic-settings + sqlalchemy + aiosqlite + alembic + openai + google-generativeai + ollama + httpx + structlog + pytest + pytest-asyncio
+- [x] **0.1** Initialize `backend/` with `uv init`, install FastAPI + uvicorn + pydantic + pydantic-settings + sqlalchemy + aiosqlite + alembic + openai + google-generativeai + ollama + httpx + structlog + pytest + pytest-asyncio
   - **Verify:** `uv run python -c "import fastapi; print(fastapi.__version__)"` prints version
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.2** Create `backend/app/main.py` with FastAPI app, `/health` endpoint, CORS middleware (allow localhost:3000), lifespan that prints startup message
+- [x] **0.2** Create `backend/app/main.py` with FastAPI app, `/health` endpoint, CORS middleware (allow localhost:3000), lifespan that prints startup message
   - **Verify:** `uv run uvicorn app.main:app --reload` starts, `curl localhost:8000/health` returns `{"status":"ok"}`
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.3** Create `backend/app/config.py` with `AppSettings(BaseSettings)` class loading from `.env` (all fields from LLD doc — modal_api_key, groq_api_key, gemini_api_key, ollama_base_url, ollama_enabled, database_url, export_dir, log_level, cache_max_size, cache_ttl_seconds, max_retries, debounce_save_ms)
+- [x] **0.3** Create `backend/app/config.py` with `AppSettings(BaseSettings)` class loading from `.env` (all fields from LLD doc — modal_api_key, groq_api_key, gemini_api_key, ollama_base_url, ollama_enabled, database_url, export_dir, log_level, cache_max_size, cache_ttl_seconds, max_retries, debounce_save_ms)
   - **Verify:** `uv run python -c "from app.config import AppSettings; print(AppSettings())"` prints defaults
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
 - [ ] **0.4** Initialize `frontend/` with `npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir` (App Router, TypeScript, Tailwind, ESLint)
   - **Verify:** `npm run dev` starts, blank page renders at `localhost:3000`
@@ -230,17 +230,17 @@ scripts-writer/
   - **Verify:** `npx shadcn@latest add button` works, button renders
   - **Date completed:** ___
 
-- [ ] **0.7** Create `.env.example` at project root with all API key placeholders + database_url + export_dir
+- [x] **0.7** Create `.env.example` at project root with all API key placeholders + database_url + export_dir
   - **Verify:** File exists with all keys documented
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.8** Create/update `.gitignore` with entries for: `.env`, `data/`, `logs/`, `__pycache__/`, `.next/`, `node_modules/`, `*.db`
+- [x] **0.8** Create/update `.gitignore` with entries for: `.env`, `data/`, `logs/`, `__pycache__/`, `.next/`, `node_modules/`, `*.db`
   - **Verify:** `git status` does not show secrets or data files
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.9** Configure `ruff` in `backend/pyproject.toml` (line-length=120, select=["E","F","I","N","W","UP"])
+- [x] **0.9** Configure `ruff` in `backend/pyproject.toml` (line-length=120, select=["E","F","I","N","W","UP"])
   - **Verify:** `uv run ruff check app/` passes with no errors
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
 - [ ] **0.10** Configure `eslint` + `prettier` in `frontend/`
   - **Verify:** `npm run lint` passes
