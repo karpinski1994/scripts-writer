@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+*.egg
+
+# Database & data
+data/
+*.db
+*.sqlite3
+
+# Logs
+logs/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+.next/
+out/
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Opencode
+.opencode/
+
+# Agent
+.agent/
