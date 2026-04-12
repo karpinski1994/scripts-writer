@@ -128,3 +128,39 @@
     @apply font-sans;
   }
 }
+
+.cue-broll {
+  background-color: rgb(254 243 199);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.cue-text-overlay {
+  background-color: rgb(219 234 254);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.cue-pause {
+  background-color: rgb(243 232 255);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.dark .cue-broll {
+  background-color: rgb(146 64 14);
+}
+.dark .cue-text-overlay {
+  background-color: rgb(37 99 235);
+}
+.dark .cue-pause {
+  background-color: rgb(107 33 168);
+}
+
+.tiptap {
+  outline: none;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

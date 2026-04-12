@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 6 — Complete |
+| **Current phase** | Phase 7 — Complete |
 | **Backend** | Full creative pipeline + WebSocket events + orchestrator integration |
-| **Frontend** | Pipeline view, agent panels (ICP/Hook/Narrative/Retention/CTA), WebSocket streaming, step navigation |
+| **Frontend** | Pipeline view, agent panels (ICP/Hook/Narrative/Retention/CTA/Writer), WebSocket streaming, step navigation, Tiptap script editor with debounced save, structural cue highlighting, version history |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select — all through browser with live status |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status |
 
 ---
 
@@ -605,29 +605,29 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **7.1** Create `frontend/src/stores/editor-store.ts` — Zustand store: content, versionNumber, isDirty, isSaving, setContent, markClean
+- [x] **7.1** Create `frontend/src/stores/editor-store.ts` — Zustand store: content, versionNumber, isDirty, isSaving, setContent, markClean
   - **Verify:** Store actions work correctly
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **7.2** Install Tiptap: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-highlight`
+- [x] **7.2** Install Tiptap: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-highlight`
   - **Verify:** Basic Tiptap editor renders in a test component
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **7.3** Create `frontend/src/components/editor/script-editor.tsx` — Tiptap with toolbar (bold, italic, headings, lists, undo/redo), debounced auto-save (500ms → PATCH), word count, dirty indicator
+- [x] **7.3** Create `frontend/src/components/editor/script-editor.tsx` — Tiptap with toolbar (bold, italic, headings, lists, undo/redo), debounced auto-save (500ms → PATCH), word count, dirty indicator
   - **Verify:** Type text → see "Unsaved" indicator → wait 500ms → "Saved" indicator
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **7.4** Add custom Tiptap extension for structural cues: highlight `[B-ROLL]`, `[TEXT OVERLAY]`, `[PAUSE]` with distinct background color
+- [x] **7.4** Add custom Tiptap extension for structural cues: highlight `[B-ROLL]`, `[TEXT OVERLAY]`, `[PAUSE]` with distinct background color
   - **Verify:** Type `[B-ROLL]` → text highlighted in distinct color
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **7.5** Add version history dropdown to editor — switch between script versions, load content on switch
+- [x] **7.5** Add version history dropdown to editor — switch between script versions, load content on switch
   - **Verify:** Generate script v1 → regenerate v2 → dropdown shows v1 and v2 → switching loads content
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **7.6** Integrate writer agent into pipeline view — "Generate Script" button triggers `POST /pipeline/run/writer`, streaming output appears in editor
+- [x] **7.6** Integrate writer agent into pipeline view — "Generate Script" button triggers `POST /pipeline/run/writer`, streaming output appears in editor
   - **Verify:** Click generate → streaming text fills editor → complete
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

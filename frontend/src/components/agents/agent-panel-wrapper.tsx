@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { PipelineStep } from "@/types/pipeline";
 import { usePipelineStore, isStepReady, DEPENDENCY_MAP } from "@/stores/pipeline-store";
@@ -9,6 +10,7 @@ import { HookPanel } from "./hook-panel";
 import { NarrativePanel } from "./narrative-panel";
 import { RetentionPanel } from "./retention-panel";
 import { CTAPanel } from "./cta-panel";
+import { WriterPanel } from "./writer-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -48,6 +50,7 @@ function parseOutput<T>(step: PipelineStep): T | null {
 export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) {
   const { activeStepType, isRunning } = usePipelineStore();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   if (!activeStepType) {
     return (
@@ -212,6 +215,24 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onContinue={(selected: CTASuggestion) => selectOption(selected)}
           onRerun={runAgent}
           isRunning={running}
+        />
+      );
+    }
+    case "writer": {
+      return (
+        <WriterPanel
+          projectId={projectId}
+          step={step}
+          onRun={async () => {
+            try {
+              await api.post(`/api/v1/projects/${projectId}/pipeline/run/writer`, {});
+            } catch {
+              // error handled by query invalidation
+            }
+            queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+            queryClient.invalidateQueries({ queryKey: ["scripts", projectId] });
+          }}
+          onNavigateToEditor={() => router.push(`/projects/${projectId}/editor`)}
         />
       );
     }
