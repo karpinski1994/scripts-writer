@@ -1,9 +1,7 @@
 ## Purpose
 
 Defines the Python backend project scaffolding: package initialization, FastAPI application with health endpoint, structured configuration via pydantic-settings, CORS middleware, linter setup, and environment variable documentation.
-
 ## Requirements
-
 ### Requirement: Backend project initialization
 The system SHALL have a Python backend project initialized under `backend/` using `uv` as the package manager with a `pyproject.toml` defining project metadata, dependencies, and tool configuration.
 
@@ -16,15 +14,19 @@ The system SHALL have a Python backend project initialized under `backend/` usin
 - **THEN** it contains `app/` package with `__init__.py`, `main.py`, and `config.py`
 
 ### Requirement: FastAPI application with health endpoint
-The system SHALL provide a FastAPI application that starts via `uvicorn` and exposes a `/health` endpoint returning `{"status": "ok"}`.
+The system SHALL provide a FastAPI application that starts via `uvicorn`, exposes a `/health` endpoint returning `{"status": "ok"}`, mounts the aggregated API router at `/api/v1`, and initializes database tables in the lifespan context manager as a fallback when Alembic has not been run.
 
 #### Scenario: Health endpoint returns ok
 - **WHEN** a GET request is made to `/health`
 - **THEN** the response status code is 200 and the body is `{"status": "ok"}`
 
-#### Scenario: Application starts with uvicorn
-- **WHEN** `uv run uvicorn app.main:app` is executed
-- **THEN** the server starts on port 8000 and responds to HTTP requests
+#### Scenario: API router mounted at /api/v1
+- **WHEN** the application starts
+- **THEN** all endpoints under `/api/v1/projects` are accessible
+
+#### Scenario: Database tables created on startup as fallback
+- **WHEN** the application starts and no database file exists
+- **THEN** all ORM model tables are created automatically as a fallback (Alembic is the primary migration tool)
 
 ### Requirement: CORS middleware for local development
 The system SHALL configure CORS middleware to allow requests from `http://localhost:3000` for frontend development.
@@ -65,3 +67,4 @@ The system SHALL configure `ruff` as the Python linter in `pyproject.toml` with 
 #### Scenario: Ruff formats code consistently
 - **WHEN** `uv run ruff format app/` is executed
 - **THEN** code is formatted with 120-character line length
+
