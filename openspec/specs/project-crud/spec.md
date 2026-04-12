@@ -70,11 +70,15 @@ The system SHALL expose 5 REST endpoints under `/api/v1/projects`: POST (create,
 - **THEN** the response status is 404
 
 ### Requirement: Aggregated API router
-The system SHALL provide an aggregated router that mounts all API sub-routers under the `/api/v1` prefix.
+The system SHALL provide an aggregated router that mounts all API sub-routers under the `/api/v1` prefix, including the project router and the settings router.
 
 #### Scenario: All project endpoints accessible via aggregated router
 - **WHEN** the aggregated router is mounted in the FastAPI app
 - **THEN** all project endpoints are accessible at `/api/v1/projects`
+
+#### Scenario: Settings endpoints accessible via aggregated router
+- **WHEN** the aggregated router is mounted in the FastAPI app
+- **THEN** all settings endpoints are accessible at `/api/v1/settings/llm`
 
 ### Requirement: Test infrastructure with in-memory SQLite
 The system SHALL provide test fixtures in `conftest.py` including: in-memory SQLite async engine, `db_session` fixture with per-test table creation and rollback, and `async_client` fixture using `httpx.AsyncClient`.

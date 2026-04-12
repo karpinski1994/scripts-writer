@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 1 — Complete |
-| **Backend** | Project CRUD API (5 endpoints) + DB + tests |
+| **Current phase** | Phase 2 — Complete |
+| **Backend** | Project CRUD API + LLM adapter layer (4 providers + factory + cache + settings API) |
 | **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
-| **LLM connectivity** | Not tested |
-| **Working end-to-end?** | Project CRUD via Swagger UI |
+| **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
+| **Working end-to-end?** | Project CRUD via Swagger UI + LLM settings API |
 
 ---
 
@@ -314,49 +314,49 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **2.1** Create `backend/app/llm/base.py` — `LLMProvider` abstract class with: `provider_name: str`, `model_name: str`, `priority: int`, abstract `generate()`, abstract `stream()`, abstract `health_check()`, `get_identifier()`
+- [x] **2.1** Create `backend/app/llm/base.py` — `LLMProvider` abstract class with: `provider_name: str`, `model_name: str`, `priority: int`, abstract `generate()`, abstract `stream()`, abstract `health_check()`, `get_identifier()`
   - **Verify:** Cannot instantiate `LLMProvider` directly (abstract)
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.2** Create `backend/app/llm/modal_provider.py` — `ModalProvider(LLMProvider)` using `openai.OpenAI(api_key, base_url="https://api.us-west-2.modal.direct/v1")`. Implement `generate()` (async via `asyncio.to_thread`), `stream()`, `health_check()`
+- [x] **2.2** Create `backend/app/llm/modal_provider.py` — `ModalProvider(LLMProvider)` using `openai.OpenAI(api_key, base_url="https://api.us-west-2.modal.direct/v1")`. Implement `generate()` (async via `asyncio.to_thread`), `stream()`, `health_check()`
   - **Verify:** `uv run python -c "from app.llm.modal_provider import ModalProvider; print('ok')"` imports without error
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.3** Create `backend/app/llm/groq_provider.py` — `GroqProvider(LLMProvider)` using `openai.OpenAI(api_key, base_url="https://api.groq.com/openai/v1")`. Same interface as Modal.
+- [x] **2.3** Create `backend/app/llm/groq_provider.py` — `GroqProvider(LLMProvider)` using `openai.OpenAI(api_key, base_url="https://api.groq.com/openai/v1")`. Same interface as Modal.
   - **Verify:** Import without error
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.4** Create `backend/app/llm/gemini_provider.py` — `GeminiProvider(LLMProvider)` using `google-generativeai` SDK
+- [x] **2.4** Create `backend/app/llm/gemini_provider.py` — `GeminiProvider(LLMProvider)` using `google-generativeai` SDK
   - **Verify:** Import without error
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.5** Create `backend/app/llm/ollama_provider.py` — `OllamaProvider(LLMProvider)` using `ollama` SDK, base_url default `http://localhost:11434`
+- [x] **2.5** Create `backend/app/llm/ollama_provider.py` — `OllamaProvider(LLMProvider)` using `ollama` SDK, base_url default `http://localhost:11434`
   - **Verify:** Import without error
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.6** Create `backend/app/llm/provider_factory.py` — `ProviderFactory` that builds providers from `AppSettings`, sorts by priority, has `get_provider()` (returns first healthy), `execute_with_failover()` (retry + failover chain per LLD)
+- [x] **2.6** Create `backend/app/llm/provider_factory.py` — `ProviderFactory` that builds providers from `AppSettings`, sorts by priority, has `get_provider()` (returns first healthy), `execute_with_failover()` (retry + failover chain per LLD)
   - **Verify:** `ProviderFactory(settings).get_provider()` returns a provider object
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.7** Create `backend/app/llm/cache.py` — `LLMCache` with LRU eviction (OrderedDict), TTL, `get()`/`set()` keyed by SHA256(prompt + system_prompt + model)
+- [x] **2.7** Create `backend/app/llm/cache.py` — `LLMCache` with LRU eviction (OrderedDict), TTL, `get()`/`set()` keyed by SHA256(prompt + system_prompt + model)
   - **Verify:** Unit test: set then get returns cached value; expired entry returns None
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.8** Create `backend/app/schemas/settings.py` — `LLMSettingsResponse`, `LLMSettingsUpdateRequest`, `LLMStatusResponse` (provider name → reachable boolean)
+- [x] **2.8** Create `backend/app/schemas/settings.py` — `LLMSettingsResponse`, `LLMSettingsUpdateRequest`, `LLMStatusResponse` (provider name → reachable boolean)
   - **Verify:** Schemas validate correct field types
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.9** Create `backend/app/api/settings.py` — `GET /api/v1/settings/llm` (masked API keys), `PATCH /api/v1/settings/llm`, `GET /api/v1/settings/llm/status` (runs health_check on each)
+- [x] **2.9** Create `backend/app/api/settings.py` — `GET /api/v1/settings/llm` (masked API keys), `PATCH /api/v1/settings/llm`, `GET /api/v1/settings/llm/status` (runs health_check on each)
   - **Verify:** `curl localhost:8000/api/v1/settings/llm/status` returns provider status JSON
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.10** Create `backend/scripts/test_llm.py` — CLI script that takes provider name as arg, sends "Say hello in one sentence", prints response
+- [x] **2.10** Create `backend/scripts/test_llm.py` — CLI script that takes provider name as arg, sends "Say hello in one sentence", prints response
   - **Verify:** `uv run python scripts/test_llm.py modal` prints an LLM-generated greeting
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **2.11** Create `backend/tests/unit/test_llm_providers.py` — tests with `MockLLMProvider` (controllable success/failure) for: successful generation, rate limit retry, failover, cache hit/miss
+- [x] **2.11** Create `backend/tests/unit/test_llm_providers.py` — tests with `MockLLMProvider` (controllable success/failure) for: successful generation, rate limit retry, failover, cache hit/miss
   - **Verify:** `uv run pytest tests/unit/test_llm_providers.py` passes
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 
