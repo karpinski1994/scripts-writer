@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 4 — Complete |
+| **Current phase** | Phase 5 — Complete |
 | **Backend** | Full creative pipeline (ICP → Hook → Narrative → Retention → CTA → Writer) + export |
-| **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
+| **Frontend** | Dashboard, project CRUD, project detail, settings page (connected to backend) |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → export as .md |
+| **Working end-to-end?** | Create project in browser → see in dashboard → view detail → configure LLM providers in Settings |
 
 ---
 
@@ -484,41 +484,41 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **5.1** Create `frontend/src/lib/api.ts` — typed API client with `api.get()`, `api.post()`, `api.patch()`, `api.delete()` wrapping fetch, base URL from env `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`)
+- [x] **5.1** Create `frontend/src/lib/api.ts` — typed API client with `api.get()`, `api.post()`, `api.patch()`, `api.delete()` wrapping fetch, base URL from env `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`)
   - **Verify:** `api.get('/api/v1/projects')` returns data from backend
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.2** Create `frontend/src/types/*.ts` — TypeScript interfaces for Project, PipelineStep, ICPProfile, ScriptVersion, AnalysisResult, LLMConfig matching backend schemas
+- [x] **5.2** Create `frontend/src/types/*.ts` — TypeScript interfaces for Project, PipelineStep, ICPProfile, ScriptVersion, AnalysisResult, LLMConfig matching backend schemas
   - **Verify:** TypeScript compiles without errors
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.3** Create `frontend/src/stores/project-store.ts` — Zustand store for project list + active project
+- [x] **5.3** Create `frontend/src/stores/project-store.ts` — Zustand store for project list + active project
   - **Verify:** Store initializes, actions work in isolation
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.4** Create `frontend/src/stores/settings-store.ts` — Zustand store for LLM config
+- [x] **5.4** Create `frontend/src/stores/settings-store.ts` — Zustand store for LLM config
   - **Verify:** Store initializes, actions work
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.5** Create `frontend/src/app/layout.tsx` — root layout with TanStack Query provider, sidebar navigation (Dashboard, Settings), Shadcn/UI Sidebar component
+- [x] **5.5** Create `frontend/src/app/layout.tsx` — root layout with TanStack Query provider, sidebar navigation (Dashboard, Settings), Shadcn/UI Sidebar component
   - **Verify:** Layout renders with sidebar navigation
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.6** Create `frontend/src/app/page.tsx` — Dashboard: project list (cards with name, format badge, status badge, updated_at), "New Project" button, empty state
+- [x] **5.6** Create `frontend/src/app/page.tsx` — Dashboard: project list (cards with name, format badge, status badge, updated_at), "New Project" button, empty state
   - **Verify:** Dashboard shows projects from backend (or empty state)
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.7** Create `frontend/src/components/dashboard/create-project-dialog.tsx` — dialog with form (name, topic, target_format, content_goal, raw_notes) validated with Zod
+- [x] **5.7** Create `frontend/src/components/dashboard/create-project-dialog.tsx` — dialog with form (name, topic, target_format, content_goal, raw_notes) validated with Zod
   - **Verify:** Fill form → submit → project appears in dashboard list
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.8** Create `frontend/src/app/projects/[id]/page.tsx` — project detail: show metadata, raw notes
+- [x] **5.8** Create `frontend/src/app/projects/[id]/page.tsx` — project detail: show metadata, raw notes
   - **Verify:** Click project card → navigate to detail page with data
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **5.9** Create `frontend/src/app/settings/page.tsx` — LLM provider config: API key inputs (masked), enable/disable toggles, "Test Connection" button, "Save" button
+- [x] **5.9** Create `frontend/src/app/settings/page.tsx` — LLM provider config: API key inputs (masked), enable/disable toggles, "Test Connection" button, "Save" button
   - **Verify:** Enter Modal API key → test → green checkmark; save persists
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 
