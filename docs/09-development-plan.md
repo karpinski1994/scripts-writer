@@ -11,9 +11,9 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-11 |
-| **Current phase** | Phase 0 — Step 0.3 complete |
+| **Current phase** | Phase 0 — Complete |
 | **Backend** | Initialized (FastAPI + health endpoint + config) |
-| **Frontend** | Not initialized |
+| **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
 | **Database** | Not created |
 | **LLM connectivity** | Not tested |
 | **Working end-to-end?** | No |
@@ -218,17 +218,17 @@ scripts-writer/
   - **Verify:** `uv run python -c "from app.config import AppSettings; print(AppSettings())"` prints defaults
   - **Date completed:** 2026-04-11
 
-- [ ] **0.4** Initialize `frontend/` with `npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir` (App Router, TypeScript, Tailwind, ESLint)
+- [x] **0.4** Initialize `frontend/` with `npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir` (App Router, TypeScript, Tailwind, ESLint)
   - **Verify:** `npm run dev` starts, blank page renders at `localhost:3000`
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.5** Install frontend dependencies: `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `react-markdown`, `lucide-react`
+- [x] **0.5** Install frontend dependencies: `@tanstack/react-query`, `zustand`, `react-hook-form`, `@hookform/resolvers`, `zod`, `react-markdown`, `lucide-react`
   - **Verify:** `npm ls @tanstack/react-query zustand` shows installed
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
-- [ ] **0.6** Initialize Shadcn/UI: `npx shadcn@latest init` (New York style, Zinc theme, CSS variables)
+- [x] **0.6** Initialize Shadcn/UI: `npx shadcn@latest init` (Nova style [New York equiv], Zinc/neutral theme, CSS variables)
   - **Verify:** `npx shadcn@latest add button` works, button renders
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
 - [x] **0.7** Create `.env.example` at project root with all API key placeholders + database_url + export_dir
   - **Verify:** File exists with all keys documented
@@ -242,9 +242,9 @@ scripts-writer/
   - **Verify:** `uv run ruff check app/` passes with no errors
   - **Date completed:** 2026-04-11
 
-- [ ] **0.10** Configure `eslint` + `prettier` in `frontend/`
+- [x] **0.10** Configure `eslint` + `prettier` in `frontend/`
   - **Verify:** `npm run lint` passes
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-11
 
 ---
 
