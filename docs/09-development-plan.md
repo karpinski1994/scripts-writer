@@ -11,9 +11,9 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 8 — Complete (Phase 9: Analysis Agents + UI next) |
-| **Backend** | Full creative pipeline + WebSocket + NotebookLM integration (Google Cloud Discovery Engine) |
-| **Frontend** | Pipeline view, agent panels with NotebookLM context sections, WebSocket streaming, step navigation, Tiptap script editor |
+| **Current phase** | Phase 9 — Complete (Phase 10: Export, Polish & Edge Cases next) |
+| **Backend** | Full creative pipeline + WebSocket + NotebookLM + 4 analysis agents (FactCheck, Readability, Copyright, Policy) with parallel execution |
+| **Frontend** | Pipeline view, agent panels, NotebookLM context, analysis tabbed panel, script editor |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
 | **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. NotebookLM integration is next. |
@@ -765,41 +765,41 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **9.1** Create `backend/app/agents/factcheck_agent.py` — identifies factual claims, flags unverifiable/questionable, confidence levels
+- [x] **9.1** Create `backend/app/agents/factcheck_agent.py` — identifies factual claims, flags unverifiable/questionable, confidence levels
   - **Verify:** `POST /analyze/factcheck` returns findings list
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.2** Create `backend/app/agents/readability_agent.py` — FK + GF scores, flagged complex sentences, suggestions
+- [x] **9.2** Create `backend/app/agents/readability_agent.py` — FK + GF scores, flagged complex sentences, suggestions
   - **Verify:** `POST /analyze/readability` returns scores + findings
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.3** Create `backend/app/agents/copyright_agent.py` — flags potential copyright/trademark issues, advisory warnings
+- [x] **9.3** Create `backend/app/agents/copyright_agent.py` — flags potential copyright/trademark issues, advisory warnings
   - **Verify:** `POST /analyze/copyright` returns findings
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.4** Create `backend/app/agents/policy_agent.py` — checks against YouTube/Facebook/LinkedIn policies
+- [x] **9.4** Create `backend/app/agents/policy_agent.py` — checks against YouTube/Facebook/LinkedIn policies
   - **Verify:** `POST /analyze/policy` returns platform-specific findings
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.5** Extend orchestrator with `run_analysis_parallel()` using `asyncio.gather` for 4 analysis agents
+- [x] **9.5** Extend orchestrator with `run_analysis_parallel()` using `asyncio.gather` for 4 analysis agents
   - **Verify:** `POST /analyze/all` returns 4 results concurrently
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.6** Create `backend/app/schemas/analysis.py` — `AnalysisResultResponse`, `FindingResponse`
+- [x] **9.6** Create `backend/app/schemas/analysis.py` — `AnalysisResultResponse`, `FindingResponse`
   - **Verify:** Schemas match LLD Finding model
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.7** Create `backend/app/api/analysis.py` — `POST /analyze/{agent_type}`, `POST /analyze/all`, `GET /analysis`
+- [x] **9.7** Create `backend/app/api/analysis.py` — `POST /analyze/{agent_type}`, `POST /analyze/all`, `GET /analysis`
   - **Verify:** All analysis endpoints work in Swagger
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.8** Create `backend/app/services/analysis_service.py` — aggregation and persistence of analysis results
+- [x] **9.8** Create `backend/app/services/analysis_service.py` — aggregation and persistence of analysis results
   - **Verify:** Results saved to DB and retrievable
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **9.9** Create `frontend/src/components/agents/analysis-panel.tsx` — tabbed panel (FactCheck, Readability, Copyright, Policy), findings cards with severity badges, confidence, suggestion, dismiss/apply buttons
+- [x] **9.9** Create `frontend/src/components/agents/analysis-panel.tsx` — tabbed panel (FactCheck, Readability, Copyright, Policy), findings cards with severity badges, confidence, suggestion, dismiss/apply buttons
   - **Verify:** Click "Analyze All" → 4 tabs populate with findings
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

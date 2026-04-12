@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import time
@@ -6,14 +7,18 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.copyright_agent import CopyrightAgent
 from app.agents.cta_agent import CTAAgent
+from app.agents.factcheck_agent import FactCheckAgent
 from app.agents.hook_agent import HookAgent
 from app.agents.icp_agent import ICPAgent
 from app.agents.narrative_agent import NarrativeAgent
+from app.agents.policy_agent import PolicyAgent
+from app.agents.readability_agent import ReadabilityAgent
 from app.agents.retention_agent import RetentionAgent
 from app.agents.writer_agent import WriterAgent
 from app.config import get_settings
-from app.db.models import PipelineStep, Project
+from app.db.models import PipelineStep, Project, ScriptVersion
 from app.integrations.notebooklm import NotebookLMClient
 from app.llm.cache import LLMCache
 from app.llm.provider_factory import ProviderFactory
@@ -28,6 +33,12 @@ from app.schemas.agents import (
     RetentionAgentInput,
     RetentionTechnique,
     WriterAgentInput,
+)
+from app.schemas.analysis import (
+    CopyrightAgentInput,
+    FactCheckAgentInput,
+    PolicyAgentInput,
+    ReadabilityAgentInput,
 )
 from app.schemas.icp import ICPAgentInput, ICPProfile
 from app.services.notebooklm_service import NotebookLMService
@@ -215,6 +226,45 @@ class PipelineOrchestrator:
             )
             return agent, input_data
 
+        if step_type == StepType.factcheck:
+            script_content = await self._get_latest_script_content(project.id)
+            agent = FactCheckAgent()
+            input_data = FactCheckAgentInput(
+                script_content=script_content,
+                topic=project.topic,
+                target_format=project.target_format,
+            )
+            return agent, input_data
+
+        if step_type == StepType.readability:
+            script_content = await self._get_latest_script_content(project.id)
+            agent = ReadabilityAgent()
+            input_data = ReadabilityAgentInput(
+                script_content=script_content,
+                target_format=project.target_format,
+            )
+            return agent, input_data
+
+        if step_type == StepType.copyright:
+            script_content = await self._get_latest_script_content(project.id)
+            agent = CopyrightAgent()
+            input_data = CopyrightAgentInput(
+                script_content=script_content,
+                topic=project.topic,
+                target_format=project.target_format,
+            )
+            return agent, input_data
+
+        if step_type == StepType.policy:
+            script_content = await self._get_latest_script_content(project.id)
+            agent = PolicyAgent()
+            input_data = PolicyAgentInput(
+                script_content=script_content,
+                topic=project.topic,
+                target_format=project.target_format,
+            )
+            return agent, input_data
+
         raise ValueError(f"No agent configured for step type: {step_type}")
 
     async def _resolve_notebooklm_context(self, project: Project, step_type: StepType) -> str | None:
@@ -232,6 +282,35 @@ class PipelineOrchestrator:
         except Exception:
             logger.warning("NotebookLM context resolution failed for project %s step %s", project.id, step_type.value)
             return None
+
+    async def _get_latest_script_content(self, project_id: str) -> str:
+        result = await self.db.execute(
+            select(ScriptVersion)
+            .where(ScriptVersion.project_id == project_id)
+            .order_by(ScriptVersion.version_number.desc())
+            .limit(1)
+        )
+        version = result.scalar_one_or_none()
+        if version is None:
+            raise ValueError(f"No script version found for project {project_id}")
+        return version.content
+
+    async def run_analysis_parallel(self, project_id: str) -> list[PipelineStep]:
+        analysis_types = [StepType.factcheck, StepType.readability, StepType.copyright, StepType.policy]
+
+        async def _run(step_type: StepType):
+            try:
+                return await self.run_step(project_id, step_type)
+            except Exception as e:
+                logger.error("Analysis step %s failed for project %s: %s", step_type.value, project_id, e)
+                return e
+
+        results = await asyncio.gather(*[_run(st) for st in analysis_types], return_exceptions=True)
+        steps = []
+        for r in results:
+            if isinstance(r, PipelineStep):
+                steps.append(r)
+        return steps
 
     def _extract_icp(self, step_map: dict[StepType, PipelineStep]) -> ICPProfile:
         icp_step = step_map.get(StepType.icp)

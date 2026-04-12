@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { PipelineStep } from "@/types/pipeline";
+import type { AnalysisResult } from "@/types/analysis";
+import type { AgentType } from "@/types/analysis";
 import { usePipelineStore, isStepReady, DEPENDENCY_MAP } from "@/stores/pipeline-store";
 import { ICPPanel } from "./icp-panel";
 import { HookPanel } from "./hook-panel";
@@ -11,6 +14,7 @@ import { NarrativePanel } from "./narrative-panel";
 import { RetentionPanel } from "./retention-panel";
 import { CTAPanel } from "./cta-panel";
 import { WriterPanel } from "./writer-panel";
+import { AnalysisPanel } from "./analysis-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -241,6 +245,18 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
         />
       );
     }
+    case "factcheck":
+    case "readability":
+    case "copyright":
+    case "policy": {
+      return (
+        <AnalysisPanelWrapper
+          projectId={projectId}
+          activeTab={activeStepType as AgentType}
+          steps={steps}
+        />
+      );
+    }
     default:
       return (
         <Card>
@@ -250,4 +266,54 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
         </Card>
       );
   }
+}
+
+const ANALYSIS_AGENT_TYPES: AgentType[] = ["factcheck", "readability", "copyright", "policy"];
+
+function AnalysisPanelWrapper({
+  projectId,
+  activeTab,
+  steps,
+}: {
+  projectId: string;
+  activeTab: AgentType;
+  steps: PipelineStep[];
+}) {
+  const queryClient = useQueryClient();
+  const { isRunning } = usePipelineStore();
+  const [results, setResults] = useState<AnalysisResult[]>([]);
+
+  const loadingAgents = new Set<string>();
+  for (const type of ANALYSIS_AGENT_TYPES) {
+    if (isRunning[type] || steps.find((s) => s.step_type === type)?.status === "running") {
+      loadingAgents.add(type);
+    }
+  }
+
+  const runAgent = async (agentType: AgentType) => {
+    try {
+      const result = await api.post<AnalysisResult>(
+        `/api/v1/projects/${projectId}/analysis/${agentType}`,
+        {}
+      );
+      setResults((prev) => {
+        const filtered = prev.filter((r) => r.agent_type !== agentType);
+        return [...filtered, result];
+      });
+    } catch {
+      // error handled by query invalidation
+    }
+    queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["analysis", projectId] });
+  };
+
+  return (
+    <AnalysisPanel
+      projectId={projectId}
+      initialTab={activeTab}
+      results={results}
+      loadingAgents={loadingAgents}
+      onRunAgent={runAgent}
+    />
+  );
 }
