@@ -9,13 +9,15 @@ from app.db.models import PipelineStep
 from app.pipeline.orchestrator import PipelineOrchestrator
 from app.pipeline.state import StepStatus, StepType
 from app.schemas.pipeline import PipelineResponse, PipelineStepResponse, StepUpdateRequest
+from app.ws.handlers import ConnectionManager
 
 logger = logging.getLogger(__name__)
 
 
 class PipelineService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, ws_manager: ConnectionManager | None = None):
         self.db = db
+        self.ws_manager = ws_manager
 
     async def get_pipeline(self, project_id: str) -> PipelineResponse:
         result = await self.db.execute(
@@ -30,7 +32,7 @@ class PipelineService:
         return PipelineResponse(project_id=project_id, current_step=current_step, steps=step_responses)
 
     async def run_step(self, project_id: str, step_type: StepType) -> PipelineStepResponse:
-        orchestrator = PipelineOrchestrator(self.db)
+        orchestrator = PipelineOrchestrator(self.db, ws_manager=self.ws_manager)
         step = await orchestrator.run_step(project_id, step_type)
         return PipelineStepResponse.model_validate(step)
 
@@ -41,7 +43,7 @@ class PipelineService:
         if data.selected_option is not None:
             step.selected_option = json.dumps(data.selected_option)
             if step.status == StepStatus.completed.value:
-                orchestrator = PipelineOrchestrator(self.db)
+                orchestrator = PipelineOrchestrator(self.db, ws_manager=self.ws_manager)
                 await orchestrator.invalidate_downstream(project_id, StepType(step.step_type))
         await self.db.commit()
         await self.db.refresh(step)

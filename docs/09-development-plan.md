@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 5 — Complete |
-| **Backend** | Full creative pipeline (ICP → Hook → Narrative → Retention → CTA → Writer) + export |
-| **Frontend** | Dashboard, project CRUD, project detail, settings page (connected to backend) |
+| **Current phase** | Phase 6 — Complete |
+| **Backend** | Full creative pipeline + WebSocket events + orchestrator integration |
+| **Frontend** | Pipeline view, agent panels (ICP/Hook/Narrative/Retention/CTA), WebSocket streaming, step navigation |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project in browser → see in dashboard → view detail → configure LLM providers in Settings |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select — all through browser with live status |
 
 ---
 
@@ -530,53 +530,53 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **6.1** Create `frontend/src/stores/pipeline-store.ts` — Zustand store: activeProjectId, steps, streamingOutput, isRunning, actions (setStepOutput, appendStreamingToken, clearStreaming, etc.)
+- [x] **6.1** Create `frontend/src/stores/pipeline-store.ts` — Zustand store: activeProjectId, steps, streamingOutput, isRunning, actions (setStepOutput, appendStreamingToken, clearStreaming, etc.)
   - **Verify:** Store initializes, actions update state correctly
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.2** Create `frontend/src/hooks/use-websocket.ts` — WebSocket hook with auto-reconnect (exponential backoff), connects to `ws://localhost:8000/ws/pipeline/{projectId}`
+- [x] **6.2** Create `frontend/src/hooks/use-websocket.ts` — WebSocket hook with auto-reconnect (exponential backoff), connects to `ws://localhost:8000/ws/pipeline/{projectId}`
   - **Verify:** Hook connects to backend WebSocket endpoint
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.3** Create `frontend/src/hooks/use-agent-stream.ts` — processes WS events (agent_start, agent_progress, agent_complete) into pipeline store
+- [x] **6.3** Create `frontend/src/hooks/use-agent-stream.ts` — processes WS events (agent_start, agent_progress, agent_complete) into pipeline store
   - **Verify:** Streaming tokens accumulate in pipeline store
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.4** Create `backend/app/ws/handlers.py` — WebSocket endpoint at `/ws/pipeline/{project_id}`, ConnectionManager, broadcast agent events (start, progress tokens, complete)
+- [x] **6.4** Create `backend/app/ws/handlers.py` — WebSocket endpoint at `/ws/pipeline/{project_id}`, ConnectionManager, broadcast agent events (start, progress tokens, complete)
   - **Verify:** `websocat ws://localhost:8000/ws/pipeline/{id}` receives events when agent runs
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.5** Create `frontend/src/components/pipeline/pipeline-view.tsx` — horizontal step cards with status indicators (✓ completed, ● running, ○ pending, ✗ failed)
+- [x] **6.5** Create `frontend/src/components/pipeline/pipeline-view.tsx` — horizontal step cards with status indicators (✓ completed, ● running, ○ pending, ✗ failed)
   - **Verify:** Step cards render with correct status from pipeline data
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.6** Create `frontend/src/components/pipeline/step-sidebar.tsx` — vertical sidebar with step list, clickable for navigation, locked steps grayed out
+- [x] **6.6** Create `frontend/src/components/pipeline/step-sidebar.tsx` — vertical sidebar with step list, clickable for navigation, locked steps grayed out
   - **Verify:** Sidebar renders, clicking navigates to step
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.7** Create `frontend/src/components/agents/icp-panel.tsx` — display ICP fields, edit toggle, approve button, re-run button
+- [x] **6.7** Create `frontend/src/components/agents/icp-panel.tsx` — display ICP fields, edit toggle, approve button, re-run button
   - **Verify:** Run ICP → see profile → edit → approve → auto-navigate to Hook step
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.8** Create `frontend/src/components/agents/hook-panel.tsx` — ranked hook list, select one, custom hook input, edit, continue
+- [x] **6.8** Create `frontend/src/components/agents/hook-panel.tsx` — ranked hook list, select one, custom hook input, edit, continue
   - **Verify:** See 5 hooks → select → continue to Narrative
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.9** Create `frontend/src/components/agents/narrative-panel.tsx` — pattern list with descriptions, recommendation badge, select, continue
+- [x] **6.9** Create `frontend/src/components/agents/narrative-panel.tsx` — pattern list with descriptions, recommendation badge, select, continue
   - **Verify:** See patterns → select → continue
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.10** Create `frontend/src/components/agents/retention-panel.tsx` — technique checkboxes with placements, multi-select, continue
+- [x] **6.10** Create `frontend/src/components/agents/retention-panel.tsx` — technique checkboxes with placements, multi-select, continue
   - **Verify:** Select 2 techniques → continue
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.11** Create `frontend/src/components/agents/cta-panel.tsx` — CTA type radio, suggested wording, customize input, placement radio, continue
+- [x] **6.11** Create `frontend/src/components/agents/cta-panel.tsx` — CTA type radio, suggested wording, customize input, placement radio, continue
   - **Verify:** Choose "Buy" → customize → select placement → continue
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **6.12** Create `frontend/src/components/shared/streaming-text.tsx` — renders streaming token output from pipeline store
+- [x] **6.12** Create `frontend/src/components/shared/streaming-text.tsx` — renders streaming token output from pipeline store
   - **Verify:** Watch text appear token-by-token during agent execution
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

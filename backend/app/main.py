@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import router
 from app.config import get_settings
 from app.db.database import engine
 from app.db.models import Base
+from app.ws.connection import connection_manager
+from app.ws.handlers import websocket_endpoint
 
 
 @asynccontextmanager
@@ -35,6 +37,11 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+
+@app.websocket("/ws/pipeline/{project_id}")
+async def ws_pipeline(websocket: WebSocket, project_id: str):
+    await websocket_endpoint(websocket, project_id, connection_manager)
 
 
 @app.get("/health")

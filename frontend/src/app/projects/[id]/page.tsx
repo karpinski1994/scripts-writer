@@ -1,43 +1,72 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
-import { useParams } from "next/navigation"
-import Link from "next/link"
-import { api, ApiError } from "@/lib/api"
-import type { ProjectDetail } from "@/types/project"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Loader2 } from "lucide-react"
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleString()
-}
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useEffect } from "react";
+import { api, ApiError } from "@/lib/api";
+import type { ProjectDetail } from "@/types/project";
+import type { Pipeline } from "@/types/pipeline";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { usePipelineStore } from "@/stores/pipeline-store";
+import { useAgentStream } from "@/hooks/use-agent-stream";
+import { PipelineView } from "@/components/pipeline/pipeline-view";
+import { StepSidebar } from "@/components/pipeline/step-sidebar";
+import { AgentPanelWrapper } from "@/components/agents/agent-panel-wrapper";
 
 export default function ProjectDetailPage() {
-  const params = useParams<{ id: string }>()
-  const id = params.id
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const { setActiveStepType, setSteps, reset } = usePipelineStore();
 
   const {
     data: project,
-    isLoading,
-    error,
+    isLoading: projectLoading,
+    error: projectError,
   } = useQuery<ProjectDetail>({
     queryKey: ["project", id],
     queryFn: () => api.get<ProjectDetail>(`/api/v1/projects/${id}`),
     enabled: !!id,
-  })
+  });
 
-  if (isLoading) {
+  const {
+    data: pipeline,
+    isLoading: pipelineLoading,
+  } = useQuery<Pipeline>({
+    queryKey: ["pipeline", id],
+    queryFn: () => api.get<Pipeline>(`/api/v1/projects/${id}/pipeline`),
+    enabled: !!id,
+  });
+
+  useAgentStream(id);
+
+  useEffect(() => {
+    if (pipeline?.steps) {
+      setSteps(pipeline.steps);
+      const firstPending = pipeline.steps.find(
+        (s) => s.status === "pending" || s.status === "failed"
+      );
+      if (firstPending && !usePipelineStore.getState().activeStepType) {
+        setActiveStepType(firstPending.step_type);
+      }
+    }
+  }, [pipeline, setSteps, setActiveStepType]);
+
+  useEffect(() => {
+    return () => reset();
+  }, [reset]);
+
+  if (projectLoading || pipelineLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
-  if (error && error instanceof ApiError && error.status === 404) {
+  if (projectError && projectError instanceof ApiError && projectError.status === 404) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
         <p className="text-lg text-muted-foreground">Project not found</p>
@@ -46,63 +75,32 @@ export default function ProjectDetailPage() {
           Back to Dashboard
         </Button>
       </div>
-    )
+    );
   }
 
-  if (!project) return null
+  if (!project || !pipeline) return null;
 
   return (
-    <div className="space-y-6">
-      <Button variant="ghost" size="sm" render={<Link href="/" />}>
-        <ArrowLeft />
-        Back
-      </Button>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon-sm" render={<Link href="/" />}>
+          <ArrowLeft />
+        </Button>
+        <h1 className="text-xl font-bold tracking-tight">{project.name}</h1>
+        <Badge variant="secondary">{project.target_format}</Badge>
+        {project.content_goal && (
+          <Badge variant="outline">{project.content_goal}</Badge>
+        )}
+      </div>
 
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">{project.name}</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">{project.target_format}</Badge>
-          {project.content_goal && (
-            <Badge variant="outline">{project.content_goal}</Badge>
-          )}
-          <Badge variant="outline">{project.status}</Badge>
+      <PipelineView steps={pipeline.steps} />
+
+      <div className="flex gap-4">
+        <StepSidebar steps={pipeline.steps} />
+        <div className="flex-1 min-w-0">
+          <AgentPanelWrapper projectId={id} steps={pipeline.steps} />
         </div>
       </div>
-
-      <Separator />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Topic</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{project.topic}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>Created: {formatDate(project.created_at)}</p>
-            <p>Updated: {formatDate(project.updated_at)}</p>
-            <p>Current Step: {project.current_step}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 text-sm">
-            {project.raw_notes}
-          </pre>
-        </CardContent>
-      </Card>
     </div>
-  )
+  );
 }

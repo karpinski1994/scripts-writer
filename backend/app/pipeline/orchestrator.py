@@ -28,13 +28,15 @@ from app.schemas.agents import (
     WriterAgentInput,
 )
 from app.schemas.icp import ICPAgentInput, ICPProfile
+from app.ws.handlers import ConnectionManager
 
 logger = logging.getLogger(__name__)
 
 
 class PipelineOrchestrator:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, ws_manager: ConnectionManager | None = None):
         self.db = db
+        self.ws_manager = ws_manager
 
     async def run_step(self, project_id: str, step_type: StepType) -> PipelineStep:
         project = await self.db.get(Project, project_id)
@@ -62,6 +64,15 @@ class PipelineOrchestrator:
         step.llm_provider = "default"
         await self.db.commit()
 
+        if self.ws_manager:
+            await self.ws_manager.broadcast(
+                project_id,
+                {
+                    "event": "agent_start",
+                    "step_type": step_type.value,
+                },
+            )
+
         start_ms = time.time()
         try:
             step_map = await self._get_step_map(project_id)
@@ -80,11 +91,30 @@ class PipelineOrchestrator:
             if step_type == StepType.icp:
                 await self._save_icp_profile(project_id, result)
 
+            if self.ws_manager:
+                await self.ws_manager.broadcast(
+                    project_id,
+                    {
+                        "event": "agent_complete",
+                        "step_type": step_type.value,
+                        "output_data": result.model_dump(),
+                    },
+                )
+
         except Exception as e:
             step.status = StepStatus.failed.value
             step.error_message = str(e)
             step.duration_ms = int((time.time() - start_ms) * 1000)
             logger.error(f"Step {step_type} failed for project {project_id}: {e}")
+            if self.ws_manager:
+                await self.ws_manager.broadcast(
+                    project_id,
+                    {
+                        "event": "agent_failed",
+                        "step_type": step_type.value,
+                        "error": str(e),
+                    },
+                )
             raise AgentExecutionError(step_type.value, str(e)) from e
         finally:
             await self.db.commit()
