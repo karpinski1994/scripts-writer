@@ -89,7 +89,8 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 | **ORM** | SQLAlchemy | 2.x | Async database models and queries |
 | **Migration** | Alembic | 1.x | Database schema migrations |
 | **WebSocket** | FastAPI native | — | Real-time agent progress and streaming |
-| **HTTP Client** | `httpx` | 0.x | Async HTTP for external APIs (YouTube, LM Notes) |
+| **HTTP Client** | `httpx` | 0.x | Async HTTP for external APIs (YouTube, NotebookLM) |
+| **NotebookLM Client** | `google-auth` + `httpx` | — | Google Cloud authentication and HTTP client for NotebookLM API |
 | **Testing** | `pytest` + `pytest-asyncio` | — | Backend unit and integration tests |
 
 ### Frontend
@@ -153,6 +154,12 @@ Project 1──* AnalysisResult
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last modification timestamp |
 
+#### `projects` (NotebookLM extension)
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| notebooklm_notebook_id | VARCHAR(100) | NULL | Connected NotebookLM notebook ID |
+
 #### `icp_profiles`
 
 | Column | Type | Constraints | Description |
@@ -165,7 +172,7 @@ Project 1──* AnalysisResult
 | desires | JSON | NOT NULL | Array of desire strings |
 | objections | JSON | NOT NULL | Array of objection strings |
 | language_style | VARCHAR(50) | NOT NULL | casual, professional, technical |
-| source | VARCHAR(20) | NOT NULL | generated, uploaded |
+| source | VARCHAR(20) | NOT NULL | generated, uploaded, notebooklm |
 | approved | BOOLEAN | NOT NULL DEFAULT FALSE | User has approved the ICP |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last modification timestamp |
@@ -307,6 +314,16 @@ Project 1──* AnalysisResult
 | GET | `/api/v1/projects/{project_id}/export?format=md` | Export as Markdown |
 | POST | `/api/v1/projects/{project_id}/export/clipboard` | Copy to clipboard |
 
+#### NotebookLM
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/projects/{project_id}/notebooklm/notebooks` | List user's NotebookLM notebooks |
+| POST | `/api/v1/projects/{project_id}/notebooklm/connect` | Connect a notebook to the project |
+| DELETE | `/api/v1/projects/{project_id}/notebooklm/connect` | Disconnect notebook from project |
+| POST | `/api/v1/projects/{project_id}/notebooklm/query` | Query connected notebook for insights |
+| POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | (Modified) Accepts optional `notebooklm_context` field |
+
 #### Settings
 
 | Method | Path | Description |
@@ -392,13 +409,15 @@ Project 1──* AnalysisResult
 | Purpose | Video metadata for policy context |
 | SDK | `google-api-python-client` |
 
-#### Google LM Notes (Optional)
+#### Google NotebookLM (Optional)
 
 | Property | Value |
 |----------|-------|
-| Protocol | HTTPS REST |
-| Auth | API key / OAuth |
-| Purpose | Note integration and context enhancement |
+| Base URL | `https://{LOCATION}-discoveryengine.googleapis.com/v1alpha/projects/{PROJECT}/locations/{LOCATION}/notebooks` |
+| Protocol | HTTPS REST (Google Cloud Discovery Engine API) |
+| Auth | OAuth 2.0 / Service Account via `google-auth` |
+| Purpose | Notebook context integration — list notebooks, get notebook, query insights |
+| SDK | `google-auth` + `httpx` (direct REST calls) |
 
 ---
 
@@ -483,6 +502,17 @@ services:
 | Access | Loaded via `pydantic-settings` Settings class at startup |
 | Masking | API keys masked in `/settings` API responses (show last 4 chars only) |
 | Validation | Startup check verifies each configured key is non-empty |
+| Google Cloud credentials for NotebookLM | Service account key or OAuth token stored in `.env` |
+
+### AppSettings (Pydantic Settings Model)
+
+```python
+class AppSettings(BaseSettings):
+    # ... existing LLM provider fields ...
+    google_cloud_project: str
+    google_cloud_location: str = "us"
+    google_application_credentials: str = ""
+```
 
 ### Data Protection
 

@@ -12,7 +12,9 @@ from app.agents.icp_agent import ICPAgent
 from app.agents.narrative_agent import NarrativeAgent
 from app.agents.retention_agent import RetentionAgent
 from app.agents.writer_agent import WriterAgent
+from app.config import get_settings
 from app.db.models import PipelineStep, Project
+from app.integrations.notebooklm import NotebookLMClient
 from app.llm.cache import LLMCache
 from app.llm.provider_factory import ProviderFactory
 from app.pipeline.errors import AgentExecutionError
@@ -28,6 +30,7 @@ from app.schemas.agents import (
     WriterAgentInput,
 )
 from app.schemas.icp import ICPAgentInput, ICPProfile
+from app.services.notebooklm_service import NotebookLMService
 from app.ws.handlers import ConnectionManager
 
 logger = logging.getLogger(__name__)
@@ -76,7 +79,7 @@ class PipelineOrchestrator:
         start_ms = time.time()
         try:
             step_map = await self._get_step_map(project_id)
-            agent, input_data = self._build_agent_inputs(project, step_type, step_map)
+            agent, input_data = await self._build_agent_inputs(project, step_type, step_map)
             from app.config import get_settings
 
             factory = ProviderFactory(get_settings())
@@ -125,9 +128,11 @@ class PipelineOrchestrator:
     async def invalidate_downstream(self, project_id: str, from_step: StepType) -> None:
         await self._invalidate_downstream(project_id, from_step)
 
-    def _build_agent_inputs(
+    async def _build_agent_inputs(
         self, project: Project, step_type: StepType, step_map: dict[StepType, PipelineStep]
     ) -> tuple:
+        notebooklm_context = await self._resolve_notebooklm_context(project, step_type)
+
         if step_type == StepType.icp:
             agent = ICPAgent()
             input_data = ICPAgentInput(
@@ -135,6 +140,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
@@ -147,6 +153,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
@@ -159,6 +166,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 topic=project.topic,
                 target_format=project.target_format,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
@@ -171,6 +179,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 target_format=project.target_format,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
@@ -183,6 +192,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 content_goal=project.content_goal,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
@@ -201,10 +211,27 @@ class PipelineOrchestrator:
                 target_format=project.target_format,
                 content_goal=project.content_goal,
                 raw_notes=project.raw_notes,
+                notebooklm_context=notebooklm_context,
             )
             return agent, input_data
 
         raise ValueError(f"No agent configured for step type: {step_type}")
+
+    async def _resolve_notebooklm_context(self, project: Project, step_type: StepType) -> str | None:
+        if not project.notebooklm_notebook_id:
+            return None
+        try:
+            settings = get_settings()
+            client = NotebookLMClient(
+                cloud_project=settings.google_cloud_project,
+                location=settings.google_cloud_location,
+                credentials_path=settings.google_application_credentials,
+            )
+            service = NotebookLMService(self.db, client)
+            return await service.get_step_context(project.id, step_type.value)
+        except Exception:
+            logger.warning("NotebookLM context resolution failed for project %s step %s", project.id, step_type.value)
+            return None
 
     def _extract_icp(self, step_map: dict[StepType, PipelineStep]) -> ICPProfile:
         icp_step = step_map.get(StepType.icp)

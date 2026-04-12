@@ -15,6 +15,9 @@ class AppSettings(BaseSettings):
     cache_ttl_seconds: int = 3600
     max_retries: int = 3
     debounce_save_ms: int = 500
+    google_cloud_project: str = ""
+    google_cloud_location: str = "us"
+    google_application_credentials: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

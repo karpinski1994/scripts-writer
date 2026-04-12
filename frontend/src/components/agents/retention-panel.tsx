@@ -4,15 +4,17 @@ import { useState } from "react";
 import type { RetentionAgentOutput, RetentionTechnique } from "@/types/agents";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { NotebookLMContext } from "@/components/shared/notebooklm-context";
 
 interface RetentionPanelProps {
   data: RetentionAgentOutput;
   onContinue: (selected: RetentionTechnique[]) => void;
   onRerun: () => void;
   isRunning: boolean;
+  projectId: string;
 }
 
-export function RetentionPanel({ data, onContinue, onRerun, isRunning }: RetentionPanelProps) {
+export function RetentionPanel({ data, onContinue, onRerun, isRunning, projectId }: RetentionPanelProps) {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
 
   function toggle(i: number) {
@@ -63,6 +65,8 @@ export function RetentionPanel({ data, onContinue, onRerun, isRunning }: Retenti
           </button>
         ))}
       </div>
+
+      <NotebookLMContext stepType="retention" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>

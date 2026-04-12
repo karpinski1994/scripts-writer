@@ -29,6 +29,7 @@ export interface ProjectDetail {
   raw_notes: string;
   status: string;
   current_step: number;
+  notebooklm_notebook_id: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -72,6 +72,7 @@ The vision is a free, self-hosted, local-first tool that any content creator can
 
 ```
 1. Creator enters raw notes + topic/context
+1a. [Optional] Creator attaches NotebookLM notebook or Google Drive data to provide enriched context
 2. [ICP Agent] Analyzes and defines Ideal Customer Profile
 3. [Hook Agent] Suggests hooks tailored to ICP; creator selects
 4. [Narrative Agent] Suggests narrative patterns; creator selects
@@ -106,6 +107,7 @@ The vision is a free, self-hosted, local-first tool that any content creator can
 | FN-11 | **Platform Policy Analysis** — Check against YouTube, Facebook, LinkedIn policies | Avoids content removal and account penalties |
 | FN-12 | **Free-Tier LLM Integration** — Run entire pipeline on $0 infrastructure | Democratizes access; no paywall |
 | FN-13 | **Local-First / Self-Hosted Deployment** — Run without cloud dependency | Privacy, control, zero cost |
+| FN-14 | **NotebookLM/Google Drive Context Integration** — Attach notebooks or Drive files to enrich agent context at any creative step | Grounds scripts in real research, not just user notes |
 
 ## Financial / Operational Constraints
 
@@ -138,3 +140,4 @@ The vision is a free, self-hosted, local-first tool that any content creator can
 | **LLM** | Large Language Model — an AI model capable of generating and analyzing text |
 | **ToS** | Terms of Service — platform rules governing content |
 | **DMCA** | Digital Millennium Copyright Act — US copyright law |
+| **NotebookLM** | Google's AI-powered notebook tool that synthesizes insights from uploaded documents and enables Q&A over the content |

@@ -7,15 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { NotebookLMContext } from "@/components/shared/notebooklm-context";
 
 interface HookPanelProps {
   data: HookAgentOutput;
   onContinue: (selected: HookSuggestion) => void;
   onRerun: () => void;
   isRunning: boolean;
+  projectId: string;
 }
 
-export function HookPanel({ data, onContinue, onRerun, isRunning }: HookPanelProps) {
+export function HookPanel({ data, onContinue, onRerun, isRunning, projectId }: HookPanelProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [customText, setCustomText] = useState("");
 
@@ -72,6 +74,8 @@ export function HookPanel({ data, onContinue, onRerun, isRunning }: HookPanelPro
           />
         </CardContent>
       </Card>
+
+      <NotebookLMContext stepType="hook" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>

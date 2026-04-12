@@ -44,6 +44,7 @@ Scripts Writer transforms raw notes and audience insights into polished, analyze
 | **Groq** | Cloud LLM inference provider with free-tier access |
 | **Modal** | Cloud compute platform hosting LLM inference endpoints |
 | **Ollama** | Local LLM runtime for running models on-device |
+| **NotebookLM** | Google's AI-powered research notebook that synthesizes insights from uploaded sources and enables Q&A; accessible via Google Cloud Discovery Engine API |
 
 ---
 
@@ -113,7 +114,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 |----|------------|----------|
 | SRS-F02.1 | The system shall analyze raw notes and generate an ICP profile including demographics, psychographics, pain points, desires, objections, and language style | Must |
 | SRS-F02.2 | The system shall present the generated ICP to the user for review and editing before proceeding | Must |
-| SRS-F02.3 | The system shall allow the user to upload an existing ICP profile, skipping the generation step | Must |
+| SRS-F02.3 | The system shall allow the user to upload an existing ICP profile, skipping the generation step, or from NotebookLM context | Must |
 | SRS-F02.4 | The system shall allow the user to manually override any ICP field | Must |
 | SRS-F02.5 | The system shall store the approved ICP as part of the project context for downstream agents | Must |
 
@@ -232,6 +233,17 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F14.3 | The system shall allow the user to branch a project — create a copy from any step | Should |
 | SRS-F14.4 | The system shall provide a visual pipeline view showing current and completed steps | Must |
 
+### SRS-F15: NotebookLM Context Integration
+
+| ID | Requirement | Priority |
+|----|------------|----------|
+| SRS-F15.1 | The system shall allow the user to connect a Google NotebookLM notebook to a project by specifying a notebook ID | Must |
+| SRS-F15.2 | The system shall allow the user to attach NotebookLM-derived context to any creative pipeline step (ICP, Hook, Narrative, Retention, CTA, Writer) before agent execution | Must |
+| SRS-F15.3 | The system shall query the connected NotebookLM notebook for step-relevant insights and include them as supplementary context in agent prompts | Should |
+| SRS-F15.4 | The system shall store the NotebookLM notebook reference per project but not store notebook content locally | Must |
+| SRS-F15.5 | The system shall proceed with agent execution using raw notes only if NotebookLM is unavailable or not connected | Must |
+| SRS-F15.6 | The system shall allow the user to disconnect a NotebookLM notebook from a project | Should |
+
 ---
 
 ## 4. External Interface Requirements
@@ -257,7 +269,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | Google Gemini API | HTTPS (REST) | LLM inference via Google Gemini free tier |
 | Ollama API | HTTP (REST) | Local LLM inference on `localhost:11434` |
 | YouTube Data API | HTTPS (REST) | Video metadata and content policy context (optional) |
-| Google LM Notes API | HTTPS (REST) | Note integration and context enhancement (optional) |
+| Google NotebookLM API | HTTPS (Google Cloud Discovery Engine) | Notebook context integration and Q&A for enriched agent prompts |
 | Local Filesystem | File I/O | Project persistence, export files, uploaded documents |
 
 ### Communication Interfaces
@@ -266,7 +278,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 |-----------|----------|-------------|
 | Frontend ↔ Backend | HTTP/REST + WebSocket | REST for CRUD operations; WebSocket for real-time agent progress updates and streaming responses |
 | Backend ↔ LLM Providers | HTTPS/REST | Synchronous and streaming API calls to LLM providers |
-| Backend ↔ External APIs | HTTPS/REST | Optional integration with YouTube Data API and Google LM Notes |
+| Backend ↔ External APIs | HTTPS/REST | Optional integration with YouTube Data API and Google NotebookLM API |
 
 ---
 

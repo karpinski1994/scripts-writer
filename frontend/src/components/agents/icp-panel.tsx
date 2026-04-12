@@ -5,15 +5,17 @@ import type { ICPAgentOutput, ICPProfile } from "@/types/agents";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { NotebookLMContext } from "@/components/shared/notebooklm-context";
 
 interface ICPPanelProps {
   data: ICPAgentOutput;
   onApprove: () => void;
   onRerun: () => void;
   isRunning: boolean;
+  projectId: string;
 }
 
-export function ICPPanel({ data, onApprove, onRerun, isRunning }: ICPPanelProps) {
+export function ICPPanel({ data, onApprove, onRerun, isRunning, projectId }: ICPPanelProps) {
   const [editing, setEditing] = useState(false);
   const icp: ICPProfile = data.icp;
 
@@ -88,6 +90,8 @@ export function ICPPanel({ data, onApprove, onRerun, isRunning }: ICPPanelProps)
           <p className="text-sm"><span className="text-muted-foreground">Language Style:</span> {icp.language_style}</p>
         </CardContent>
       </Card>
+
+      <NotebookLMContext stepType="icp" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>

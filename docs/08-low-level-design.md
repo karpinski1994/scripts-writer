@@ -134,6 +134,19 @@ Actions:
   - onReRun → POST /pipeline/run/icp → stream new output
   - onApprove → PATCH /pipeline/{step_id} { approved: true } → navigate to next step
   - onFieldChange(field, value) → local state only (saved on Approve)
+
+NotebookLM Context (shown when notebook connected to project):
+  ┌──────────────────────────────────────┐
+  │  NotebookLM Context                  │
+  │──────────────────────────────────────│
+  │  📓 Connected: "Audience Research"    │
+  │  [Query for ICP insights]           │
+  │                                      │
+  │  Insights:                           │
+  │  • Target audience is mid-level...   │
+  │  • Primary pain point is...          │
+  │  [Include in ICP generation] ☑      │
+  └──────────────────────────────────────┘
 ```
 
 **File:** `frontend/src/components/agents/hook-panel.tsx`
@@ -171,6 +184,19 @@ Actions:
   - onCustom() → isCustom = true; selectedIndex = null
   - onEdit → open inline editor for selected/custom hook
   - onContinue → PATCH /pipeline/{step_id} { selected_option: { hook_text, rank } }
+
+NotebookLM Context (shown when notebook connected to project):
+  ┌──────────────────────────────────────┐
+  │  NotebookLM Context                  │
+  │──────────────────────────────────────│
+  │  📓 Connected: "Audience Research"    │
+  │  [Query for Hook insights]          │
+  │                                      │
+  │  Insights:                           │
+  │  • Best hooks for this audience...   │
+  │  • Emotional triggers include...    │
+  │  [Include in Hook generation] ☑     │
+  └──────────────────────────────────────┘
 ```
 
 **File:** `frontend/src/components/agents/narrative-panel.tsx`
@@ -205,6 +231,19 @@ Actions:
   - onSelect(index) → selectedIndex = index
   - onInfo(index) → toggle descriptionVisible
   - onContinue → PATCH /pipeline/{step_id} { selected_option: { pattern, recommendation_rank } }
+
+NotebookLM Context (shown when notebook connected to project):
+  ┌──────────────────────────────────────┐
+  │  NotebookLM Context                  │
+  │──────────────────────────────────────│
+  │  📓 Connected: "Audience Research"    │
+  │  [Query for Narrative insights]     │
+  │                                      │
+  │  Insights:                           │
+  │  • Audience responds to stories...   │
+  │  • PAS pattern historically works... │
+  │  [Include in Narrative selection] ☑ │
+  └──────────────────────────────────────┘
 ```
 
 **File:** `frontend/src/components/agents/retention-panel.tsx`
@@ -238,6 +277,19 @@ Layout:
 Actions:
   - onToggle(index) → add/remove from selectedIndices
   - onContinue → PATCH /pipeline/{step_id} { selected_option: { techniques: [...] } }
+
+NotebookLM Context (shown when notebook connected to project):
+  ┌──────────────────────────────────────┐
+  │  NotebookLM Context                  │
+  │──────────────────────────────────────│
+  │  📓 Connected: "Audience Research"    │
+  │  [Query for Retention insights]     │
+  │                                      │
+  │  Insights:                           │
+  │  • Audience drop-off at 40% mark...  │
+  │  • Pattern interrupts effective...  │
+  │  [Include in Retention selection] ☑│
+  └──────────────────────────────────────┘
 ```
 
 **File:** `frontend/src/components/agents/cta-panel.tsx`
@@ -275,6 +327,19 @@ Actions:
   - onCustomize(text) → customWording = text
   - onSelectPlacement(p) → placement = p
   - onContinue → PATCH /pipeline/{step_id} { selected_option: { cta_type, cta_text, placement } }
+
+NotebookLM Context (shown when notebook connected to project):
+  ┌──────────────────────────────────────┐
+  │  NotebookLM Context                  │
+  │──────────────────────────────────────│
+  │  📓 Connected: "Audience Research"    │
+  │  [Query for CTA insights]           │
+  │                                      │
+  │  Insights:                           │
+  │  • Audience prefers soft CTAs...     │
+  │  • Mid-video CTAs convert at 2x...   │
+  │  [Include in CTA generation] ☑     │
+  └──────────────────────────────────────┘
 ```
 
 ---
@@ -448,7 +513,25 @@ function useAgentStream(projectId: string) {
 
 ---
 
-### Frontend: Zustand Stores
+### Frontend: NotebookLM API Client
+
+**File:** `frontend/src/lib/notebooklm-api.ts`
+
+```typescript
+const notebooklmApi = {
+  listNotebooks: (projectId: string) =>
+    api.get<{ id: string; title: string }[]>(`/api/v1/projects/${projectId}/notebooklm/notebooks`),
+
+  connectNotebook: (projectId: string, notebookId: string) =>
+    api.post(`/api/v1/projects/${projectId}/notebooklm/connect`, { notebook_id: notebookId }),
+
+  disconnectNotebook: (projectId: string) =>
+    api.delete(`/api/v1/projects/${projectId}/notebooklm/connect`),
+
+  queryNotebook: (projectId: string, query: string, stepType: string) =>
+    api.post<{ context: string }>(`/api/v1/projects/${projectId}/notebooklm/query`, { query, step_type: stepType }),
+};
+```
 
 **File:** `frontend/src/stores/pipeline-store.ts`
 
@@ -525,6 +608,41 @@ const useEditorStore = create<EditorStore>((set) => ({
   setIsSaving: (saving) => set({ isSaving: saving }),
   markClean: () => set({ isDirty: false }),
   reset: () => set({ content: "", versionNumber: 1, isDirty: false, isSaving: false }),
+}));
+```
+
+**File:** `frontend/src/stores/notebooklm-store.ts`
+
+```typescript
+interface NotebookLMStore {
+  connectedNotebook: { id: string; title: string } | null;
+  stepContexts: Record<string, string>;
+  isQuerying: boolean;
+
+  setConnectedNotebook: (notebook: { id: string; title: string } | null) => void;
+  setStepContext: (stepType: string, context: string) => void;
+  clearStepContext: (stepType: string) => void;
+  setIsQuerying: (querying: boolean) => void;
+  reset: () => void;
+}
+
+const useNotebookLMStore = create<NotebookLMStore>((set) => ({
+  connectedNotebook: null,
+  stepContexts: {},
+  isQuerying: false,
+
+  setConnectedNotebook: (notebook) => set({ connectedNotebook: notebook }),
+  setStepContext: (stepType, context) =>
+    set((state) => ({
+      stepContexts: { ...state.stepContexts, [stepType]: context },
+    })),
+  clearStepContext: (stepType) =>
+    set((state) => {
+      const { [stepType]: _, ...rest } = state.stepContexts;
+      return { stepContexts: rest };
+    }),
+  setIsQuerying: (querying) => set({ isQuerying: querying }),
+  reset: () => set({ connectedNotebook: null, stepContexts: {}, isQuerying: false }),
 }));
 ```
 
@@ -606,6 +724,7 @@ class ICPAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    notebooklm_context: str | None = None
 
 class ICPAgentOutput(BaseModel):
     icp: ICPProfile
@@ -627,6 +746,7 @@ class HookAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    notebooklm_context: str | None = None
 
     def icp_summary(self) -> str:
         return f"Audience: {self.icp.demographics.age_range}, {', '.join(self.icp.demographics.occupation)}. Pain points: {', '.join(self.icp.pain_points[:3])}. Desires: {', '.join(self.icp.desires[:3])}."
@@ -651,6 +771,7 @@ class NarrativeAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    notebooklm_context: str | None = None
 
     def icp_summary(self) -> str:
         return f"Audience: {self.icp.demographics.age_range}. Pain: {', '.join(self.icp.pain_points[:3])}."
@@ -674,6 +795,7 @@ class RetentionAgentInput(BaseModel):
     selected_hook: str
     selected_narrative: str
     target_format: str
+    notebooklm_context: str | None = None
 
 class RetentionAgentOutput(BaseModel):
     techniques: list[RetentionTechnique] = Field(min_length=3)
@@ -693,6 +815,7 @@ class CTAAgentInput(BaseModel):
     selected_hook: str
     selected_narrative: str
     content_goal: str | None = None
+    notebooklm_context: str | None = None
 
 class CTAAgentOutput(BaseModel):
     suggestions: list[CTASuggestion] = Field(min_length=2)
@@ -716,6 +839,7 @@ class WriterAgentInput(BaseModel):
     target_format: str
     topic: str
     raw_notes: str
+    notebooklm_context: str | None = None
 
 class WriterAgentOutput(BaseModel):
     script: ScriptDraft
@@ -806,6 +930,7 @@ CREATE TABLE projects (
     status          VARCHAR(20)  NOT NULL DEFAULT 'draft'
                     CHECK (status IN ('draft','in_progress','completed')),
     current_step    INTEGER      NOT NULL DEFAULT 0,
+    notebooklm_notebook_id VARCHAR(100) NULL,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -824,7 +949,7 @@ CREATE TABLE icp_profiles (
     objections      JSONB       NOT NULL DEFAULT '[]'::jsonb,
     language_style  VARCHAR(50)  NOT NULL DEFAULT 'professional',
     source          VARCHAR(20)  NOT NULL DEFAULT 'generated'
-                    CHECK (source IN ('generated','uploaded')),
+                    CHECK (source IN ('generated','uploaded','notebooklm')),
     approved        BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
@@ -911,6 +1036,7 @@ async def _build_agent_inputs(self, project_id: UUID, step_type: StepType) -> Ba
     project = await self._get_project(project_id)
     steps = await self._get_all_steps(project_id)
     step_map = {s.step_type: s for s in steps}
+    notebooklm_context = await self._get_notebooklm_context(project) if project.notebooklm_notebook_id else None
 
     match step_type:
         case StepType.ICP:
@@ -919,31 +1045,32 @@ async def _build_agent_inputs(self, project_id: UUID, step_type: StepType) -> Ba
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                notebooklm_context=notebooklm_context,
             )
         case StepType.HOOK:
             icp = ICPProfile.model_validate(step_map[StepType.ICP].selected_option or step_map[StepType.ICP].output_data)
-            return HookAgentInput(icp=icp, topic=project.topic, target_format=project.target_format, content_goal=project.content_goal)
+            return HookAgentInput(icp=icp, topic=project.topic, target_format=project.target_format, content_goal=project.content_goal, notebooklm_context=notebooklm_context)
         case StepType.NARRATIVE:
             icp = self._extract_icp(step_map)
             hook = step_map[StepType.HOOK].selected_option["hook_text"]
-            return NarrativeAgentInput(icp=icp, selected_hook=hook, topic=project.topic, target_format=project.target_format, content_goal=project.content_goal)
+            return NarrativeAgentInput(icp=icp, selected_hook=hook, topic=project.topic, target_format=project.target_format, content_goal=project.content_goal, notebooklm_context=notebooklm_context)
         case StepType.RETENTION:
             icp = self._extract_icp(step_map)
             hook = step_map[StepType.HOOK].selected_option["hook_text"]
             narrative = step_map[StepType.NARRATIVE].selected_option["pattern"]
-            return RetentionAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, target_format=project.target_format)
+            return RetentionAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, target_format=project.target_format, notebooklm_context=notebooklm_context)
         case StepType.CTA:
             icp = self._extract_icp(step_map)
             hook = step_map[StepType.HOOK].selected_option["hook_text"]
             narrative = step_map[StepType.NARRATIVE].selected_option["pattern"]
-            return CTAAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, content_goal=project.content_goal)
+            return CTAAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, content_goal=project.content_goal, notebooklm_context=notebooklm_context)
         case StepType.WRITER:
             icp = self._extract_icp(step_map)
             hook = step_map[StepType.HOOK].selected_option["hook_text"]
             narrative = step_map[StepType.NARRATIVE].selected_option["pattern"]
             retention = [RetentionTechnique(**t) for t in step_map[StepType.RETENTION].selected_option["techniques"]]
             cta = step_map[StepType.CTA].selected_option["cta_text"]
-            return WriterAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, selected_retention=retention, selected_cta=cta, target_format=project.target_format, topic=project.topic, raw_notes=project.raw_notes)
+            return WriterAgentInput(icp=icp, selected_hook=hook, selected_narrative=narrative, selected_retention=retention, selected_cta=cta, target_format=project.target_format, topic=project.topic, raw_notes=project.raw_notes, notebooklm_context=notebooklm_context)
         case StepType.FACTCHECK | StepType.READABILITY | StepType.COPYRIGHT | StepType.POLICY:
             latest_script = await self._get_latest_script(project_id)
             input_cls = self._get_analysis_input_class(step_type)
@@ -1368,6 +1495,41 @@ async def get_llm_status() -> LLMStatusResponse:
     """
 ```
 
+#### NotebookLM
+
+```python
+# GET /api/v1/projects/{project_id}/notebooklm/notebooks
+async def list_notebooks(project_id: UUID) -> list[NotebookSummary]:
+    """
+    Response: [{id: "notebook-uuid", title: "Audience Research"}]
+    Errors: 404 project not found, 502 Google API unavailable
+    """
+
+# POST /api/v1/projects/{project_id}/notebooklm/connect
+async def connect_notebook(project_id: UUID, body: ConnectNotebookRequest) -> ConnectNotebookResponse:
+    """
+    Request:  ConnectNotebookRequest(notebook_id: str)
+    Response: ConnectNotebookResponse(id, title, connected_at)
+    Side effects: Stores notebook_id on project; queries notebook for validation
+    Errors: 404, 422 invalid notebook_id, 502 Google API unavailable
+    """
+
+# DELETE /api/v1/projects/{project_id}/notebooklm/connect
+async def disconnect_notebook(project_id: UUID) -> None:
+    """
+    Side effects: Removes notebook_id from project; clears stored step contexts
+    Errors: 404
+    """
+
+# POST /api/v1/projects/{project_id}/notebooklm/query
+async def query_notebook(project_id: UUID, body: NotebookQueryRequest) -> NotebookQueryResponse:
+    """
+    Request:  NotebookQueryRequest(query: str, step_type: str)
+    Response: NotebookQueryResponse(context: str)
+    Errors: 404, 409 no notebook connected, 502 Google API unavailable
+    """
+```
+
 ---
 
 ## State Management & Data Persistence
@@ -1431,6 +1593,7 @@ async def get_llm_status() -> LLMStatusResponse:
 | User edits ICP | ICPProfile fields | SQLite | On PATCH request |
 | User edits script | ScriptVersion.content | SQLite | Debounced 500ms PATCH |
 | Analysis completes | AnalysisResult(findings, overall_score) | SQLite | After each agent |
+| NotebookLM notebook connected | project.notebooklm_notebook_id | SQLite | On connect/disconnect |
 | User exports | File on disk | Filesystem | On GET request |
 
 ---
@@ -1486,6 +1649,7 @@ async def get_llm_status() -> LLMStatusResponse:
 | T-API-05 | pipeline | User selection saved | PATCH /pipeline/{id} {selected_option: {...}} | 200 with updated step | Test DB |
 | T-API-06 | export | Export as markdown | GET /export?format=md | 200 text/markdown file | Test DB |
 | T-API-07 | analysis | Run all analysis agents | POST /analyze/all | 200 with 4 analysis results | MockAgent |
+| T-API-08 | notebooklm | Connect notebook to project | POST /notebooklm/connect | 200 with notebook details | Mock Google API |
 
 #### Service Tests
 

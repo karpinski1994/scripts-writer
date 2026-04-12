@@ -136,6 +136,9 @@ Scripts Writer
 │   │   ├── ORM models (SQLAlchemy)
 │   │   ├── Migrations (Alembic)
 │   │   └── File storage (exports, uploads)
+│   ├── Integration Module
+│   │   ├── NotebookLM client (connect, query, disconnect)
+│   │   └── Google Drive file reference (optional, future)
 │   └── WebSocket Module
 │       ├── Connection manager
 │       ├── Event broadcaster
@@ -169,9 +172,11 @@ Settings ──────► Settings Router ───► Settings Service ─
                                                                     │
                                                               Provider Factory
                                                                     │
-                                                    ┌───────────┬───┴───┬──────────┐
-                                                    │           │       │          │
-                                                 Modal      Groq   Gemini    Ollama
+                                                     ┌───────────┬───┴───┬──────────┐
+                                                     │           │       │          │
+                                                  Modal      Groq   Gemini    Ollama
+
+NotebookLM Panel ──► NotebookLM Router ──► NotebookLM Service ──► Google Cloud API
 ```
 
 ---
@@ -196,7 +201,11 @@ Settings ──────► Settings Router ───► Settings Service ─
    Frontend ──POST /projects──► API ──► ProjectService ──► SQLite
    Frontend ◄──201 {project}── API ◄── ProjectService ◄── SQLite
 
-2. USER TRIGGERS ICP AGENT
+1a. USER ATTACHES NOTEBOOK (OPTIONAL)
+   Frontend ──POST /notebooklm/connect──► API ──► NotebookLM Service ──► Google Cloud API
+   Store notebook_id on project
+
+2. USER TRIGGERS ICP AGENT (If NotebookLM notebook connected, query for ICP-related insights; include in agent prompt)
    Frontend ──POST /pipeline/run/icp──► API ──► Orchestrator
    Orchestrator ──► ICPAgent ──► LLMProvider ──► Modal/Groq/Gemini/Ollama
    LLMProvider ◄──streaming tokens── External
@@ -310,7 +319,7 @@ Frontend                              Backend
 | Gemini | Outbound | HTTPS REST (Google SDK) | API key | Same as Modal | Failover to next provider |
 | Ollama | Outbound | HTTP REST | None | Same as Modal | Prompt user to start Ollama or switch provider |
 | YouTube Data | Outbound | HTTPS REST | API key | Video metadata queries | Graceful degradation; analysis proceeds without |
-| Google LM Notes | Outbound | HTTPS REST | API key/OAuth | Note retrieval and sync | Graceful degradation; manual notes input instead |
+| Google NotebookLM | Outbound | HTTPS REST (Google Cloud Discovery Engine) | OAuth 2.0 / Service Account | Notebook ID + step-relevant query → contextual insights | Graceful degradation; agents use raw notes only |
 
 ### Integration Resilience
 

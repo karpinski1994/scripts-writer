@@ -7,15 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { NotebookLMContext } from "@/components/shared/notebooklm-context";
 
 interface CTAPanelProps {
   data: CTAAgentOutput;
   onContinue: (selected: CTASuggestion) => void;
   onRerun: () => void;
   isRunning: boolean;
+  projectId: string;
 }
 
-export function CTAPanel({ data, onContinue, onRerun, isRunning }: CTAPanelProps) {
+export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId }: CTAPanelProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [customText, setCustomText] = useState("");
 
@@ -72,6 +74,8 @@ export function CTAPanel({ data, onContinue, onRerun, isRunning }: CTAPanelProps
           />
         </CardContent>
       </Card>
+
+      <NotebookLMContext stepType="cta" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>

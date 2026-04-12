@@ -5,15 +5,17 @@ import type { NarrativeAgentOutput, NarrativePattern } from "@/types/agents";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { NotebookLMContext } from "@/components/shared/notebooklm-context";
 
 interface NarrativePanelProps {
   data: NarrativeAgentOutput;
   onContinue: (selected: NarrativePattern) => void;
   onRerun: () => void;
   isRunning: boolean;
+  projectId: string;
 }
 
-export function NarrativePanel({ data, onContinue, onRerun, isRunning }: NarrativePanelProps) {
+export function NarrativePanel({ data, onContinue, onRerun, isRunning, projectId }: NarrativePanelProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   function handleContinue() {
@@ -62,6 +64,8 @@ export function NarrativePanel({ data, onContinue, onRerun, isRunning }: Narrati
           </button>
         ))}
       </div>
+
+      <NotebookLMContext stepType="narrative" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>

@@ -21,6 +21,7 @@ backend/
 │   │   ├── scripts.py            # /api/v1/projects/{id}/scripts endpoints
 │   │   ├── analysis.py           # /api/v1/projects/{id}/analyze endpoints
 │   │   ├── export.py            # /api/v1/projects/{id}/export endpoints
+│   │   ├── notebooklm.py       # /api/v1/projects/{id}/notebooklm endpoints
 │   │   └── settings.py          # /api/v1/settings endpoints
 │   ├── schemas/
 │   │   ├── project.py           # Pydantic request/response schemas
@@ -49,6 +50,8 @@ backend/
 │   │   ├── ollama_provider.py   # Ollama local provider
 │   │   ├── provider_factory.py  # Provider factory + failover chain
 │   │   └── cache.py            # LLM response LRU cache
+│   ├── integrations/
+│   │   └── notebooklm.py        # NotebookLM API client
 │   ├── pipeline/
 │   │   ├── orchestrator.py      # Pipeline execution orchestrator
 │   │   └── state.py             # Pipeline state machine
@@ -56,7 +59,8 @@ backend/
 │   │   ├── project_service.py   # Project CRUD business logic
 │   │   ├── pipeline_service.py  # Pipeline execution business logic
 │   │   ├── export_service.py    # Export file generation logic
-│   │   └── analysis_service.py  # Analysis aggregation logic
+│   │   ├── analysis_service.py  # Analysis aggregation logic
+│   │   └── notebooklm_service.py # NotebookLM connection and query logic
 │   └── ws/
 │       └── handlers.py          # WebSocket connection & message handlers
 ├── tests/
@@ -138,6 +142,7 @@ frontend/
 | `app/llm/` | LLM provider abstraction, failover chain, response caching |
 | `app/pipeline/` | Orchestration of agent sequence, state transitions, branching |
 | `app/services/` | Business logic layer between API and data/agents |
+| `app/integrations/` | External service clients — NotebookLM API wrapper, authentication, response mapping |
 | `app/db/` | Database models, session management, migrations |
 | `app/ws/` | WebSocket connection lifecycle and message routing |
 | `frontend/src/stores/` | Client-side state management (Zustand) |
@@ -293,6 +298,31 @@ Present findings as advisory — the user has final say."""
 
 ---
 
+#### NotebookLMService
+
+```python
+class NotebookLMService:
+    def __init__(self, project_id: str, credentials_path: str, cloud_project: str, location: str = "us"):
+        ...
+
+    async def list_notebooks(self) -> list[NotebookSummary]:
+        """List user's NotebookLM notebooks."""
+
+    async def connect_notebook(self, notebook_id: str) -> None:
+        """Connect a notebook to the project."""
+
+    async def disconnect_notebook(self) -> None:
+        """Disconnect notebook from the project."""
+
+    async def query_notebook(self, query: str) -> str:
+        """Query the connected notebook for insights."""
+
+    async def get_step_context(self, step_type: StepType) -> str:
+        """Get context relevant to a pipeline step by querying the notebook."""
+```
+
+---
+
 #### LLMProvider (Abstract)
 
 ```python
@@ -420,10 +450,11 @@ class PipelineOrchestrator:
         StepType.COPYRIGHT, StepType.POLICY,
     }
 
-    def __init__(self, db: AsyncSession, provider_factory: ProviderFactory, cache: LLMCache):
+    def __init__(self, db: AsyncSession, provider_factory: ProviderFactory, cache: LLMCache, notebooklm_service: NotebookLMService | None = None):
         self.db = db
         self.provider_factory = provider_factory
         self.cache = cache
+        self.notebooklm_service = notebooklm_service
         self._agents: dict[StepType, BaseAgent] = self._init_agents()
 
     def _init_agents(self) -> dict[StepType, BaseAgent]:
@@ -479,6 +510,14 @@ class PipelineOrchestrator:
 
     async def _build_agent_inputs(self, project_id: UUID, step_type: StepType) -> BaseModel:
         """Assemble agent inputs from project context and previous step outputs."""
+        inputs = # ... existing assembly logic ...
+
+        if self.notebooklm_service:
+            notebooklm_context = await self.notebooklm_service.get_step_context(step_type)
+            if notebooklm_context:
+                inputs.notebooklm_context = notebooklm_context
+
+        return inputs
 ```
 
 #### PipelineState
@@ -521,6 +560,7 @@ class PipelineState:
 | **Adapter** | Modal/Groq/Gemini/Ollama providers | Each wraps a different SDK behind the common `LLMProvider` interface |
 | **Repository** | Service layer (`ProjectService`, `PipelineService`) | Encapsulates database access logic; keeps API handlers thin |
 | **State Machine** | `PipelineState` | Enforces valid step transitions and dependency checks |
+| **Facade** | `NotebookLMService` | Simplifies Google Cloud Discovery Engine API interactions; provides simple connect/query/disconnect interface |
 
 ---
 
@@ -536,6 +576,7 @@ CREATE TABLE projects (
     raw_notes   TEXT        NOT NULL,
     status      VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','in_progress','completed')),
     current_step INTEGER    NOT NULL DEFAULT 0,
+    notebooklm_notebook_id VARCHAR(100),
     created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -552,7 +593,7 @@ CREATE TABLE icp_profiles (
     desires         JSON        NOT NULL DEFAULT '[]',
     objections      JSON        NOT NULL DEFAULT '[]',
     language_style  VARCHAR(50) NOT NULL DEFAULT 'professional',
-    source          VARCHAR(20) NOT NULL DEFAULT 'generated' CHECK (source IN ('generated','uploaded')),
+    source          VARCHAR(20) NOT NULL DEFAULT 'generated' CHECK (source IN ('generated','uploaded','notebooklm')),
     approved        BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -641,6 +682,29 @@ CREATE INDEX idx_analysis_results_project ON analysis_results(project_id);
 ```
 
 **Errors:** 422 (validation error)
+
+---
+
+#### POST /api/v1/projects/{project_id}/notebooklm/connect
+
+**Request:**
+```json
+{
+  "notebook_id": "NOTEBOOK_ID"
+}
+```
+
+**Response (200):**
+```json
+{
+  "project_id": "...",
+  "notebook_id": "NOTEBOOK_ID",
+  "notebook_title": "My Research Notes",
+  "connected": true
+}
+```
+
+**Errors:** 404 (project not found), 502 (NotebookLM API unavailable)
 
 ---
 

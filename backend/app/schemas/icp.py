@@ -32,6 +32,7 @@ class ICPAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    notebooklm_context: str | None = None
 
 
 class ICPAgentOutput(BaseModel):

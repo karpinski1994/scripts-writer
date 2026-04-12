@@ -8,6 +8,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "alembic>=1.18.4",
     "fastapi>=0.135.3",
+    "google-auth>=2.49.2",
     "google-generativeai>=0.8.6",
     "httpx>=0.28.1",
     "ollama>=0.6.1",

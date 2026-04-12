@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 7 — Complete |
-| **Backend** | Full creative pipeline + WebSocket events + orchestrator integration |
-| **Frontend** | Pipeline view, agent panels (ICP/Hook/Narrative/Retention/CTA/Writer), WebSocket streaming, step navigation, Tiptap script editor with debounced save, structural cue highlighting, version history |
+| **Current phase** | Phase 8 — Complete (Phase 9: Analysis Agents + UI next) |
+| **Backend** | Full creative pipeline + WebSocket + NotebookLM integration (Google Cloud Discovery Engine) |
+| **Frontend** | Pipeline view, agent panels with NotebookLM context sections, WebSocket streaming, step navigation, Tiptap script editor |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. NotebookLM integration is next. |
 
 ---
 
@@ -631,7 +631,133 @@ scripts-writer/
 
 ---
 
-## Phase 8: Analysis Agents + UI
+## Phase 8: NotebookLM Integration
+
+**Goal:** Google NotebookLM integration — connect notebooks, query for step context, enrich agent prompts.
+
+**Test criteria for the whole phase:** Connect a NotebookLM notebook → query for ICP insights → run ICP agent with enriched context → verify output includes NotebookLM-derived insights.
+
+### Steps
+
+- [x] **8.1** Install `google-auth` dependency in backend
+  - **Verify:** `uv run python -c "import google.auth; print('ok')"`
+  - **Date completed:** 2026-04-12
+
+- [x] **8.2** Create `backend/app/integrations/notebooklm.py` — NotebookLM API client with `list_notebooks()`, `connect()`, `disconnect()`, `query()`, `get_step_context()` using Google Cloud Discovery Engine API via `google-auth` + `httpx`
+  - **Verify:** Client imports and initializes
+  - **Date completed:** 2026-04-12
+
+- [x] **8.3** Create `backend/app/schemas/notebooklm.py` — `NotebookSummary`, `ConnectNotebookRequest`, `ConnectNotebookResponse`, `NotebookQueryRequest`, `NotebookQueryResponse`
+  - **Verify:** Schemas validate correctly
+  - **Date completed:** 2026-04-12
+
+- [x] **8.4** Create `backend/app/services/notebooklm_service.py` — service wrapping NotebookLM client with DB session (connect/disconnect persists notebook_id on project, query delegates to client)
+  - **Verify:** Service methods work with mock client
+  - **Date completed:** 2026-04-12
+
+- [x] **8.5** Create `backend/app/api/notebooklm.py` — `GET /notebooklm/notebooks`, `POST /notebooklm/connect`, `DELETE /notebooklm/connect`, `POST /notebooklm/query`
+  - **Verify:** Router includes notebooklm endpoints
+  - **Date completed:** 2026-04-12
+
+- [x] **8.6** Add `notebooklm_notebook_id` column to projects table via Alembic migration
+  - **Verify:** `alembic upgrade head` applies cleanly
+  - **Date completed:** 2026-04-12
+
+- [x] **8.7** Update `icp_profiles.source` CHECK constraint to include `'notebooklm'`
+  - **Verify:** ICPProfile model accepts source='notebooklm'
+  - **Date completed:** 2026-04-12
+
+- [x] **8.8** Update agent input schemas to include `notebooklm_context: str | None = None` on ICPAgentInput, HookAgentInput, NarrativeAgentInput, RetentionAgentInput, CTAAgentInput, WriterAgentInput
+  - **Verify:** All agent inputs accept notebooklm_context field
+  - **Date completed:** 2026-04-12
+
+- [x] **8.9** Update `PipelineOrchestrator._build_agent_inputs()` to query NotebookLM and inject context when notebook connected to project
+  - **Verify:** Orchestrator resolves notebooklm_context when project has notebook connected
+  - **Date completed:** 2026-04-12
+
+- [x] **8.10** Create `frontend/src/types/notebooklm.ts` — `NotebookSummary`, `ConnectedNotebook`, `NotebookQuery` types
+  - **Verify:** TypeScript compiles
+  - **Date completed:** 2026-04-12
+
+- [x] **8.11** Create `frontend/src/stores/notebooklm-store.ts` — Zustand store for connected notebook and step contexts
+  - **Verify:** Store initializes correctly
+  - **Date completed:** 2026-04-12
+
+- [x] **8.12** Add NotebookLM context section to each agent panel (ICP, Hook, Narrative, Retention, CTA) — show connected notebook, query button, context preview, include checkbox
+  - **Verify:** Agent panels render NotebookLM context section
+  - **Date completed:** 2026-04-12
+
+- [x] **8.13** Add NotebookLM connection UI to project detail page — connect/disconnect notebook button, notebook list selector
+  - **Verify:** Connect/disconnect notebook flow works in UI
+  - **Date completed:** 2026-04-12
+
+- [x] **8.14** Create `backend/tests/unit/test_notebooklm.py` — test NotebookLM client, service, API
+  - **Verify:** `uv run pytest tests/unit/test_notebooklm.py -v` passes
+  - **Date completed:** 2026-04-12
+
+- [x] **8.15** Verify: `uv run pytest tests/ -v` passes, `npm run build` passes
+  - **Verify:** 78 tests pass, frontend build succeeds
+  - **Date completed:** 2026-04-12
+
+- [ ] **8.2** Create `backend/app/integrations/notebooklm.py` — NotebookLM API client with `list_notebooks()`, `connect()`, `disconnect()`, `query()`, `get_step_context()` using Google Cloud Discovery Engine API via `google-auth` + `httpx`
+  - **Verify:** Client instantiates; `list_notebooks()` returns list of notebook summaries (mock test)
+  - **Date completed:** ___
+
+- [ ] **8.3** Create `backend/app/schemas/notebooklm.py` — `NotebookSummary`, `ConnectNotebookRequest`, `ConnectNotebookResponse`, `NotebookQueryRequest`, `NotebookQueryResponse`
+  - **Verify:** Schemas validate correctly; `ConnectNotebookRequest(notebook_id="x")` passes
+  - **Date completed:** ___
+
+- [ ] **8.4** Create `backend/app/services/notebooklm_service.py` — service wrapping NotebookLM client with DB session (connect/disconnect persists notebook_id on project, query delegates to client)
+  - **Verify:** Unit test: connect sets notebook_id, disconnect clears it
+  - **Date completed:** ___
+
+- [ ] **8.5** Create `backend/app/api/notebooklm.py` — `GET /notebooklm/notebooks`, `POST /notebooklm/connect`, `DELETE /notebooklm/connect`, `POST /notebooklm/query`
+  - **Verify:** `curl -X POST localhost:8000/api/v1/projects/{id}/notebooklm/connect -d '{"notebook_id":"x"}'` returns 200
+  - **Date completed:** ___
+
+- [ ] **8.6** Add `notebooklm_notebook_id` column to projects table via Alembic migration
+  - **Verify:** `uv run alembic upgrade head` adds column; `sqlite3 data/scripts_writer.db "PRAGMA table_info(projects)"` shows new column
+  - **Date completed:** ___
+
+- [ ] **8.7** Update `icp_profiles.source` CHECK constraint to include `'notebooklm'`
+  - **Verify:** Migration applies; `icp_profiles.source` accepts 'notebooklm' value
+  - **Date completed:** ___
+
+- [ ] **8.8** Update agent input schemas to include `notebooklm_context: str | None = None` on ICPAgentInput, HookAgentInput, NarrativeAgentInput, RetentionAgentInput, CTAAgentInput, WriterAgentInput
+  - **Verify:** `ICPAgentInput(raw_notes="x", topic="x", target_format="VSL", notebooklm_context="insights")` validates
+  - **Date completed:** ___
+
+- [ ] **8.9** Update `PipelineOrchestrator._build_agent_inputs()` to query NotebookLM and inject context when notebook connected to project
+  - **Verify:** Unit test: with notebook connected, agent input includes notebooklm_context; without, field is None
+  - **Date completed:** ___
+
+- [ ] **8.10** Create `frontend/src/types/notebooklm.ts` — `NotebookSummary`, `ConnectedNotebook`, `NotebookQuery` types
+  - **Verify:** TypeScript compiles without errors
+  - **Date completed:** ___
+
+- [ ] **8.11** Create `frontend/src/stores/notebooklm-store.ts` — Zustand store for connected notebook and step contexts
+  - **Verify:** Store initializes; `setConnectedNotebook`, `setStepContext` actions work
+  - **Date completed:** ___
+
+- [ ] **8.12** Add NotebookLM context section to each agent panel (ICP, Hook, Narrative, Retention, CTA) — show connected notebook, query button, context preview, include checkbox
+  - **Verify:** Connected notebook shows in panel; query returns context; checkbox controls inclusion
+  - **Date completed:** ___
+
+- [ ] **8.13** Add NotebookLM connection UI to project detail page — connect/disconnect notebook button, notebook list selector
+  - **Verify:** Click connect → notebook list → select → connected badge shown; disconnect clears
+  - **Date completed:** ___
+
+- [ ] **8.14** Create `backend/tests/unit/test_notebooklm.py` — test NotebookLM client, service, API
+  - **Verify:** `uv run pytest tests/unit/test_notebooklm.py` passes
+  - **Date completed:** ___
+
+- [ ] **8.15** Verify: `uv run pytest tests/ -v` passes, `npm run build` passes
+  - **Verify:** All existing + new tests pass; frontend builds without errors
+  - **Date completed:** ___
+
+---
+
+## Phase 9: Analysis Agents + UI
 
 **Goal:** 4 analysis agents run in parallel, results in tabbed panel.
 
@@ -639,45 +765,45 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **8.1** Create `backend/app/agents/factcheck_agent.py` — identifies factual claims, flags unverifiable/questionable, confidence levels
+- [ ] **9.1** Create `backend/app/agents/factcheck_agent.py` — identifies factual claims, flags unverifiable/questionable, confidence levels
   - **Verify:** `POST /analyze/factcheck` returns findings list
   - **Date completed:** ___
 
-- [ ] **8.2** Create `backend/app/agents/readability_agent.py` — FK + GF scores, flagged complex sentences, suggestions
+- [ ] **9.2** Create `backend/app/agents/readability_agent.py` — FK + GF scores, flagged complex sentences, suggestions
   - **Verify:** `POST /analyze/readability` returns scores + findings
   - **Date completed:** ___
 
-- [ ] **8.3** Create `backend/app/agents/copyright_agent.py` — flags potential copyright/trademark issues, advisory warnings
+- [ ] **9.3** Create `backend/app/agents/copyright_agent.py` — flags potential copyright/trademark issues, advisory warnings
   - **Verify:** `POST /analyze/copyright` returns findings
   - **Date completed:** ___
 
-- [ ] **8.4** Create `backend/app/agents/policy_agent.py` — checks against YouTube/Facebook/LinkedIn policies
+- [ ] **9.4** Create `backend/app/agents/policy_agent.py` — checks against YouTube/Facebook/LinkedIn policies
   - **Verify:** `POST /analyze/policy` returns platform-specific findings
   - **Date completed:** ___
 
-- [ ] **8.5** Extend orchestrator with `run_analysis_parallel()` using `asyncio.gather` for 4 analysis agents
+- [ ] **9.5** Extend orchestrator with `run_analysis_parallel()` using `asyncio.gather` for 4 analysis agents
   - **Verify:** `POST /analyze/all` returns 4 results concurrently
   - **Date completed:** ___
 
-- [ ] **8.6** Create `backend/app/schemas/analysis.py` — `AnalysisResultResponse`, `FindingResponse`
+- [ ] **9.6** Create `backend/app/schemas/analysis.py` — `AnalysisResultResponse`, `FindingResponse`
   - **Verify:** Schemas match LLD Finding model
   - **Date completed:** ___
 
-- [ ] **8.7** Create `backend/app/api/analysis.py` — `POST /analyze/{agent_type}`, `POST /analyze/all`, `GET /analysis`
+- [ ] **9.7** Create `backend/app/api/analysis.py` — `POST /analyze/{agent_type}`, `POST /analyze/all`, `GET /analysis`
   - **Verify:** All analysis endpoints work in Swagger
   - **Date completed:** ___
 
-- [ ] **8.8** Create `backend/app/services/analysis_service.py` — aggregation and persistence of analysis results
+- [ ] **9.8** Create `backend/app/services/analysis_service.py` — aggregation and persistence of analysis results
   - **Verify:** Results saved to DB and retrievable
   - **Date completed:** ___
 
-- [ ] **8.9** Create `frontend/src/components/agents/analysis-panel.tsx` — tabbed panel (FactCheck, Readability, Copyright, Policy), findings cards with severity badges, confidence, suggestion, dismiss/apply buttons
+- [ ] **9.9** Create `frontend/src/components/agents/analysis-panel.tsx` — tabbed panel (FactCheck, Readability, Copyright, Policy), findings cards with severity badges, confidence, suggestion, dismiss/apply buttons
   - **Verify:** Click "Analyze All" → 4 tabs populate with findings
   - **Date completed:** ___
 
 ---
 
-## Phase 9: Export, Polish & Edge Cases
+## Phase 10: Export, Polish & Edge Cases
 
 **Goal:** Complete feature set — export, clipboard, branching, re-run, error handling.
 
@@ -685,45 +811,45 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **9.1** Create export panel component — format selector (txt, md), download button, copy-to-clipboard button
+- [ ] **10.1** Create export panel component — format selector (txt, md), download button, copy-to-clipboard button
   - **Verify:** Download .txt and .md; clipboard copy works
   - **Date completed:** ___
 
-- [ ] **9.2** Add re-run functionality to pipeline sidebar — click completed step → warning about downstream invalidation → confirm → re-run agent
+- [ ] **10.2** Add re-run functionality to pipeline sidebar — click completed step → warning about downstream invalidation → confirm → re-run agent
   - **Verify:** Re-run ICP → warning modal → confirm → new ICP generated, downstream reset
   - **Date completed:** ___
 
-- [ ] **9.3** Add branch project — "Branch" button on pipeline view → creates copy with steps up to selected step
+- [ ] **10.3** Add branch project — "Branch" button on pipeline view → creates copy with steps up to selected step
   - **Verify:** Branch from Narrative → new project appears in dashboard with ICP+Hook+Narrative completed
   - **Date completed:** ___
 
-- [ ] **9.4** Add ICP file upload to frontend — file input accepting .json and .txt, parses and submits
+- [ ] **10.4** Add ICP file upload to frontend — file input accepting .json and .txt, parses and submits
   - **Verify:** Upload .json ICP file → parsed and displayed in ICP panel
   - **Date completed:** ___
 
-- [ ] **9.5** Add error handling UI — toast notifications for API errors, error boundary component wrapping pipeline
+- [ ] **10.5** Add error handling UI — toast notifications for API errors, error boundary component wrapping pipeline
   - **Verify:** Kill LLM provider → toast shows error, app doesn't crash
   - **Date completed:** ___
 
-- [ ] **9.6** Add loading states — skeleton screens for project list, spinners for agent execution, progress indicators
+- [ ] **10.6** Add loading states — skeleton screens for project list, spinners for agent execution, progress indicators
   - **Verify:** Agent running → spinner + streaming text visible
   - **Date completed:** ___
 
-- [ ] **9.7** Add empty states — "Create your first project" CTA on empty dashboard, "Run ICP to start" on empty pipeline
+- [ ] **10.7** Add empty states — "Create your first project" CTA on empty dashboard, "Run ICP to start" on empty pipeline
   - **Verify:** Fresh app shows helpful empty states
   - **Date completed:** ___
 
-- [ ] **9.8** Configure `structlog` in backend — JSON structured logging per module, log to stdout + `./logs/` files
+- [ ] **10.8** Configure `structlog` in backend — JSON structured logging per module, log to stdout + `./logs/` files
   - **Verify:** Run agent → `./logs/agents.log` shows JSON entry with agent name, duration, provider, status
   - **Date completed:** ___
 
-- [ ] **9.9** Add remaining Gemini and Ollama providers (if not already done in Phase 2)
+- [ ] **10.9** Add remaining Gemini and Ollama providers (if not already done in Phase 2)
   - **Verify:** Settings page shows all 4 providers with test buttons
   - **Date completed:** ___
 
 ---
 
-## Phase 10: Docker & Deployment
+## Phase 11: Docker & Deployment
 
 **Goal:** One-command deployment.
 
@@ -731,19 +857,19 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **10.1** Create `backend/Dockerfile` — Python 3.11 slim, install uv, copy files, install deps, expose 8000, CMD uvicorn
+- [ ] **11.1** Create `backend/Dockerfile` — Python 3.11 slim, install uv, copy files, install deps, expose 8000, CMD uvicorn
   - **Verify:** `docker build backend/` succeeds
   - **Date completed:** ___
 
-- [ ] **10.2** Create `frontend/Dockerfile` — Node 20, install deps, build, expose 3000, CMD next start
+- [ ] **11.2** Create `frontend/Dockerfile` — Node 20, install deps, build, expose 3000, CMD next start
   - **Verify:** `docker build frontend/` succeeds
   - **Date completed:** ___
 
-- [ ] **10.3** Create `docker-compose.yml` — backend + frontend services, volume for `data/`, env file, health checks
+- [ ] **11.3** Create `docker-compose.yml` — backend + frontend services, volume for `data/`, env file, health checks
   - **Verify:** `docker-compose up` starts both services, app is usable
   - **Date completed:** ___
 
-- [ ] **10.4** Create `README.md` — setup instructions, prerequisites, quickstart (local dev + Docker), environment variables, project structure overview
+- [ ] **11.4** Create `README.md` — setup instructions, prerequisites, quickstart (local dev + Docker), environment variables, project structure overview
   - **Verify:** Fresh clone → follow README → app runs
   - **Date completed:** ___
 

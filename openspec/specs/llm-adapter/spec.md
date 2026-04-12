@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the abstract LLM provider interface, four concrete providers (Modal, Groq, Gemini, Ollama), a failover-aware provider factory, an LRU+TTL response cache, and the settings API for configuring and health-checking providers.
+Defines the abstract LLM provider interface, four concrete providers (Modal, Groq, Gemini, Ollama), a failover-aware provider factory, an LRU+TTL response cache, the settings API for configuring and health-checking providers, and the Google Cloud authentication helper and NotebookLM API client for the integrations layer.
 ## Requirements
 ### Requirement: Abstract LLM provider interface
 The system SHALL define an abstract `LLMProvider` class with `provider_name`, `model_name`, and `priority` properties, and abstract methods `generate()`, `stream()`, and `health_check()`. The class SHALL NOT be instantiable directly.
@@ -113,4 +113,30 @@ The system SHALL provide `backend/scripts/test_llm.py` that accepts a provider n
 #### Scenario: Test with missing API key
 - **WHEN** `uv run python scripts/test_llm.py modal` is executed without an API key
 - **THEN** a clear error message is printed indicating the API key is not configured
+
+### Requirement: Google Cloud authentication helper
+The system SHALL provide a Google Cloud authentication helper using `google-auth` that supports both OAuth 2.0 and Service Account credentials for authenticating with Google Cloud APIs. The helper SHALL handle token refresh automatically and provide authenticated `httpx.AsyncClient` instances for making API calls.
+
+#### Scenario: Service account authentication
+- **WHEN** Google Cloud credentials are configured via a service account key file or environment variable
+- **THEN** the helper returns an authenticated httpx client that includes valid Authorization headers
+
+#### Scenario: Missing credentials
+- **WHEN** no Google Cloud credentials are configured
+- **THEN** the helper raises a clear error indicating credentials are required
+
+### Requirement: NotebookLM API client
+The system SHALL provide a NotebookLM API client in `backend/app/integrations/notebooklm.py` that uses the Google Cloud Discovery Engine API via `google-auth` + `httpx`. The client SHALL implement `list_notebooks()` (list available notebooks), `connect()` (validate and return notebook metadata), `disconnect()` (cleanup), `query()` (send a query to a specific notebook and return contextual insights), and `get_step_context()` (construct step-relevant queries for each pipeline step type and return context). On API failures, the client SHALL raise errors that the service layer can catch for graceful degradation.
+
+#### Scenario: List notebooks returns available notebooks
+- **WHEN** `NotebookLMClient.list_notebooks()` is called with valid credentials
+- **THEN** a list of `NotebookSummary` objects with id and title is returned
+
+#### Scenario: Query notebook returns contextual insights
+- **WHEN** `NotebookLMClient.query(notebook_id, "What are the key pain points?")` is called
+- **THEN** a string containing relevant insights from the notebook is returned
+
+#### Scenario: NotebookLM API unavailable
+- **WHEN** the Google Cloud Discovery Engine API is unreachable or returns an error
+- **THEN** the client raises an exception that the service layer catches, and agents proceed with raw notes only (graceful degradation)
 

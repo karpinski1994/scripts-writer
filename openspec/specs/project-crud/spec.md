@@ -24,7 +24,7 @@ The system SHALL define ORM models for `Project`, `ICPProfile`, `PipelineStep`, 
 
 #### Scenario: Project model has required fields
 - **WHEN** the `Project` model is inspected
-- **THEN** it has columns: id (String PK), name, topic, target_format, content_goal, raw_notes, status, current_step, created_at, updated_at with appropriate types and constraints
+- **THEN** it has columns: id (String PK), name, topic, target_format, content_goal, raw_notes, status, current_step, notebooklm_notebook_id (nullable), created_at, updated_at with appropriate types and constraints
 
 ### Requirement: Alembic migrations with async support
 The system SHALL use Alembic for database schema migrations with async engine support, configured to read `AppSettings.database_url` and autogenerate migrations from ORM models.

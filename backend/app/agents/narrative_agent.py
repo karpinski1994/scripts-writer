@@ -34,6 +34,8 @@ class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
             f"Topic: {input_data.topic}",
             f"Target Format: {input_data.target_format}",
         ]
+        if input_data.notebooklm_context:
+            parts.append(f"Additional research context from NotebookLM:\n{input_data.notebooklm_context}")
         return "\n\n".join(parts)
 
     def _build_agent(self) -> Agent:

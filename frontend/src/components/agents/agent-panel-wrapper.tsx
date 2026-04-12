@@ -167,6 +167,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onApprove={() => selectOption(data.icp)}
           onRerun={runAgent}
           isRunning={running}
+          projectId={projectId}
         />
       );
     }
@@ -179,6 +180,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onContinue={(selected: HookSuggestion) => selectOption(selected)}
           onRerun={runAgent}
           isRunning={running}
+          projectId={projectId}
         />
       );
     }
@@ -191,6 +193,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onContinue={(selected: NarrativePattern) => selectOption(selected)}
           onRerun={runAgent}
           isRunning={running}
+          projectId={projectId}
         />
       );
     }
@@ -203,6 +206,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onContinue={(selected: RetentionTechnique[]) => selectOption(selected)}
           onRerun={runAgent}
           isRunning={running}
+          projectId={projectId}
         />
       );
     }
@@ -215,6 +219,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
           onContinue={(selected: CTASuggestion) => selectOption(selected)}
           onRerun={runAgent}
           isRunning={running}
+          projectId={projectId}
         />
       );
     }

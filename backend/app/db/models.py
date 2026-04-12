@@ -38,6 +38,7 @@ class Project(Base):
     raw_notes: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    notebooklm_notebook_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=_now)
     updated_at: Mapped[datetime] = mapped_column(nullable=False, default=_now, onupdate=_now)
 
@@ -88,7 +89,9 @@ class ICPProfile(Base):
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=_now)
     updated_at: Mapped[datetime] = mapped_column(nullable=False, default=_now, onupdate=_now)
 
-    __table_args__ = (CheckConstraint("source IN ('generated','uploaded')", name="ck_icp_profiles_source"),)
+    __table_args__ = (
+        CheckConstraint("source IN ('generated','uploaded','notebooklm')", name="ck_icp_profiles_source"),
+    )
 
     project: Mapped["Project"] = relationship(back_populates="icp_profile")
 

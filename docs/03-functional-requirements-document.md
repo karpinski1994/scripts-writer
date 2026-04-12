@@ -39,6 +39,9 @@ Notes & Context → ICP Analysis → Hook Selection → Narrative Pattern → Re
 | US-13 | As a Creator, I want to choose my output format (VSL, YouTube, tutorial, Facebook, LinkedIn, blog) so that the script matches the target platform |
 | US-14 | As a Creator, I want to re-run individual agents without restarting the whole pipeline so that I can iterate on specific parts |
 | US-15 | As a Creator, I want to export my final script in multiple formats (plain text, markdown, clipboard) so that I can use it in my workflow |
+| US-16 | As a Creator, I want to attach a Google NotebookLM notebook to my project so that agents can use my existing research and notes |
+| US-17 | As a Creator, I want to query my NotebookLM notebook for specific insights before running an agent so that the agent output is grounded in my research |
+| US-18 | As a Creator, I want to attach NotebookLM context to any creative step (ICP, Hook, Narrative, Retention, CTA, Writer) so that each agent can benefit from relevant research |
 
 ## Functional Requirements
 
@@ -52,13 +55,13 @@ Notes & Context → ICP Analysis → Hook Selection → Narrative Pattern → Re
 | FR-1.3 | The system shall allow the user to specify the target format (VSL, YouTube, tutorial, Facebook, LinkedIn, blog) | Must |
 | FR-1.4 | The system shall allow the user to specify the content goal (sell, educate, entertain, build authority) | Should |
 | FR-1.5 | The system shall persist notes and context per project so the user can resume later | Must |
-| FR-1.6 | The system shall allow the user to attach existing ICP data if available, skipping the ICP agent | Should |
+| FR-1.6 | The system shall allow the user to attach existing ICP data from upload or NotebookLM if available, skipping the ICP agent | Should |
 
 ### FR-2: ICP Analysis Agent
 
 | ID | Requirement | Priority |
 |----|------------|----------|
-| FR-2.1 | The system shall analyze raw notes and generate an ICP profile including demographics, psychographics, pain points, and desires | Must |
+| FR-2.1 | The system shall analyze raw notes (optionally enriched by NotebookLM context) and generate an ICP profile including demographics, psychographics, pain points, and desires | Must |
 | FR-2.2 | The system shall present the generated ICP to the user for review and editing before proceeding | Must |
 | FR-2.3 | The system shall allow the user to manually override any ICP field | Must |
 | FR-2.4 | The system shall store the approved ICP as part of the project context for downstream agents | Must |
@@ -166,6 +169,17 @@ Notes & Context → ICP Analysis → Hook Selection → Narrative Pattern → Re
 | FR-13.3 | The system shall export final scripts as Markdown | Must |
 | FR-13.4 | The system shall copy final scripts to the system clipboard | Should |
 | FR-13.5 | The system shall maintain a version history of script revisions within a project | Should |
+
+### FR-15: NotebookLM Integration
+
+| ID | Requirement | Priority |
+|----|------------|----------|
+| FR-15.1 | The system shall allow the user to connect a Google NotebookLM notebook to a project | Must |
+| FR-15.2 | The system shall allow the user to attach NotebookLM context to any creative pipeline step before running the agent | Must |
+| FR-15.3 | The system shall query the NotebookLM notebook for insights relevant to the current step type (ICP profiling, hook ideas, narrative summaries, retention techniques, CTA wording, script generation) | Should |
+| FR-15.4 | The system shall present NotebookLM-sourced context alongside agent output for review | Should |
+| FR-15.5 | The system shall degrade gracefully if NotebookLM is unavailable — agents proceed with raw notes only | Must |
+| FR-15.6 | The system shall allow the user to disconnect a notebook from a project | Should |
 
 ## Workflow & Logic
 
