@@ -10,13 +10,13 @@
 
 | Item | Value |
 |------|-------|
-| **Last updated** | 2026-04-11 |
-| **Current phase** | Phase 0 — Complete |
-| **Backend** | Initialized (FastAPI + health endpoint + config) |
+| **Last updated** | 2026-04-12 |
+| **Current phase** | Phase 1 — Complete |
+| **Backend** | Project CRUD API (5 endpoints) + DB + tests |
 | **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
-| **Database** | Not created |
+| **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Not tested |
-| **Working end-to-end?** | No |
+| **Working end-to-end?** | Project CRUD via Swagger UI |
 
 ---
 
@@ -256,53 +256,53 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **1.1** Create `backend/app/db/database.py` — async SQLAlchemy engine (`create_async_engine`), `async_sessionmaker`, `get_db` dependency
+- [x] **1.1** Create `backend/app/db/database.py` — async SQLAlchemy engine (`create_async_engine`), `async_sessionmaker`, `get_db` dependency
   - **Verify:** `uv run python -c "from app.db.database import engine; print(engine)"` prints engine object
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.2** Create `backend/app/db/models.py` — SQLAlchemy ORM models for all 5 tables: `Project`, `ICPProfile`, `PipelineStep`, `ScriptVersion`, `AnalysisResult` (match LLD schema exactly — UUID PKs, JSON columns, CHECK constraints, indexes, CASCADE deletes)
+- [x] **1.2** Create `backend/app/db/models.py` — SQLAlchemy ORM models for all 5 tables: `Project`, `ICPProfile`, `PipelineStep`, `ScriptVersion`, `AnalysisResult` (match LLD schema exactly — UUID PKs, JSON columns, CHECK constraints, indexes, CASCADE deletes)
   - **Verify:** Models import without error; column types match LLD
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.3** Initialize Alembic: `uv run alembic init app/db/migrations`, configure `alembic.ini` to use `AppSettings.database_url`, configure `env.py` for async + `Base.metadata`
+- [x] **1.3** Initialize Alembic: `uv run alembic init app/db/migrations`, configure `alembic.ini` to use `AppSettings.database_url`, configure `env.py` for async + `Base.metadata`
   - **Verify:** `uv run alembic revision --autogenerate -m "initial"` creates migration with all 5 tables
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.4** Run initial migration: `uv run alembic upgrade head`
+- [x] **1.4** Run initial migration: `uv run alembic upgrade head`
   - **Verify:** `data/scripts_writer.db` file exists; `sqlite3 data/scripts_writer.db ".tables"` shows all 5 tables
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.5** Create `backend/app/schemas/project.py` — `ProjectCreateRequest` (name, topic, target_format, content_goal?, raw_notes with validation), `ProjectUpdateRequest` (all optional), `ProjectResponse`, `ProjectSummaryResponse`, `ProjectDetailResponse`
+- [x] **1.5** Create `backend/app/schemas/project.py` — `ProjectCreateRequest` (name, topic, target_format, content_goal?, raw_notes with validation), `ProjectUpdateRequest` (all optional), `ProjectResponse`, `ProjectSummaryResponse`, `ProjectDetailResponse`
   - **Verify:** `ProjectCreateRequest(name="", topic="x", target_format="VSL", raw_notes="x")` raises ValidationError on empty name
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.6** Create `backend/app/services/project_service.py` — `ProjectService` class with methods: `create`, `list_all`, `get_by_id`, `update`, `delete` (all async, using SQLAlchemy)
+- [x] **1.6** Create `backend/app/services/project_service.py` — `ProjectService` class with methods: `create`, `list_all`, `get_by_id`, `update`, `delete` (all async, using SQLAlchemy)
   - **Verify:** Unit test creates project, lists it, gets it, updates it, deletes it
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.7** Create `backend/app/api/projects.py` — FastAPI router with 5 endpoints: `POST /api/v1/projects` (201), `GET /api/v1/projects` (list with pagination), `GET /api/v1/projects/{id}`, `PATCH /api/v1/projects/{id}`, `DELETE /api/v1/projects/{id}`
+- [x] **1.7** Create `backend/app/api/projects.py` — FastAPI router with 5 endpoints: `POST /api/v1/projects` (201), `GET /api/v1/projects` (list with pagination), `GET /api/v1/projects/{id}`, `PATCH /api/v1/projects/{id}`, `DELETE /api/v1/projects/{id}`
   - **Verify:** `curl -X POST localhost:8000/api/v1/projects -H "Content-Type: application/json" -d '{"name":"Test","topic":"Python","target_format":"VSL","raw_notes":"test notes"}'` returns 201
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.8** Create `backend/app/api/router.py` — aggregate all API routers under `/api/v1` prefix
+- [x] **1.8** Create `backend/app/api/router.py` — aggregate all API routers under `/api/v1` prefix
   - **Verify:** Router imports and mounts without circular imports
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.9** Update `backend/app/main.py` — mount `api.router`, add lifespan for DB table creation (create_all as fallback), add CORS for `localhost:3000`
+- [x] **1.9** Update `backend/app/main.py` — mount `api.router`, add lifespan for DB table creation (create_all as fallback), add CORS for `localhost:3000`
   - **Verify:** `curl localhost:8000/docs` returns Swagger UI with all project endpoints visible
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.10** Create `backend/tests/conftest.py` — in-memory SQLite test DB, `async_client` fixture, `db_session` fixture
+- [x] **1.10** Create `backend/tests/conftest.py` — in-memory SQLite test DB, `async_client` fixture, `db_session` fixture
   - **Verify:** `uv run pytest tests/` runs (no tests yet but fixtures load)
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.11** Create `backend/tests/unit/test_project_service.py` — test CRUD for ProjectService
+- [x] **1.11** Create `backend/tests/unit/test_project_service.py` — test CRUD for ProjectService
   - **Verify:** `uv run pytest tests/unit/test_project_service.py` passes with 5+ tests
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **1.12** Create `backend/tests/unit/test_project_api.py` — integration tests for project endpoints via `httpx.AsyncClient`
+- [x] **1.12** Create `backend/tests/unit/test_project_api.py` — integration tests for project endpoints via `httpx.AsyncClient`
   - **Verify:** `uv run pytest tests/unit/test_project_api.py` passes with create/list/get/update/delete tests
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 
