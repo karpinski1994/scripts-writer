@@ -33,8 +33,6 @@ out/
 *.swp
 *.swo
 
-# Opencode
-.opencode/
 
 # Agent
 .agent/

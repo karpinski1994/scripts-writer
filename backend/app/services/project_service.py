@@ -4,7 +4,8 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Project
+from app.db.models import PipelineStep, Project
+from app.pipeline.state import STEP_ORDER, StepStatus
 from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest
 
 
@@ -22,6 +23,18 @@ class ProjectService:
             raw_notes=data.raw_notes,
         )
         self.db.add(project)
+        await self.db.flush()
+
+        for order, step_type in enumerate(STEP_ORDER):
+            step = PipelineStep(
+                id=str(uuid4()),
+                project_id=project.id,
+                step_type=step_type.value,
+                step_order=order,
+                status=StepStatus.pending.value,
+            )
+            self.db.add(step)
+
         await self.db.commit()
         await self.db.refresh(project)
         return project

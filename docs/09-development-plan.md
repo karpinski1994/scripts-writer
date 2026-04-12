@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 2 — Complete |
-| **Backend** | Project CRUD API + LLM adapter layer (4 providers + factory + cache + settings API) |
+| **Current phase** | Phase 3 — Complete |
+| **Backend** | Project CRUD + LLM adapter + ICP agent + pipeline orchestrator + state machine |
 | **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Project CRUD via Swagger UI + LLM settings API |
+| **Working end-to-end?** | Create project → run ICP agent → get structured ICP profile → approve via API |
 
 ---
 
@@ -368,53 +368,53 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **3.1** Create `backend/app/agents/base.py` — `BaseAgent(ABC, Generic[InputT, OutputT])` with: `name`, `step_type`, abstract `_build_agent()`, abstract `build_prompt()`, `execute()` (cache check → failover run → cache write), `_compute_cache_key()`
+- [x] **3.1** Create `backend/app/agents/base.py` — `BaseAgent(ABC, Generic[InputT, OutputT])` with: `name`, `step_type`, abstract `_build_agent()`, abstract `build_prompt()`, `execute()` (cache check → failover run → cache write), `_compute_cache_key()`
   - **Verify:** Cannot instantiate `BaseAgent` directly
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.2** Create `backend/app/agents/icp_agent.py` — `ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput])` with Pydantic AI agent, system prompt for ICP generation, `build_prompt()` including notes + topic + format + goal
+- [x] **3.2** Create `backend/app/agents/icp_agent.py` — `ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput])` with Pydantic AI agent, system prompt for ICP generation, `build_prompt()` including notes + topic + format + goal
   - **Verify:** `agent.build_prompt(test_input)` contains raw_notes text and topic
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.3** Create `backend/app/pipeline/state.py` — `StepType` enum, `StepStatus` enum, `PipelineState` with `TRANSITIONS` dict, `can_transition()`, `validate_step_ready()`, `DEPENDENCY_MAP`
+- [x] **3.3** Create `backend/app/pipeline/state.py` — `StepType` enum, `StepStatus` enum, `PipelineState` with `TRANSITIONS` dict, `can_transition()`, `validate_step_ready()`, `DEPENDENCY_MAP`
   - **Verify:** `can_transition(PENDING, RUNNING) == True`; `validate_step_ready` raises `DependencyNotMetError` for Hook without ICP
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.4** Create `backend/app/pipeline/orchestrator.py` — `PipelineOrchestrator` with `STEP_ORDER`, `run_step()` (check deps → set RUNNING → execute agent → set COMPLETED → save), `_build_agent_inputs()` for ICP case, `_get_or_create_step()`
+- [x] **3.4** Create `backend/app/pipeline/orchestrator.py` — `PipelineOrchestrator` with `STEP_ORDER`, `run_step()` (check deps → set RUNNING → execute agent → set COMPLETED → save), `_build_agent_inputs()` for ICP case, `_get_or_create_step()`
   - **Verify:** Unit test: `run_step(project_id, StepType.ICP)` completes and saves output_data
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.5** Create `backend/app/services/pipeline_service.py` — thin service wrapping orchestrator, handling DB session
+- [x] **3.5** Create `backend/app/services/pipeline_service.py` — thin service wrapping orchestrator, handling DB session
   - **Verify:** Service calls orchestrator and persists results
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.6** Create `backend/app/schemas/pipeline.py` — `PipelineStepResponse`, `StepUpdateRequest`, `PipelineResponse`
+- [x] **3.6** Create `backend/app/schemas/pipeline.py` — `PipelineStepResponse`, `StepUpdateRequest`, `PipelineResponse`
   - **Verify:** Schemas validate correctly
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.7** Create `backend/app/api/pipeline.py` — `GET /api/v1/projects/{id}/pipeline`, `POST /api/v1/projects/{id}/pipeline/run/{step_type}`, `PATCH /api/v1/projects/{id}/pipeline/{step_id}`
+- [x] **3.7** Create `backend/app/api/pipeline.py` — `GET /api/v1/projects/{id}/pipeline`, `POST /api/v1/projects/{id}/pipeline/run/{step_type}`, `PATCH /api/v1/projects/{id}/pipeline/{step_id}`
   - **Verify:** `curl -X POST localhost:8000/api/v1/projects/{id}/pipeline/run/icp` returns ICP profile in output_data
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.8** Create `backend/app/schemas/icp.py` — `ICPProfileResponse`, `ICPUpdateRequest`
+- [x] **3.8** Create `backend/app/schemas/icp.py` — `ICPProfileResponse`, `ICPUpdateRequest`
   - **Verify:** Schemas match LLD ICP model
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.9** Create `backend/app/api/icp.py` — `POST /api/v1/projects/{id}/icp/generate`, `GET /api/v1/projects/{id}/icp`, `PATCH /api/v1/projects/{id}/icp`, `POST /api/v1/projects/{id}/icp/upload`
+- [x] **3.9** Create `backend/app/api/icp.py` — `POST /api/v1/projects/{id}/icp/generate`, `GET /api/v1/projects/{id}/icp`, `PATCH /api/v1/projects/{id}/icp`, `POST /api/v1/projects/{id}/icp/upload`
   - **Verify:** Generate → get → edit → approve flow works in Swagger
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.10** On project creation, create 10 `pipeline_steps` rows (icp, hook, narrative, retention, cta, writer, factcheck, readability, copyright, policy) all with status=pending and correct step_order
+- [x] **3.10** On project creation, create 10 `pipeline_steps` rows (icp, hook, narrative, retention, cta, writer, factcheck, readability, copyright, policy) all with status=pending and correct step_order
   - **Verify:** After creating a project, `GET /pipeline` returns 10 pending steps
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.11** Create `backend/tests/unit/test_pipeline_state.py` — state transition tests, dependency validation tests
+- [x] **3.11** Create `backend/tests/unit/test_pipeline_state.py` — state transition tests, dependency validation tests
   - **Verify:** `uv run pytest tests/unit/test_pipeline_state.py` passes
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **3.12** Create `backend/tests/unit/test_icp_agent.py` — prompt construction tests
+- [x] **3.12** Create `backend/tests/unit/test_icp_agent.py` — prompt construction tests
   - **Verify:** `uv run pytest tests/unit/test_icp_agent.py` passes
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

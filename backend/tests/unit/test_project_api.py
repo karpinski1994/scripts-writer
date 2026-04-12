@@ -15,6 +15,20 @@ async def test_create_project(async_client):
 
 
 @pytest.mark.asyncio
+async def test_create_project_creates_pipeline_steps(async_client):
+    create_resp = await async_client.post(
+        "/api/v1/projects",
+        json={"name": "P", "topic": "T", "target_format": "VSL", "raw_notes": "n"},
+    )
+    assert create_resp.status_code == 201
+    project_id = create_resp.json()["id"]
+    pipeline_resp = await async_client.get(f"/api/v1/projects/{project_id}/pipeline")
+    assert pipeline_resp.status_code == 200
+    pipeline = pipeline_resp.json()
+    assert len(pipeline["steps"]) == 10
+
+
+@pytest.mark.asyncio
 async def test_list_projects(async_client):
     await async_client.post(
         "/api/v1/projects",
