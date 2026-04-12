@@ -11,12 +11,12 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 3 — Complete |
-| **Backend** | Project CRUD + LLM adapter + ICP agent + pipeline orchestrator + state machine |
+| **Current phase** | Phase 4 — Complete |
+| **Backend** | Full creative pipeline (ICP → Hook → Narrative → Retention → CTA → Writer) + export |
 | **Frontend** | Initialized (Next.js 16 + Shadcn/UI + deps) |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP agent → get structured ICP profile → approve via API |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → export as .md |
 
 ---
 
@@ -426,53 +426,53 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **4.1** Create `backend/app/agents/hook_agent.py` — 5+ ranked hook suggestions with effectiveness scores
+- [x] **4.1** Create `backend/app/agents/hook_agent.py` — 5+ ranked hook suggestions with effectiveness scores
   - **Verify:** After approving ICP, `POST /pipeline/run/hook` returns 5 hooks with rank + rationale
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.2** Create `backend/app/agents/narrative_agent.py` — 4+ narrative patterns with fit scores, recommendation
+- [x] **4.2** Create `backend/app/agents/narrative_agent.py` — 4+ narrative patterns with fit scores, recommendation
   - **Verify:** After selecting hook, `POST /pipeline/run/narrative` returns patterns with recommended_index
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.3** Create `backend/app/agents/retention_agent.py` — technique suggestions with placements
+- [x] **4.3** Create `backend/app/agents/retention_agent.py` — technique suggestions with placements
   - **Verify:** After selecting narrative, `POST /pipeline/run/retention` returns techniques with placement info
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.4** Create `backend/app/agents/cta_agent.py` — CTA suggestions with wording + placement options
+- [x] **4.4** Create `backend/app/agents/cta_agent.py` — CTA suggestions with wording + placement options
   - **Verify:** After selecting retention, `POST /pipeline/run/cta` returns CTA suggestions
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.5** Extend `orchestrator._build_agent_inputs()` to assemble context for Hook, Narrative, Retention, CTA, Writer (pull from previous steps' selected_option)
+- [x] **4.5** Extend `orchestrator._build_agent_inputs()` to assemble context for Hook, Narrative, Retention, CTA, Writer (pull from previous steps' selected_option)
   - **Verify:** Each agent receives correct upstream data in its input
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.6** Implement `orchestrator._invalidate_downstream()` — reset downstream steps to PENDING when a completed step is re-run
+- [x] **4.6** Implement `orchestrator._invalidate_downstream()` — reset downstream steps to PENDING when a completed step is re-run
   - **Verify:** Re-running ICP resets Hook+Narrative+Retention+CTA+Writer to PENDING
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.7** Create `backend/app/agents/writer_agent.py` — full script generation incorporating all selections
+- [x] **4.7** Create `backend/app/agents/writer_agent.py` — full script generation incorporating all selections
   - **Verify:** After all selections, `POST /pipeline/run/writer` returns complete script in ScriptDraft format
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.8** Create `backend/app/schemas/script.py` — `ScriptVersionResponse`, `ScriptUpdateRequest`
+- [x] **4.8** Create `backend/app/schemas/script.py` — `ScriptVersionResponse`, `ScriptUpdateRequest`
   - **Verify:** Schemas validate correctly
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.9** Create `backend/app/services/export_service.py` — `export_txt()`, `export_md()`, `_format_as_markdown()`, `_slugify()`
+- [x] **4.9** Create `backend/app/services/export_service.py` — `export_txt()`, `export_md()`, `_format_as_markdown()`, `_slugify()`
   - **Verify:** Unit test: export creates .md file with correct format
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.10** Create `backend/app/api/scripts.py` — `GET /scripts`, `GET /scripts/{version_id}`, `POST /scripts/generate`, `PATCH /scripts/{version_id}`
+- [x] **4.10** Create `backend/app/api/scripts.py` — `GET /scripts`, `GET /scripts/{version_id}`, `POST /scripts/generate`, `PATCH /scripts/{version_id}`
   - **Verify:** Script generation creates a version; edit updates content
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.11** Create `backend/app/api/export.py` — `GET /export?format=txt|md`
+- [x] **4.11** Create `backend/app/api/export.py` — `GET /export?format=txt|md`
   - **Verify:** `curl localhost:8000/api/v1/projects/{id}/export?format=md` downloads a .md file
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **4.12** Create `backend/tests/unit/test_agents.py` — prompt construction tests for all creative agents
+- [x] **4.12** Create `backend/tests/unit/test_agents.py` — prompt construction tests for all creative agents
   - **Verify:** `uv run pytest tests/unit/test_agents.py` passes
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

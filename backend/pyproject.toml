@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Agentic AI pipeline for generating high-converting video scripts and marketing posts"
 requires-python = ">=3.11"
 dependencies = [
+    "aiofiles>=25.1.0",
     "aiosqlite>=0.22.1",
     "alembic>=1.18.4",
     "fastapi>=0.135.3",

@@ -1,3 +1,7 @@
+import json
+import logging
+
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -5,6 +9,8 @@ from app.db.models import PipelineStep
 from app.pipeline.orchestrator import PipelineOrchestrator
 from app.pipeline.state import StepStatus, StepType
 from app.schemas.pipeline import PipelineResponse, PipelineStepResponse, StepUpdateRequest
+
+logger = logging.getLogger(__name__)
 
 
 class PipelineService:
@@ -31,13 +37,12 @@ class PipelineService:
     async def update_step(self, project_id: str, step_id: str, data: StepUpdateRequest) -> PipelineStepResponse:
         step = await self.db.get(PipelineStep, step_id)
         if step is None or step.project_id != project_id:
-            from fastapi import HTTPException
-
             raise HTTPException(status_code=404, detail="Pipeline step not found")
         if data.selected_option is not None:
-            import json
-
             step.selected_option = json.dumps(data.selected_option)
+            if step.status == StepStatus.completed.value:
+                orchestrator = PipelineOrchestrator(self.db)
+                await orchestrator.invalidate_downstream(project_id, StepType(step.step_type))
         await self.db.commit()
         await self.db.refresh(step)
         return PipelineStepResponse.model_validate(step)
