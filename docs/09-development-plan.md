@@ -80,8 +80,9 @@ Provider priority (failover order): Modal → Groq → Gemini → Ollama
 ```
 scripts-writer/
 ├── backend/
+│   ├── main.py                  # uv init placeholder (not the FastAPI app)
 │   ├── app/
-│   │   ├── main.py
+│   │   ├── main.py              # FastAPI app (health, CORS, routes, WS)
 │   │   ├── config.py
 │   │   ├── db/
 │   │   │   ├── database.py
@@ -93,16 +94,17 @@ scripts-writer/
 │   │   │   ├── pipeline.py
 │   │   │   ├── icp.py
 │   │   │   ├── scripts.py
-│   │   │   ├── analysis.py
 │   │   │   ├── export.py
-│   │   │   └── settings.py
+│   │   │   ├── settings.py
+│   │   │   └── analysis.py      # Phase 8
 │   │   ├── schemas/
 │   │   │   ├── project.py
 │   │   │   ├── pipeline.py
 │   │   │   ├── icp.py
+│   │   │   ├── agents.py
 │   │   │   ├── script.py
-│   │   │   ├── analysis.py
-│   │   │   └── settings.py
+│   │   │   ├── settings.py
+│   │   │   └── analysis.py      # Phase 8
 │   │   ├── agents/
 │   │   │   ├── base.py
 │   │   │   ├── icp_agent.py
@@ -111,10 +113,10 @@ scripts-writer/
 │   │   │   ├── retention_agent.py
 │   │   │   ├── cta_agent.py
 │   │   │   ├── writer_agent.py
-│   │   │   ├── factcheck_agent.py
-│   │   │   ├── readability_agent.py
-│   │   │   ├── copyright_agent.py
-│   │   │   └── policy_agent.py
+│   │   │   ├── factcheck_agent.py    # Phase 8
+│   │   │   ├── readability_agent.py  # Phase 8
+│   │   │   ├── copyright_agent.py    # Phase 8
+│   │   │   └── policy_agent.py       # Phase 8
 │   │   ├── llm/
 │   │   │   ├── base.py
 │   │   │   ├── modal_provider.py
@@ -122,20 +124,23 @@ scripts-writer/
 │   │   │   ├── gemini_provider.py
 │   │   │   ├── ollama_provider.py
 │   │   │   ├── provider_factory.py
-│   │   │   └── cache.py
+│   │   │   ├── cache.py
+│   │   │   └── errors.py
 │   │   ├── pipeline/
 │   │   │   ├── orchestrator.py
-│   │   │   └── state.py
+│   │   │   ├── state.py
+│   │   │   └── errors.py
 │   │   ├── services/
 │   │   │   ├── project_service.py
 │   │   │   ├── pipeline_service.py
 │   │   │   ├── export_service.py
-│   │   │   └── analysis_service.py
+│   │   │   └── analysis_service.py  # Phase 8
 │   │   └── ws/
-│   │       └── handlers.py
+│   │       ├── handlers.py
+│   │       └── connection.py
 │   ├── tests/
 │   │   ├── unit/
-│   │   ├── integration/
+│   │   ├── integration/         # Empty (Phase 8+)
 │   │   └── conftest.py
 │   ├── scripts/
 │   │   └── test_llm.py
@@ -147,41 +152,44 @@ scripts-writer/
 │   │   ├── app/
 │   │   │   ├── layout.tsx
 │   │   │   ├── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── favicon.ico
 │   │   │   ├── projects/
-│   │   │   │   ├── page.tsx
 │   │   │   │   └── [id]/
-│   │   │   │       ├── page.tsx
+│   │   │   │       └── page.tsx
 │   │   │   │       └── editor/
-│   │   │   │           └── page.tsx
+│   │   │   │           └── page.tsx  # Phase 7
 │   │   │   └── settings/
 │   │   │       └── page.tsx
 │   │   ├── components/
+│   │   │   ├── providers.tsx    # TanStack QueryClientProvider
+│   │   │   ├── app-shell.tsx    # Sidebar layout + navigation
 │   │   │   ├── ui/
 │   │   │   ├── dashboard/
 │   │   │   ├── pipeline/
 │   │   │   ├── agents/
-│   │   │   ├── editor/
+│   │   │   ├── editor/          # Phase 7
 │   │   │   └── shared/
 │   │   ├── lib/
 │   │   │   ├── api.ts
-│   │   │   ├── ws.ts
 │   │   │   └── utils.ts
 │   │   ├── hooks/
-│   │   │   ├── use-pipeline.ts
 │   │   │   ├── use-websocket.ts
-│   │   │   └── use-agent-stream.ts
+│   │   │   ├── use-agent-stream.ts
+│   │   │   └── use-mobile.ts
 │   │   ├── stores/
 │   │   │   ├── project-store.ts
 │   │   │   ├── pipeline-store.ts
-│   │   │   ├── editor-store.ts
+│   │   │   ├── editor-store.ts    # Phase 7
 │   │   │   └── settings-store.ts
 │   │   └── types/
 │   │       ├── project.ts
 │   │       ├── pipeline.ts
 │   │       ├── icp.ts
+│   │       ├── agents.ts
 │   │       ├── script.ts
-│   │       └── analysis.ts
-│   ├── tailwind.config.ts
+│   │       ├── settings.ts
+│   │       └── analysis.ts        # Phase 8
 │   ├── next.config.ts
 │   ├── package.json
 │   └── Dockerfile
@@ -190,6 +198,15 @@ scripts-writer/
 │   └── exports/
 ├── docs/
 │   └── (all 8 design docs + this file)
+├── openspec/
+│   ├── config.yaml
+│   ├── specs/
+│   │   ├── backend-foundation/
+│   │   ├── frontend-foundation/
+│   │   ├── llm-adapter/
+│   │   └── project-crud/
+│   └── changes/
+│       └── archive/
 ├── .env.example
 ├── .gitignore
 ├── docker-compose.yml

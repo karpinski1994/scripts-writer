@@ -1,7 +1,8 @@
 # llm-adapter Specification
 
 ## Purpose
-TBD - created by archiving change phase2-llm-adapter-layer. Update Purpose after archive.
+
+Defines the abstract LLM provider interface, four concrete providers (Modal, Groq, Gemini, Ollama), a failover-aware provider factory, an LRU+TTL response cache, and the settings API for configuring and health-checking providers.
 ## Requirements
 ### Requirement: Abstract LLM provider interface
 The system SHALL define an abstract `LLMProvider` class with `provider_name`, `model_name`, and `priority` properties, and abstract methods `generate()`, `stream()`, and `health_check()`. The class SHALL NOT be instantiable directly.

@@ -1,7 +1,8 @@
 # project-crud Specification
 
 ## Purpose
-TBD - created by archiving change phase1-backend-foundation. Update Purpose after archive.
+
+Defines the async SQLAlchemy database engine and sessions, five ORM models with Alembic migrations, Pydantic project schemas, the ProjectService CRUD layer, five REST endpoints under /api/v1/projects, the aggregated API router, and in-memory SQLite test infrastructure.
 ## Requirements
 ### Requirement: Async SQLAlchemy database engine and sessions
 The system SHALL provide an async SQLAlchemy engine configured via `AppSettings.database_url` with an `async_sessionmaker` and a `get_db` FastAPI dependency that yields async database sessions.
