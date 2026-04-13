@@ -35,8 +35,8 @@ class RetentionAgent(BaseAgent[RetentionAgentInput, RetentionAgentOutput]):
             f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
             f"Target Format: {input_data.target_format}",
         ]
-        if input_data.notebooklm_context:
-            parts.append(f"Additional research context from NotebookLM:\n{input_data.notebooklm_context}")
+        if input_data.piragi_context:
+            parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)
 
     def _build_agent(self) -> Agent:

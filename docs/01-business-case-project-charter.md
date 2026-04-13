@@ -17,7 +17,7 @@ Creating scripts and marketing content that actually convert is a multi-discipli
 - Place effective calls to action
 - Ensure factual accuracy, readability, copyright compliance, and platform policy adherence
 
-Creators often have existing research, audience notes, and content stored in Google Drive or NotebookLM notebooks that could enrich their scripts, but no tool integrates these sources into the creative pipeline. Most creators approach this ad hoc, resulting in scripts that underperform on retention, conversion, or compliance. Existing AI writing tools generate generic content without the strategic scaffolding needed for high-performing scripts. There is no free, self-hosted tool that orchestrates this entire pipeline agenticly.
+Creators often have existing research, audience notes, and content stored in local documents or cloud storage that could enrich their scripts using Piragi RAG, but no tool integrates these sources into the creative pipeline. Most creators approach this ad hoc, resulting in scripts that underperform on retention, conversion, or compliance. Existing AI writing tools generate generic content without the strategic scaffolding needed for high-performing scripts. There is a free, self-hosted tool that orchestrates this entire pipeline agenticly.
 
 ### Strategic Alignment
 
@@ -30,7 +30,7 @@ This project aligns with the following strategic goals:
 | Ensure content compliance and quality | Built-in fact-checking, copyright, and policy analysis |
 | Serve the developer/tech creator niche | First-class support for software-related content niches |
 | Maintain lean, solo-developer operations | Zero-cost infra, self-hosted, no vendor lock-in |
-| Leverage existing research and notes | NotebookLM/Google Drive integration lets creators bring their accumulated knowledge into the pipeline |
+| Leverage existing research and notes | Piragi RAG integration lets creators bring their accumulated knowledge into the pipeline |
 
 ### Cost-Benefit Analysis
 
@@ -85,7 +85,7 @@ This project aligns with the following strategic goals:
 - Script analysis module (fact-checking, readability, copyright, YouTube policies)
 - Support for output formats: VSL scripts, YouTube video scripts, tutorials, Facebook posts, LinkedIn posts, blog posts
 - Free-tier LLM integration (local + cloud free tiers)
-- Google NotebookLM integration for enriching agent context with existing research and notes
+- Google Piragi integration for enriching agent context with existing research and notes
 - Local-first, self-hosted deployment
 
 **Out of Scope:**
@@ -111,7 +111,7 @@ This project aligns with the following strategic goals:
 | Phase | Milestone | Deliverable |
 |-------|-----------|-------------|
 | Phase 1 | Core Workflow Engine | Agentic pipeline: Notes → ICP → Hook → Narrative → Retention → CTA → Script |
-| Phase 2 | NotebookLM Integration | Google NotebookLM/Drive context attachment for all creative steps |
+| Phase 2 | Piragi RAG Integration | Piragi RAG context attachment for all creative steps |
 | Phase 3 | Script Analysis Module | Fact-check, readability, copyright, policy compliance agents |
 | Phase 4 | Output Format Support | VSL, YouTube, tutorial, Facebook, LinkedIn, blog templates |
 | Phase 5 | LLM Integration Layer | Free-tier LLM adapter (local Ollama + cloud free tiers) |
@@ -136,7 +136,7 @@ This project aligns with the following strategic goals:
 | R3 | Copyright/policy analysis produces false positives | Medium | Medium | Present analysis as advisory, not authoritative; allow user override |
 | R4 | Scope creep from adding more output formats | Medium | Low | Strict format backlog prioritization; community-driven feature requests |
 | R5 | Solo developer burnout / motivation loss | Medium | High | No external deadlines; milestone-based pacing; ship MVP first |
-| R6 | Google NotebookLM API changes or rate limits | Low | Medium | Use official Google Cloud API; graceful degradation when unavailable; manual notes input as fallback |
+| R6 | Piragi API changes or rate limits | Low | Medium | Use official Piragi API; graceful degradation when unavailable; manual notes input as fallback |
 
 ### Success Criteria
 

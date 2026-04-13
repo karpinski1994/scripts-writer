@@ -43,8 +43,8 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
             parts.append(f"Content Goal: {input_data.content_goal}")
         if input_data.raw_notes:
             parts.append(f"Raw Notes:\n{input_data.raw_notes}")
-        if input_data.notebooklm_context:
-            parts.append(f"Additional research context from NotebookLM:\n{input_data.notebooklm_context}")
+        if input_data.piragi_context:
+            parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)
 
     def _build_agent(self) -> Agent:

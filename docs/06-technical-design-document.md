@@ -51,25 +51,15 @@ backend/
 │   │   ├── provider_factory.py  # Provider factory + failover chain
 │   │   └── cache.py            # LLM response LRU cache
 │   ├── integrations/
-│   │   └── notebooklm.py        # NotebookLM API client
-│   ├── pipeline/
-│   │   ├── orchestrator.py      # Pipeline execution orchestrator
-│   │   └── state.py             # Pipeline state machine
-│   ├── services/
-│   │   ├── project_service.py   # Project CRUD business logic
-│   │   ├── pipeline_service.py  # Pipeline execution business logic
-│   │   ├── export_service.py    # Export file generation logic
-│   │   ├── analysis_service.py  # Analysis aggregation logic
-│   │   └── notebooklm_service.py # NotebookLM connection and query logic
-│   └── ws/
-│       └── handlers.py          # WebSocket connection & message handlers
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
-├── alembic.ini
-├── pyproject.toml
-└── Dockerfile
+│   │   └── piragi.py        # Piragi RAG client
+│   │   └── rag/
+│   │       └── config.py           # Piragi configuration per step type
+```
+
+And in services:
+
+```
+│   │   └── rag_service.py # Piragi connection and query logic
 ```
 
 ### Frontend Package Structure
@@ -142,7 +132,7 @@ frontend/
 | `app/llm/` | LLM provider abstraction, failover chain, response caching |
 | `app/pipeline/` | Orchestration of agent sequence, state transitions, branching |
 | `app/services/` | Business logic layer between API and data/agents |
-| `app/integrations/` | External service clients — NotebookLM API wrapper, authentication, response mapping |
+| `app/integrations/` | External service clients — Piragi RAG wrapper, configuration, response mapping |
 | `app/db/` | Database models, session management, migrations |
 | `app/ws/` | WebSocket connection lifecycle and message routing |
 | `frontend/src/stores/` | Client-side state management (Zustand) |
@@ -298,27 +288,27 @@ Present findings as advisory — the user has final say."""
 
 ---
 
-#### NotebookLMService
+#### PiragiService
 
 ```python
-class NotebookLMService:
-    def __init__(self, project_id: str, credentials_path: str, cloud_project: str, location: str = "us"):
+class PiragiService:
+    def __init__(self, project_id: str, document_paths: str):
         ...
 
-    async def list_notebooks(self) -> list[NotebookSummary]:
-        """List user's NotebookLM notebooks."""
+    async def list_documents(self) -> list[DocumentSummary]:
+        """List available Piragi documents."""
 
-    async def connect_notebook(self, notebook_id: str) -> None:
-        """Connect a notebook to the project."""
+    async def connect_documents(self, document_paths: str) -> None:
+        """Connect documents to the project."""
 
-    async def disconnect_notebook(self) -> None:
-        """Disconnect notebook from the project."""
+    async def disconnect_documents(self) -> None:
+        """Disconnect documents from the project."""
 
-    async def query_notebook(self, query: str) -> str:
-        """Query the connected notebook for insights."""
+    async def query_documents(self, query: str) -> str:
+        """Query the connected documents for insights."""
 
     async def get_step_context(self, step_type: StepType) -> str:
-        """Get context relevant to a pipeline step by querying the notebook."""
+        """Get context relevant to a pipeline step by querying the documents."""
 ```
 
 ---
@@ -450,7 +440,7 @@ class PipelineOrchestrator:
         StepType.COPYRIGHT, StepType.POLICY,
     }
 
-    def __init__(self, db: AsyncSession, provider_factory: ProviderFactory, cache: LLMCache, notebooklm_service: NotebookLMService | None = None):
+    def __init__(self, db: AsyncSession, provider_factory: ProviderFactory, cache: LLMCache, piragi_service: PiragiService | None = None):
         self.db = db
         self.provider_factory = provider_factory
         self.cache = cache

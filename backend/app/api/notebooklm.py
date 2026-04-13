@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db.database import get_db
-from app.integrations.notebooklm import NotebookLMClient
+from app.integrations.notebooklm import NotebookLMClientWrapper
 from app.schemas.notebooklm import (
     ConnectNotebookRequest,
     ConnectNotebookResponse,
@@ -17,13 +17,10 @@ from app.services.project_service import ProjectService
 router = APIRouter(prefix="/projects/{project_id}/notebooklm", tags=["notebooklm"])
 
 
-def _build_client() -> NotebookLMClient:
+def _build_client() -> NotebookLMClientWrapper:
     settings = get_settings()
-    return NotebookLMClient(
-        cloud_project=settings.google_cloud_project,
-        location=settings.google_cloud_location,
-        credentials_path=settings.google_application_credentials,
-    )
+    storage_path = settings.notebooklm_storage_path or None
+    return NotebookLMClientWrapper(storage_path=storage_path)
 
 
 @router.get("/notebooks", response_model=list[NotebookSummary])

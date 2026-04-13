@@ -1,8 +1,7 @@
 import logging
-
-import google.auth
-import google.auth.transport.requests
-import httpx
+import os
+import subprocess
+import json
 
 from app.integrations.errors import NotebookLMAPIError
 
@@ -15,63 +14,72 @@ class NotebookSummary:
         self.title = title
 
 
-class NotebookLMClient:
-    def __init__(self, cloud_project: str, location: str = "us", credentials_path: str = ""):
-        self._cloud_project = cloud_project
-        self._location = location
-        self._credentials_path = credentials_path
-        self._credentials = None
+class NotebookLMClientWrapper:
+    """Wrapper for NotebookLM using nlm CLI.
 
-    def _get_credentials(self):
-        if self._credentials is not None:
-            return self._credentials
-        import google.oauth2.service_account
+    Requires: nlm login (run manually)
+    """
 
-        if self._credentials_path:
-            self._credentials = google.oauth2.service_account.Credentials.from_service_account_file(
-                self._credentials_path,
-                scopes=["https://www.googleapis.com/auth/cloud-platform"],
-            )
-        else:
-            self._credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
-        return self._credentials
-
-    def _get_base_url(self) -> str:
-        return (
-            f"https://{self._location}-discoveryengine.googleapis.com/v1alpha"
-            f"/projects/{self._cloud_project}/locations/{self._location}/notebooks"
-        )
-
-    def _get_token(self) -> str:
-        creds = self._get_credentials()
-        if not creds.valid:
-            request = google.auth.transport.requests.Request()
-            creds.refresh(request)
-        return creds.token
+    def __init__(self, storage_path: str | None = None):
+        self._storage_path = storage_path
 
     async def list_notebooks(self) -> list[NotebookSummary]:
-        base_url = self._get_base_url()
-        token = self._get_token()
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                base_url,
-                headers={"Authorization": f"Bearer {token}"},
+        try:
+            result = subprocess.run(
+                ["nlm", "notebook", "list", "--json"],
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
-        if resp.status_code != 200:
-            raise NotebookLMAPIError(resp.status_code, resp.text)
-        notebooks = resp.json().get("notebooks", [])
-        return [NotebookSummary(id=n["name"].split("/")[-1], title=n.get("displayName", "")) for n in notebooks]
+            if result.returncode != 0:
+                error_msg = result.stderr.strip() or result.stdout.strip()
+                if "not found" in error_msg.lower() or "login" in error_msg.lower():
+                    logger.info("NotebookLM not configured - return empty list")
+                    return []
+                raise NotebookLMAPIError(500, error_msg)
+            if not result.stdout.strip():
+                return []
+            data = json.loads(result.stdout)
+            notebooks = data.get("notebooks", [])
+            return [NotebookSummary(id=nb.get("id", ""), title=nb.get("name", "")) for nb in notebooks]
+        except FileNotFoundError:
+            logger.info("nlm CLI not found - return empty list")
+            return []
+        except subprocess.TimeoutExpired:
+            logger.warning("NotebookLM request timed out")
+            return []
+        except json.JSONDecodeError:
+            logger.warning("Failed to parse nlm response")
+            return []
+        except Exception as e:
+            logger.warning(f"NotebookLM error: {e}")
+            return []
 
     async def query_notebook(self, notebook_id: str, query: str) -> str:
-        base_url = self._get_base_url()
-        token = self._get_token()
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{base_url}/{notebook_id}:converse",
-                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-                json={"query": {"text": query}},
+        try:
+            result = subprocess.run(
+                ["nlm", "notebook", "query", notebook_id, query, "--json"],
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
-        if resp.status_code != 200:
-            raise NotebookLMAPIError(resp.status_code, resp.text)
-        data = resp.json()
-        return data.get("answer", {}).get("text", "")
+            if result.returncode != 0:
+                error_msg = result.stderr.strip() or result.stdout.strip()
+                if "not found" in error_msg.lower() or "login" in error_msg.lower():
+                    return ""
+                logger.warning(f"Query error: {error_msg}")
+                return ""
+            if not result.stdout.strip():
+                return ""
+            data = json.loads(result.stdout)
+            return data.get("answer", "")
+        except FileNotFoundError:
+            return ""
+        except subprocess.TimeoutExpired:
+            logger.warning("NotebookLM query timed out")
+            return ""
+        except json.JSONDecodeError:
+            return ""
+        except Exception as e:
+            logger.warning(f"Query failed: {e}")
+            return ""

@@ -19,7 +19,7 @@ from app.agents.retention_agent import RetentionAgent
 from app.agents.writer_agent import WriterAgent
 from app.config import get_settings
 from app.db.models import PipelineStep, Project, ScriptVersion
-from app.integrations.notebooklm import NotebookLMClient
+from app.integrations.notebooklm import NotebookLMClientWrapper
 from app.llm.cache import LLMCache
 from app.llm.provider_factory import ProviderFactory
 from app.pipeline.errors import AgentExecutionError
@@ -162,7 +162,7 @@ class PipelineOrchestrator:
     async def _build_agent_inputs(
         self, project: Project, step_type: StepType, step_map: dict[StepType, PipelineStep]
     ) -> tuple:
-        notebooklm_context = await self._resolve_notebooklm_context(project, step_type)
+        piragi_context = await self._resolve_rag_context(project, step_type)
 
         if step_type == StepType.icp:
             agent = ICPAgent()
@@ -171,7 +171,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -184,7 +184,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -197,7 +197,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 topic=project.topic,
                 target_format=project.target_format,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -210,7 +210,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 target_format=project.target_format,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -223,7 +223,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 content_goal=project.content_goal,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -242,7 +242,7 @@ class PipelineOrchestrator:
                 target_format=project.target_format,
                 content_goal=project.content_goal,
                 raw_notes=project.raw_notes,
-                notebooklm_context=notebooklm_context,
+                piragi_context=piragi_context,
             )
             return agent, input_data
 
@@ -287,20 +287,16 @@ class PipelineOrchestrator:
 
         raise ValueError(f"No agent configured for step type: {step_type}")
 
-    async def _resolve_notebooklm_context(self, project: Project, step_type: StepType) -> str | None:
-        if not project.notebooklm_notebook_id:
+    async def _resolve_rag_context(self, project: Project, step_type: StepType) -> str | None:
+        if not project.piragi_document_paths:
             return None
         try:
-            settings = get_settings()
-            client = NotebookLMClient(
-                cloud_project=settings.google_cloud_project,
-                location=settings.google_cloud_location,
-                credentials_path=settings.google_application_credentials,
-            )
-            service = NotebookLMService(self.db, client)
-            return await service.get_step_context(project.id, step_type.value)
+            from app.services.piragi_service import PiragiService
+
+            service = PiragiService(self.db)
+            return await service.get_step_context(project.id, step_type)
         except Exception:
-            logger.warning("NotebookLM context resolution failed for project %s step %s", project.id, step_type.value)
+            logger.warning("Piragi context resolution failed for project %s step %s", project.id, step_type.value)
             return None
 
     async def _get_latest_script_content(self, project_id: str) -> str:

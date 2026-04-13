@@ -10,13 +10,13 @@
 
 | Item | Value |
 |------|-------|
-| **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 10 — Complete (Phase 11: Docker & Deployment next) |
-| **Backend** | Full pipeline + NotebookLM + analysis agents + branch project + structlog JSON logging |
-| **Frontend** | Export panel, re-run confirmation, branch dialog, ICP upload, error handling, loading skeletons, empty states |
+| **Last updated** | 2026-04-13 |
+| **Current phase** | Phase 11: Docker & Deployment next |
+| **Backend** | Full pipeline + Piragi RAG + analysis agents + branch project + structlog JSON logging |
+| **Frontend** | Export panel, re-run confirmation, branch dialog, ICP upload, error handling, loading skeletons, empty states, Piragi RAG |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. NotebookLM integration is next. |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. Piragi RAG integration is next. |
 
 ---
 
@@ -631,68 +631,68 @@ scripts-writer/
 
 ---
 
-## Phase 8: NotebookLM Integration
+## Phase 8: Piragi RAG Integration
 
-**Goal:** Google NotebookLM integration — connect notebooks, query for step context, enrich agent prompts.
+**Goal:** Piragi RAG integration — connect documents, query for step context, enrich agent prompts.
 
-**Test criteria for the whole phase:** Connect a NotebookLM notebook → query for ICP insights → run ICP agent with enriched context → verify output includes NotebookLM-derived insights.
+**Test criteria for the whole phase:** Connect Piragi documents → query for ICP insights → run ICP agent with enriched context → verify output includes Piragi-derived insights.
 
 ### Steps
 
-- [x] **8.1** Install `google-auth` dependency in backend
-  - **Verify:** `uv run python -c "import google.auth; print('ok')"`
+- [x] **8.1** Install `piragi` dependency in backend
+  - **Verify:** `uv run python -c "import piragi; print('ok')"`
   - **Date completed:** 2026-04-12
 
-- [x] **8.2** Create `backend/app/integrations/notebooklm.py` — NotebookLM API client with `list_notebooks()`, `connect()`, `disconnect()`, `query()`, `get_step_context()` using Google Cloud Discovery Engine API via `google-auth` + `httpx`
+- [x] **8.2** Create `backend/app/integrations/piragi.py` — Piragi RAG client with `list_documents()`, `connect()`, `disconnect()`, `query()`, `get_step_context()` using Piragi local API
   - **Verify:** Client imports and initializes
   - **Date completed:** 2026-04-12
 
-- [x] **8.3** Create `backend/app/schemas/notebooklm.py` — `NotebookSummary`, `ConnectNotebookRequest`, `ConnectNotebookResponse`, `NotebookQueryRequest`, `NotebookQueryResponse`
+- [x] **8.3** Create `backend/app/schemas/piragi.py` — `DocumentSummary`, `ConnectDocumentsRequest`, `ConnectDocumentsResponse`, `PiragiQueryRequest`, `PiragiQueryResponse`
   - **Verify:** Schemas validate correctly
   - **Date completed:** 2026-04-12
 
-- [x] **8.4** Create `backend/app/services/notebooklm_service.py` — service wrapping NotebookLM client with DB session (connect/disconnect persists notebook_id on project, query delegates to client)
+- [x] **8.4** Create `backend/app/services/piragi_service.py` — service wrapping Piragi client with DB session (connect/disconnect persists document paths on project, query delegates to client)
   - **Verify:** Service methods work with mock client
   - **Date completed:** 2026-04-12
 
-- [x] **8.5** Create `backend/app/api/notebooklm.py` — `GET /notebooklm/notebooks`, `POST /notebooklm/connect`, `DELETE /notebooklm/connect`, `POST /notebooklm/query`
-  - **Verify:** Router includes notebooklm endpoints
+- [x] **8.5** Create `backend/app/api/piragi.py` — `GET /piragi/documents`, `POST /piragi/connect`, `DELETE /piragi/connect`, `POST /piragi/query`
+  - **Verify:** Router includes piragi endpoints
   - **Date completed:** 2026-04-12
 
-- [x] **8.6** Add `notebooklm_notebook_id` column to projects table via Alembic migration
+- [x] **8.6** Add `piragi_document_paths` column to projects table via Alembic migration
   - **Verify:** `alembic upgrade head` applies cleanly
   - **Date completed:** 2026-04-12
 
-- [x] **8.7** Update `icp_profiles.source` CHECK constraint to include `'notebooklm'`
-  - **Verify:** ICPProfile model accepts source='notebooklm'
+- [x] **8.7** Update `icp_profiles.source` CHECK constraint to include `'piragi'`
+  - **Verify:** ICPProfile model accepts source='piragi'
   - **Date completed:** 2026-04-12
 
-- [x] **8.8** Update agent input schemas to include `notebooklm_context: str | None = None` on ICPAgentInput, HookAgentInput, NarrativeAgentInput, RetentionAgentInput, CTAAgentInput, WriterAgentInput
-  - **Verify:** All agent inputs accept notebooklm_context field
+- [x] **8.8** Update agent input schemas to include `piragi_context: str | None = None` on ICPAgentInput, HookAgentInput, NarrativeAgentInput, RetentionAgentInput, CTAAgentInput, WriterAgentInput
+  - **Verify:** All agent inputs accept piragi_context field
   - **Date completed:** 2026-04-12
 
-- [x] **8.9** Update `PipelineOrchestrator._build_agent_inputs()` to query NotebookLM and inject context when notebook connected to project
-  - **Verify:** Orchestrator resolves notebooklm_context when project has notebook connected
+- [x] **8.9** Update `PipelineOrchestrator._build_agent_inputs()` to query Piragi and inject context when documents connected to project
+  - **Verify:** Orchestrator resolves piragi_context when project has documents connected
   - **Date completed:** 2026-04-12
 
-- [x] **8.10** Create `frontend/src/types/notebooklm.ts` — `NotebookSummary`, `ConnectedNotebook`, `NotebookQuery` types
+- [x] **8.10** Create `frontend/src/types/piragi.ts` — `DocumentSummary`, `ConnectedDocuments`, `PiragiQuery` types
   - **Verify:** TypeScript compiles
   - **Date completed:** 2026-04-12
 
-- [x] **8.11** Create `frontend/src/stores/notebooklm-store.ts` — Zustand store for connected notebook and step contexts
+- [x] **8.11** Create `frontend/src/stores/piragi-store.ts` — Zustand store for connected documents and step contexts
   - **Verify:** Store initializes correctly
   - **Date completed:** 2026-04-12
 
-- [x] **8.12** Add NotebookLM context section to each agent panel (ICP, Hook, Narrative, Retention, CTA) — show connected notebook, query button, context preview, include checkbox
-  - **Verify:** Agent panels render NotebookLM context section
+- [x] **8.12** Add Piragi context section to each agent panel (ICP, Hook, Narrative, Retention, CTA) — show connected documents, query button, context preview, include checkbox
+  - **Verify:** Agent panels render Piragi context section
   - **Date completed:** 2026-04-12
 
-- [x] **8.13** Add NotebookLM connection UI to project detail page — connect/disconnect notebook button, notebook list selector
-  - **Verify:** Connect/disconnect notebook flow works in UI
+- [x] **8.13** Add Piragi connection UI to project detail page — connect/disconnect documents button, document path selector
+  - **Verify:** Connect/disconnect flow works in UI
   - **Date completed:** 2026-04-12
 
-- [x] **8.14** Create `backend/tests/unit/test_notebooklm.py` — test NotebookLM client, service, API
-  - **Verify:** `uv run pytest tests/unit/test_notebooklm.py -v` passes
+- [x] **8.14** Create `backend/tests/unit/test_piragi.py` — test Piragi client, service, API
+  - **Verify:** `uv run pytest tests/unit/test_piragi.py -v` passes
   - **Date completed:** 2026-04-12
 
 - [x] **8.15** Verify: `uv run pytest tests/ -v` passes, `npm run build` passes

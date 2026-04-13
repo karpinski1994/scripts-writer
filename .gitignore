@@ -21,6 +21,13 @@ logs/
 .env.local
 .env.*.local
 
+# Credentials & tokens
+token.json
+service-account-key.json
+client_secret_*.json
+*.pem
+*.key
+
 # Node
 node_modules/
 .next/

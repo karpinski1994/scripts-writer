@@ -44,7 +44,7 @@ Scripts Writer transforms raw notes and audience insights into polished, analyze
 | **Groq** | Cloud LLM inference provider with free-tier access |
 | **Modal** | Cloud compute platform hosting LLM inference endpoints |
 | **Ollama** | Local LLM runtime for running models on-device |
-| **NotebookLM** | Google's AI-powered research notebook that synthesizes insights from uploaded sources and enables Q&A; accessible via Google Cloud Discovery Engine API |
+| **Piragi** | Google's AI-powered RAG tool that synthesizes insights from uploaded sources and enables Q&A; accessible via local filesystem or remote storage |
 
 ---
 
@@ -114,7 +114,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 |----|------------|----------|
 | SRS-F02.1 | The system shall analyze raw notes and generate an ICP profile including demographics, psychographics, pain points, desires, objections, and language style | Must |
 | SRS-F02.2 | The system shall present the generated ICP to the user for review and editing before proceeding | Must |
-| SRS-F02.3 | The system shall allow the user to upload an existing ICP profile, skipping the generation step, or from NotebookLM context | Must |
+| SRS-F02.3 | The system shall allow the user to upload an existing ICP profile, skipping the generation step, or from Piragi context | Must |
 | SRS-F02.4 | The system shall allow the user to manually override any ICP field | Must |
 | SRS-F02.5 | The system shall store the approved ICP as part of the project context for downstream agents | Must |
 
@@ -212,7 +212,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F12.5 | The system shall allow the user to configure which LLM provider(s) to use | Must |
 | SRS-F12.6 | The system shall handle rate-limit responses gracefully (queue, retry, fallback to alternate provider) | Must |
 | SRS-F12.7 | The system shall not require any paid API key or subscription | Must |
-| SRS-F12.8 | The system shall support Google LM Notes for enhanced note integration | Should |
+| SRS-F12.8 | The system shall support Piragi RAG for enhanced note integration | Should |
 
 ### SRS-F13: Project & Export Management
 
@@ -233,16 +233,16 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F14.3 | The system shall allow the user to branch a project — create a copy from any step | Should |
 | SRS-F14.4 | The system shall provide a visual pipeline view showing current and completed steps | Must |
 
-### SRS-F15: NotebookLM Context Integration
+### SRS-F15: Piragi RAG Context Integration
 
 | ID | Requirement | Priority |
 |----|------------|----------|
-| SRS-F15.1 | The system shall allow the user to connect a Google NotebookLM notebook to a project by specifying a notebook ID | Must |
-| SRS-F15.2 | The system shall allow the user to attach NotebookLM-derived context to any creative pipeline step (ICP, Hook, Narrative, Retention, CTA, Writer) before agent execution | Must |
-| SRS-F15.3 | The system shall query the connected NotebookLM notebook for step-relevant insights and include them as supplementary context in agent prompts | Should |
-| SRS-F15.4 | The system shall store the NotebookLM notebook reference per project but not store notebook content locally | Must |
-| SRS-F15.5 | The system shall proceed with agent execution using raw notes only if NotebookLM is unavailable or not connected | Must |
-| SRS-F15.6 | The system shall allow the user to disconnect a NotebookLM notebook from a project | Should |
+| SRS-F15.1 | The system shall allow the user to connect Piragi RAG documents to a project by specifying document paths | Must |
+| SRS-F15.2 | The system shall allow the user to attach Piragi-derived context to any creative pipeline step (ICP, Hook, Narrative, Retention, CTA, Writer) before agent execution | Must |
+| SRS-F15.3 | The system shall query the connected Piragi documents for step-relevant insights and include them as supplementary context in agent prompts | Should |
+| SRS-F15.4 | The system shall store the Piragi document references per project but not store document content locally | Must |
+| SRS-F15.5 | The system shall proceed with agent execution using raw notes only if Piragi is unavailable or not connected | Must |
+| SRS-F15.6 | The system shall allow the user to disconnect Piragi documents from a project | Should |
 
 ---
 
@@ -269,7 +269,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | Google Gemini API | HTTPS (REST) | LLM inference via Google Gemini free tier |
 | Ollama API | HTTP (REST) | Local LLM inference on `localhost:11434` |
 | YouTube Data API | HTTPS (REST) | Video metadata and content policy context (optional) |
-| Google NotebookLM API | HTTPS (Google Cloud Discovery Engine) | Notebook context integration and Q&A for enriched agent prompts |
+| Piragi API | Local filesystem | Document context integration and Q&A for enriched agent prompts |
 | Local Filesystem | File I/O | Project persistence, export files, uploaded documents |
 
 ### Communication Interfaces
@@ -278,7 +278,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 |-----------|----------|-------------|
 | Frontend ↔ Backend | HTTP/REST + WebSocket | REST for CRUD operations; WebSocket for real-time agent progress updates and streaming responses |
 | Backend ↔ LLM Providers | HTTPS/REST | Synchronous and streaming API calls to LLM providers |
-| Backend ↔ External APIs | HTTPS/REST | Optional integration with YouTube Data API and Google NotebookLM API |
+| Backend ↔ External APIs | HTTPS/REST | Optional integration with YouTube Data API and Piragi API |
 
 ---
 

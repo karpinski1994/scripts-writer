@@ -137,20 +137,12 @@ Scripts Writer
 │   │   ├── Migrations (Alembic)
 │   │   └── File storage (exports, uploads)
 │   ├── Integration Module
-│   │   ├── NotebookLM client (connect, query, disconnect)
+│   │   ├── Piragi client (connect, query, disconnect)
 │   │   └── Google Drive file reference (optional, future)
-│   └── WebSocket Module
-│       ├── Connection manager
-│       ├── Event broadcaster
-│       └── Streaming token relay
-│
-└── External Integrations
-    ├── Modal (GLM-5.1)
-    ├── Groq (free-tier LLM)
-    ├── Google Gemini (free-tier LLM)
-    ├── Ollama (local LLM)
-    ├── YouTube Data API (optional)
-    └── Google LM Notes API (optional)
+```
+
+```
+Piragi Panel ──► Piragi Router ──► Piragi Service ──► Local filesystem
 ```
 
 ### Module Dependency Graph
@@ -201,11 +193,11 @@ NotebookLM Panel ──► NotebookLM Router ──► NotebookLM Service ──
    Frontend ──POST /projects──► API ──► ProjectService ──► SQLite
    Frontend ◄──201 {project}── API ◄── ProjectService ◄── SQLite
 
-1a. USER ATTACHES NOTEBOOK (OPTIONAL)
-   Frontend ──POST /notebooklm/connect──► API ──► NotebookLM Service ──► Google Cloud API
-   Store notebook_id on project
+1a. USER ATTACHES PIRAGI DOCUMENTS (OPTIONAL)
+   Frontend ──POST /piragi/connect──► API ──► Piragi Service ──► Local filesystem
+   Store document_paths on project
 
-2. USER TRIGGERS ICP AGENT (If NotebookLM notebook connected, query for ICP-related insights; include in agent prompt)
+2. USER TRIGGERS ICP AGENT (If Piragi documents connected, query for ICP-related insights; include in agent prompt)
    Frontend ──POST /pipeline/run/icp──► API ──► Orchestrator
    Orchestrator ──► ICPAgent ──► LLMProvider ──► Modal/Groq/Gemini/Ollama
    LLMProvider ◄──streaming tokens── External
@@ -319,7 +311,7 @@ Frontend                              Backend
 | Gemini | Outbound | HTTPS REST (Google SDK) | API key | Same as Modal | Failover to next provider |
 | Ollama | Outbound | HTTP REST | None | Same as Modal | Prompt user to start Ollama or switch provider |
 | YouTube Data | Outbound | HTTPS REST | API key | Video metadata queries | Graceful degradation; analysis proceeds without |
-| Google NotebookLM | Outbound | HTTPS REST (Google Cloud Discovery Engine) | OAuth 2.0 / Service Account | Notebook ID + step-relevant query → contextual insights | Graceful degradation; agents use raw notes only |
+| Piragi RAG | Outbound | Local I/O | Document paths | Step-relevant query → contextual insights | Graceful degradation; agents use raw notes only |
 
 ### Integration Resilience
 

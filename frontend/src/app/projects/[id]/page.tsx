@@ -7,12 +7,10 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { ProjectDetail } from "@/types/project";
 import type { Pipeline } from "@/types/pipeline";
-import type { NotebookSummary } from "@/types/notebooklm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, BookOpen, Unplug, GitBranch } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, GitBranch } from "lucide-react";
 import { usePipelineStore } from "@/stores/pipeline-store";
-import { useNotebookLMStore } from "@/stores/notebooklm-store";
 import { useAgentStream } from "@/hooks/use-agent-stream";
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { StepSidebar } from "@/components/pipeline/step-sidebar";
@@ -25,8 +23,6 @@ export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const { setActiveStepType, setSteps, reset } = usePipelineStore();
-  const { connectedNotebook, connectNotebook, disconnectNotebook, fetchNotebooks, notebooks, reset: resetNotebookLM } = useNotebookLMStore();
-  const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [showBranchDialog, setShowBranchDialog] = useState(false);
 
   const {
@@ -63,8 +59,8 @@ export default function ProjectDetailPage() {
   }, [pipeline, setSteps, setActiveStepType]);
 
   useEffect(() => {
-    return () => { reset(); resetNotebookLM(); };
-  }, [reset, resetNotebookLM]);
+    return () => { reset(); };
+  }, [reset]);
 
   if (projectLoading || pipelineLoading) {
     return (
@@ -108,65 +104,8 @@ export default function ProjectDetailPage() {
             <GitBranch className="size-4" />
             Branch
           </Button>
-          {connectedNotebook ? (
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <BookOpen className="size-3" />
-                {connectedNotebook.notebook_title}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => disconnectNotebook(id)}
-                title="Disconnect NotebookLM"
-              >
-                <Unplug className="size-3" />
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await fetchNotebooks(id);
-                setShowConnectDialog(true);
-              }}
-            >
-              <BookOpen className="size-4" />
-              Connect NotebookLM
-            </Button>
-          )}
         </div>
       </div>
-
-      {showConnectDialog && (
-        <div className="rounded-md border p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Select a Notebook</h3>
-            <Button variant="ghost" size="sm" onClick={() => setShowConnectDialog(false)}>
-              Cancel
-            </Button>
-          </div>
-          {notebooks.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No notebooks found.</p>
-          ) : (
-            <div className="space-y-1">
-              {notebooks.map((nb: NotebookSummary) => (
-                <button
-                  key={nb.id}
-                  className="w-full rounded-md border px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
-                  onClick={async () => {
-                    await connectNotebook(id, nb.id);
-                    setShowConnectDialog(false);
-                  }}
-                >
-                  {nb.title || nb.id}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       <PipelineView steps={pipeline.steps} />
 

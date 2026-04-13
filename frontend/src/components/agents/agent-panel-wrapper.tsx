@@ -15,6 +15,7 @@ import { RetentionPanel } from "./retention-panel";
 import { CTAPanel } from "./cta-panel";
 import { WriterPanel } from "./writer-panel";
 import { AnalysisPanel } from "./analysis-panel";
+import { StepDocumentDropzone } from "@/components/piragi/step-document-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -118,8 +119,9 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   if (step?.status === "pending" || !step) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+        <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
           <p className="text-lg font-medium">{STEP_LABELS[activeStepType]}</p>
+          <StepDocumentDropzone projectId={projectId} stepType={activeStepType} className="w-full max-w-md mb-4" />
           <p className="text-sm text-muted-foreground">This step hasn&apos;t been run yet.</p>
           <Button
             onClick={async () => {

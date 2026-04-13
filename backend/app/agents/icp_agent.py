@@ -35,8 +35,8 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
         ]
         if input_data.content_goal:
             parts.append(f"Content Goal: {input_data.content_goal}")
-        if input_data.notebooklm_context:
-            parts.append(f"Additional research context from NotebookLM:\n{input_data.notebooklm_context}")
+        if input_data.piragi_context:
+            parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)
 
     def _build_agent(self) -> Agent:
@@ -50,6 +50,9 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
         if not raw or not raw.strip():
             raise ValueError("LLM returned empty response")
+        raw = raw.strip()
+        if not raw.startswith("{") and not raw.startswith("["):
+            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         try:
             data = json.loads(raw)
         except json.JSONDecodeError as e:

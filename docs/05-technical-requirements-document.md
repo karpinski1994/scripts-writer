@@ -89,8 +89,8 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 | **ORM** | SQLAlchemy | 2.x | Async database models and queries |
 | **Migration** | Alembic | 1.x | Database schema migrations |
 | **WebSocket** | FastAPI native | — | Real-time agent progress and streaming |
-| **HTTP Client** | `httpx` | 0.x | Async HTTP for external APIs (YouTube, NotebookLM) |
-| **NotebookLM Client** | `google-auth` + `httpx` | — | Google Cloud authentication and HTTP client for NotebookLM API |
+| **HTTP Client** | `httpx` | 0.x | Async HTTP for external APIs (YouTube, Piragi) |
+| **Piragi Client** | `piragi` | latest | Local RAG client for document querying and retrieval |
 | **Testing** | `pytest` + `pytest-asyncio` | — | Backend unit and integration tests |
 
 ### Frontend
@@ -154,11 +154,11 @@ Project 1──* AnalysisResult
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last modification timestamp |
 
-#### `projects` (NotebookLM extension)
+#### `projects` (Piragi extension)
 
 | Column | Type | Constraints | Description |
 |--------|------|------------|-------------|
-| notebooklm_notebook_id | VARCHAR(100) | NULL | Connected NotebookLM notebook ID |
+| piragi_document_paths | VARCHAR(500) | NULL | Connected Piragi document paths (comma-separated) |
 
 #### `icp_profiles`
 
@@ -314,15 +314,15 @@ Project 1──* AnalysisResult
 | GET | `/api/v1/projects/{project_id}/export?format=md` | Export as Markdown |
 | POST | `/api/v1/projects/{project_id}/export/clipboard` | Copy to clipboard |
 
-#### NotebookLM
+#### Piragi
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/v1/projects/{project_id}/notebooklm/notebooks` | List user's NotebookLM notebooks |
-| POST | `/api/v1/projects/{project_id}/notebooklm/connect` | Connect a notebook to the project |
-| DELETE | `/api/v1/projects/{project_id}/notebooklm/connect` | Disconnect notebook from project |
-| POST | `/api/v1/projects/{project_id}/notebooklm/query` | Query connected notebook for insights |
-| POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | (Modified) Accepts optional `notebooklm_context` field |
+| GET | `/api/v1/projects/{project_id}/piragi/documents` | List available Piragi documents |
+| POST | `/api/v1/projects/{project_id}/piragi/connect` | Connect documents to the project |
+| DELETE | `/api/v1/projects/{project_id}/piragi/connect` | Disconnect documents from project |
+| POST | `/api/v1/projects/{project_id}/piragi/query` | Query connected documents for insights |
+| POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | (Modified) Accepts optional `piragi_context` field |
 
 #### Settings
 
@@ -409,15 +409,15 @@ Project 1──* AnalysisResult
 | Purpose | Video metadata for policy context |
 | SDK | `google-api-python-client` |
 
-#### Google NotebookLM (Optional)
+#### Piragi RAG (Optional)
 
 | Property | Value |
 |----------|-------|
-| Base URL | `https://{LOCATION}-discoveryengine.googleapis.com/v1alpha/projects/{PROJECT}/locations/{LOCATION}/notebooks` |
-| Protocol | HTTPS REST (Google Cloud Discovery Engine API) |
-| Auth | OAuth 2.0 / Service Account via `google-auth` |
-| Purpose | Notebook context integration — list notebooks, get notebook, query insights |
-| SDK | `google-auth` + `httpx` (direct REST calls) |
+| Base URL | Local filesystem or remote storage (S3, GCS, Azure) |
+| Protocol | Local file I/O or HTTPS |
+| Auth | None (local) or storage-specific |
+| Purpose | Document context integration — list documents, query insights |
+| SDK | `piragi` Python package |
 
 ---
 
@@ -502,7 +502,7 @@ services:
 | Access | Loaded via `pydantic-settings` Settings class at startup |
 | Masking | API keys masked in `/settings` API responses (show last 4 chars only) |
 | Validation | Startup check verifies each configured key is non-empty |
-| Google Cloud credentials for NotebookLM | Service account key or OAuth token stored in `.env` |
+| Piragi credentials | Document paths configured in `.env` |
 
 ### AppSettings (Pydantic Settings Model)
 

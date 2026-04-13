@@ -19,10 +19,14 @@ async function request<T>(
   const url = `${BASE_URL}${path}`;
   const init: RequestInit = {
     method,
-    headers: { "Content-Type": "application/json" },
   };
-  if (body !== undefined) {
-    init.body = JSON.stringify(body);
+  if (body instanceof FormData) {
+    init.body = body;
+  } else {
+    init.headers = { "Content-Type": "application/json" };
+    if (body !== undefined) {
+      init.body = JSON.stringify(body);
+    }
   }
   let res: Response;
   try {
@@ -55,6 +59,9 @@ export const api = {
   },
   delete(path: string) {
     return request<void>("DELETE", path);
+  },
+  upload<T extends FormData>(path: string, body: T) {
+    return request<T>("POST", path, body);
   },
 };
 

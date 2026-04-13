@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NotebookLMContext } from "@/components/shared/notebooklm-context";
+import { PiragiContextPreview } from "@/components/piragi/piragi-context-preview";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -139,6 +140,8 @@ export function ICPPanel({ data, onApprove, onRerun, isRunning, projectId }: ICP
       </Card>
 
       <NotebookLMContext stepType="icp" projectId={projectId} />
+
+      <PiragiContextPreview stepType="icp" projectId={projectId} />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">Confidence: {Math.round(data.confidence * 100)}%</p>
