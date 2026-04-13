@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.schemas.project import (
+    BranchRequest,
     ProjectCreateRequest,
     ProjectDetailResponse,
     ProjectResponse,
@@ -46,3 +47,9 @@ async def update_project(project_id: str, body: ProjectUpdateRequest, db: AsyncS
 async def delete_project(project_id: str, db: AsyncSession = Depends(get_db)):
     service = ProjectService(db)
     await service.delete(project_id)
+
+
+@router.post("/{project_id}/branch", response_model=ProjectResponse, status_code=201)
+async def branch_project(project_id: str, body: BranchRequest, db: AsyncSession = Depends(get_db)):
+    service = ProjectService(db)
+    return await service.branch_project(project_id, body.branch_from_step, body.name)

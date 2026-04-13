@@ -24,10 +24,20 @@ async function request<T>(
   if (body !== undefined) {
     init.body = JSON.stringify(body);
   }
-  const res = await fetch(url, init);
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch {
+    const { toast } = await import("sonner");
+    toast.error("Network error — please check your connection");
+    throw new ApiError(0, "Network error");
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new ApiError(res.status, text || res.statusText);
+    const message = text || res.statusText;
+    const { toast } = await import("sonner");
+    toast.error(message);
+    throw new ApiError(res.status, message);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

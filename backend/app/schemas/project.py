@@ -36,6 +36,11 @@ class ProjectUpdateRequest(BaseModel):
     raw_notes: str | None = Field(default=None, min_length=1, max_length=10000)
 
 
+class BranchRequest(BaseModel):
+    branch_from_step: str = Field(min_length=1)
+    name: str = Field(min_length=1, max_length=100)
+
+
 class ProjectResponse(BaseModel):
     id: str
     name: str

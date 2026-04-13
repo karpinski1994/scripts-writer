@@ -1,9 +1,9 @@
 import asyncio
 import json
-import logging
 import time
 from uuid import uuid4
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,7 +44,7 @@ from app.schemas.icp import ICPAgentInput, ICPProfile
 from app.services.notebooklm_service import NotebookLMService
 from app.ws.handlers import ConnectionManager
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 
 class PipelineOrchestrator:
@@ -101,6 +101,17 @@ class PipelineOrchestrator:
             step.status = StepStatus.completed.value
             step.completed_at = datetime.now(UTC).replace(tzinfo=None)
             step.duration_ms = int((time.time() - start_ms) * 1000)
+            step.llm_provider = factory._default_provider if hasattr(factory, "_default_provider") else "default"
+
+            logger.info(
+                "agent_step_completed",
+                agent_name=step_type.value,
+                step_type=step_type.value,
+                project_id=project_id,
+                duration_ms=step.duration_ms,
+                provider=step.llm_provider,
+                status="completed",
+            )
 
             if step_type == StepType.icp:
                 await self._save_icp_profile(project_id, result)
@@ -119,7 +130,16 @@ class PipelineOrchestrator:
             step.status = StepStatus.failed.value
             step.error_message = str(e)
             step.duration_ms = int((time.time() - start_ms) * 1000)
-            logger.error(f"Step {step_type} failed for project {project_id}: {e}")
+            logger.error(
+                "agent_step_failed",
+                agent_name=step_type.value,
+                step_type=step_type.value,
+                project_id=project_id,
+                duration_ms=step.duration_ms,
+                provider="default",
+                status="failed",
+                error=str(e),
+            )
             if self.ws_manager:
                 await self.ws_manager.broadcast(
                     project_id,

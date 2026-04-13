@@ -11,9 +11,9 @@
 | Item | Value |
 |------|-------|
 | **Last updated** | 2026-04-12 |
-| **Current phase** | Phase 9 — Complete (Phase 10: Export, Polish & Edge Cases next) |
-| **Backend** | Full creative pipeline + WebSocket + NotebookLM + 4 analysis agents (FactCheck, Readability, Copyright, Policy) with parallel execution |
-| **Frontend** | Pipeline view, agent panels, NotebookLM context, analysis tabbed panel, script editor |
+| **Current phase** | Phase 10 — Complete (Phase 11: Docker & Deployment next) |
+| **Backend** | Full pipeline + NotebookLM + analysis agents + branch project + structlog JSON logging |
+| **Frontend** | Export panel, re-run confirmation, branch dialog, ICP upload, error handling, loading skeletons, empty states |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
 | **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. NotebookLM integration is next. |
@@ -811,41 +811,41 @@ scripts-writer/
 
 ### Steps
 
-- [ ] **10.1** Create export panel component — format selector (txt, md), download button, copy-to-clipboard button
+- [x] **10.1** Create export panel component — format selector (txt, md), download button, copy-to-clipboard button
   - **Verify:** Download .txt and .md; clipboard copy works
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.2** Add re-run functionality to pipeline sidebar — click completed step → warning about downstream invalidation → confirm → re-run agent
+- [x] **10.2** Add re-run functionality to pipeline sidebar — click completed step → warning about downstream invalidation → confirm → re-run agent
   - **Verify:** Re-run ICP → warning modal → confirm → new ICP generated, downstream reset
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.3** Add branch project — "Branch" button on pipeline view → creates copy with steps up to selected step
+- [x] **10.3** Add branch project — "Branch" button on pipeline view → creates copy with steps up to selected step
   - **Verify:** Branch from Narrative → new project appears in dashboard with ICP+Hook+Narrative completed
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.4** Add ICP file upload to frontend — file input accepting .json and .txt, parses and submits
+- [x] **10.4** Add ICP file upload to frontend — file input accepting .json and .txt, parses and submits
   - **Verify:** Upload .json ICP file → parsed and displayed in ICP panel
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.5** Add error handling UI — toast notifications for API errors, error boundary component wrapping pipeline
+- [x] **10.5** Add error handling UI — toast notifications for API errors, error boundary component wrapping pipeline
   - **Verify:** Kill LLM provider → toast shows error, app doesn't crash
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.6** Add loading states — skeleton screens for project list, spinners for agent execution, progress indicators
+- [x] **10.6** Add loading states — skeleton screens for project list, spinners for agent execution, progress indicators
   - **Verify:** Agent running → spinner + streaming text visible
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.7** Add empty states — "Create your first project" CTA on empty dashboard, "Run ICP to start" on empty pipeline
+- [x] **10.7** Add empty states — "Create your first project" CTA on empty dashboard, "Run ICP to start" on empty pipeline
   - **Verify:** Fresh app shows helpful empty states
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.8** Configure `structlog` in backend — JSON structured logging per module, log to stdout + `./logs/` files
-  - **Verify:** Run agent → `./logs/agents.log` shows JSON entry with agent name, duration, provider, status
-  - **Date completed:** ___
+- [x] **10.8** Configure `structlog` in backend — JSON structured logging per module, log to stdout + `./logs/` files
+  - **Verify:** Run agent → `./logs/app.log` shows JSON entry with agent name, duration, provider, status
+  - **Date completed:** 2026-04-12
 
-- [ ] **10.9** Add remaining Gemini and Ollama providers (if not already done in Phase 2)
+- [x] **10.9** Add remaining Gemini and Ollama providers (if not already done in Phase 2)
   - **Verify:** Settings page shows all 4 providers with test buttons
-  - **Date completed:** ___
+  - **Date completed:** 2026-04-12
 
 ---
 

@@ -17,7 +17,15 @@ import { WriterPanel } from "./writer-panel";
 import { AnalysisPanel } from "./analysis-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Loader2, TriangleAlert } from "lucide-react";
 import type { ICPAgentOutput } from "@/types/agents";
 import type { HookAgentOutput, HookSuggestion } from "@/types/agents";
 import type { NarrativeAgentOutput, NarrativePattern } from "@/types/agents";
@@ -37,6 +45,19 @@ const STEP_LABELS: Record<string, string> = {
   policy: "Policy",
 };
 
+const STEP_ORDER_LIST = [
+  "icp", "hook", "narrative", "retention", "cta", "writer",
+  "factcheck", "readability", "copyright", "policy",
+];
+
+function getDownstreamSteps(stepType: string, steps: PipelineStep[]): string[] {
+  const idx = STEP_ORDER_LIST.indexOf(stepType);
+  if (idx === -1) return [];
+  return STEP_ORDER_LIST.slice(idx + 1)
+    .filter((st) => steps.some((s) => s.step_type === st && s.status === "completed"))
+    .map((st) => STEP_LABELS[st] || st);
+}
+
 interface AgentPanelWrapperProps {
   projectId: string;
   steps: PipelineStep[];
@@ -55,6 +76,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   const { activeStepType, isRunning } = usePipelineStore();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [rerunConfirm, setRerunConfirm] = useState<string | null>(null);
 
   if (!activeStepType) {
     return (
@@ -154,6 +176,15 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
   };
 
+  const handleRerun = () => {
+    const downstream = getDownstreamSteps(activeStepType!, steps);
+    if (downstream.length > 0) {
+      setRerunConfirm(activeStepType);
+    } else {
+      runAgent();
+    }
+  };
+
   const selectOption = async (selected: unknown) => {
     await api.patch(`/api/v1/projects/${projectId}/pipeline/${step.id}`, {
       selected_option: selected,
@@ -166,65 +197,105 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
       const data = parseOutput<ICPAgentOutput>(step);
       if (!data) return null;
       return (
-        <ICPPanel
-          data={data}
-          onApprove={() => selectOption(data.icp)}
-          onRerun={runAgent}
-          isRunning={running}
-          projectId={projectId}
-        />
+        <>
+          <ICPPanel
+            data={data}
+            onApprove={() => selectOption(data.icp)}
+            onRerun={handleRerun}
+            isRunning={running}
+            projectId={projectId}
+          />
+          <RerunConfirmDialog
+            open={rerunConfirm === activeStepType}
+            onOpenChange={(o) => !o && setRerunConfirm(null)}
+            downstream={getDownstreamSteps(activeStepType, steps)}
+            onConfirm={() => { setRerunConfirm(null); runAgent(); }}
+          />
+        </>
       );
     }
     case "hook": {
       const data = parseOutput<HookAgentOutput>(step);
       if (!data) return null;
       return (
-        <HookPanel
-          data={data}
-          onContinue={(selected: HookSuggestion) => selectOption(selected)}
-          onRerun={runAgent}
-          isRunning={running}
-          projectId={projectId}
-        />
+        <>
+          <HookPanel
+            data={data}
+            onContinue={(selected: HookSuggestion) => selectOption(selected)}
+            onRerun={handleRerun}
+            isRunning={running}
+            projectId={projectId}
+          />
+          <RerunConfirmDialog
+            open={rerunConfirm === activeStepType}
+            onOpenChange={(o) => !o && setRerunConfirm(null)}
+            downstream={getDownstreamSteps(activeStepType, steps)}
+            onConfirm={() => { setRerunConfirm(null); runAgent(); }}
+          />
+        </>
       );
     }
     case "narrative": {
       const data = parseOutput<NarrativeAgentOutput>(step);
       if (!data) return null;
       return (
-        <NarrativePanel
-          data={data}
-          onContinue={(selected: NarrativePattern) => selectOption(selected)}
-          onRerun={runAgent}
-          isRunning={running}
-          projectId={projectId}
-        />
+        <>
+          <NarrativePanel
+            data={data}
+            onContinue={(selected: NarrativePattern) => selectOption(selected)}
+            onRerun={handleRerun}
+            isRunning={running}
+            projectId={projectId}
+          />
+          <RerunConfirmDialog
+            open={rerunConfirm === activeStepType}
+            onOpenChange={(o) => !o && setRerunConfirm(null)}
+            downstream={getDownstreamSteps(activeStepType, steps)}
+            onConfirm={() => { setRerunConfirm(null); runAgent(); }}
+          />
+        </>
       );
     }
     case "retention": {
       const data = parseOutput<RetentionAgentOutput>(step);
       if (!data) return null;
       return (
-        <RetentionPanel
-          data={data}
-          onContinue={(selected: RetentionTechnique[]) => selectOption(selected)}
-          onRerun={runAgent}
-          isRunning={running}
-          projectId={projectId}
-        />
+        <>
+          <RetentionPanel
+            data={data}
+            onContinue={(selected: RetentionTechnique[]) => selectOption(selected)}
+            onRerun={handleRerun}
+            isRunning={running}
+            projectId={projectId}
+          />
+          <RerunConfirmDialog
+            open={rerunConfirm === activeStepType}
+            onOpenChange={(o) => !o && setRerunConfirm(null)}
+            downstream={getDownstreamSteps(activeStepType, steps)}
+            onConfirm={() => { setRerunConfirm(null); runAgent(); }}
+          />
+        </>
       );
     }
     case "cta": {
       const data = parseOutput<CTAAgentOutput>(step);
       if (!data) return null;
       return (
-        <CTAPanel
-          data={data}
-          onContinue={(selected: CTASuggestion) => selectOption(selected)}
-          onRerun={runAgent}
-          isRunning={running}
-          projectId={projectId}
-        />
+        <>
+          <CTAPanel
+            data={data}
+            onContinue={(selected: CTASuggestion) => selectOption(selected)}
+            onRerun={handleRerun}
+            isRunning={running}
+            projectId={projectId}
+          />
+          <RerunConfirmDialog
+            open={rerunConfirm === activeStepType}
+            onOpenChange={(o) => !o && setRerunConfirm(null)}
+            downstream={getDownstreamSteps(activeStepType, steps)}
+            onConfirm={() => { setRerunConfirm(null); runAgent(); }}
+          />
+        </>
       );
     }
     case "writer": {
@@ -315,5 +386,48 @@ function AnalysisPanelWrapper({
       loadingAgents={loadingAgents}
       onRunAgent={runAgent}
     />
+  );
+}
+
+function RerunConfirmDialog({
+  open,
+  onOpenChange,
+  downstream,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  downstream: string[];
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <TriangleAlert className="size-5 text-destructive" />
+            Re-run this step?
+          </DialogTitle>
+          <DialogDescription>
+            Re-running will invalidate the following completed downstream steps. They will need to be re-run.
+          </DialogDescription>
+        </DialogHeader>
+        {downstream.length > 0 && (
+          <ul className="list-disc pl-5 text-sm text-muted-foreground">
+            {downstream.map((name) => (
+              <li key={name}>{name}</li>
+            ))}
+          </ul>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={onConfirm}>
+            Re-run
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

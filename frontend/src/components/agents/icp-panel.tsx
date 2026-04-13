@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ICPAgentOutput, ICPProfile } from "@/types/agents";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NotebookLMContext } from "@/components/shared/notebooklm-context";
+import { Upload } from "lucide-react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ICPPanelProps {
   data: ICPAgentOutput;
@@ -17,7 +20,35 @@ interface ICPPanelProps {
 
 export function ICPPanel({ data, onApprove, onRerun, isRunning, projectId }: ICPPanelProps) {
   const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const icp: ICPProfile = data.icp;
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${baseUrl}/api/v1/projects/${projectId}/icp/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+      toast.success("ICP profile uploaded");
+      queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+    } catch {
+      toast.error("Failed to upload ICP profile");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -29,6 +60,22 @@ export function ICPPanel({ data, onApprove, onRerun, isRunning, projectId }: ICP
           </Button>
           <Button variant="outline" size="sm" onClick={onRerun} disabled={isRunning}>
             Re-run
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,.txt"
+            className="hidden"
+            onChange={handleUpload}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            <Upload />
+            {uploading ? "Uploading..." : "Upload ICP"}
           </Button>
         </div>
       </div>

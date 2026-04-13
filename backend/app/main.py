@@ -7,8 +7,11 @@ from app.api.router import router
 from app.config import get_settings
 from app.db.database import engine
 from app.db.models import Base
+from app.logging_config import setup_logging
 from app.ws.connection import connection_manager
 from app.ws.handlers import websocket_endpoint
+
+setup_logging()
 
 
 @asynccontextmanager

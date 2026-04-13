@@ -10,13 +10,16 @@ import type { Pipeline } from "@/types/pipeline";
 import type { NotebookSummary } from "@/types/notebooklm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, BookOpen, Unplug } from "lucide-react";
+import { ArrowLeft, Loader2, BookOpen, Unplug, GitBranch } from "lucide-react";
 import { usePipelineStore } from "@/stores/pipeline-store";
 import { useNotebookLMStore } from "@/stores/notebooklm-store";
 import { useAgentStream } from "@/hooks/use-agent-stream";
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { StepSidebar } from "@/components/pipeline/step-sidebar";
 import { AgentPanelWrapper } from "@/components/agents/agent-panel-wrapper";
+import { ExportPanel } from "@/components/shared/export-panel";
+import { BranchDialog } from "@/components/shared/branch-dialog";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -24,6 +27,7 @@ export default function ProjectDetailPage() {
   const { setActiveStepType, setSteps, reset } = usePipelineStore();
   const { connectedNotebook, connectNotebook, disconnectNotebook, fetchNotebooks, notebooks, reset: resetNotebookLM } = useNotebookLMStore();
   const [showConnectDialog, setShowConnectDialog] = useState(false);
+  const [showBranchDialog, setShowBranchDialog] = useState(false);
 
   const {
     data: project,
@@ -96,6 +100,14 @@ export default function ProjectDetailPage() {
           <Badge variant="outline">{project.content_goal}</Badge>
         )}
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowBranchDialog(true)}
+          >
+            <GitBranch className="size-4" />
+            Branch
+          </Button>
           {connectedNotebook ? (
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="gap-1">
@@ -161,9 +173,28 @@ export default function ProjectDetailPage() {
       <div className="flex gap-4">
         <StepSidebar steps={pipeline.steps} />
         <div className="flex-1 min-w-0">
-          <AgentPanelWrapper projectId={id} steps={pipeline.steps} />
+          <ErrorBoundary>
+            {pipeline.steps.every((s) => s.status === "pending") && (
+              <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-8">
+                <p className="text-sm text-muted-foreground">Run ICP Agent to get started</p>
+              </div>
+            )}
+            <AgentPanelWrapper projectId={id} steps={pipeline.steps} />
+          </ErrorBoundary>
         </div>
       </div>
+
+      {pipeline.steps.some((s) => s.step_type === "writer" && s.status === "completed") && (
+        <ExportPanel projectId={id} />
+      )}
+
+      <BranchDialog
+        open={showBranchDialog}
+        onOpenChange={setShowBranchDialog}
+        projectId={id}
+        steps={pipeline.steps}
+        projectName={project.name}
+      />
     </div>
   );
 }

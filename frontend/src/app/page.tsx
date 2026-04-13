@@ -8,7 +8,8 @@ import type { ProjectSummary } from "@/types/project"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { CreateProjectDialog } from "@/components/dashboard/create-project-dialog"
 
 function formatRelativeTime(dateStr: string) {
@@ -54,8 +55,19 @@ export default function DashboardPage() {
       />
 
       {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-5 w-3/4" />
+              </CardHeader>
+              <CardContent className="flex items-center gap-2">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="ml-auto h-4 w-12" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
@@ -64,7 +76,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">No projects yet.</p>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus />
-            Create your first project
+            Create your first script
           </Button>
         </div>
       )}

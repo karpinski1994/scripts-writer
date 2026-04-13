@@ -66,3 +66,63 @@ class ProjectService:
         project = await self.get_by_id(project_id)
         await self.db.delete(project)
         await self.db.commit()
+
+    async def branch_project(self, project_id: str, branch_from_step: str, name: str) -> Project:
+        project = await self.get_by_id(project_id)
+
+        new_project = Project(
+            id=str(uuid4()),
+            name=name,
+            topic=project.topic,
+            target_format=project.target_format,
+            content_goal=project.content_goal,
+            raw_notes=project.raw_notes,
+        )
+        self.db.add(new_project)
+        await self.db.flush()
+
+        from app.pipeline.state import STEP_ORDER, StepStatus
+
+        branch_idx = None
+        for i, st in enumerate(STEP_ORDER):
+            if st.value == branch_from_step:
+                branch_idx = i
+                break
+        if branch_idx is None:
+            raise HTTPException(status_code=400, detail=f"Invalid step type: {branch_from_step}")
+
+        result = await self.db.execute(
+            select(PipelineStep).where(PipelineStep.project_id == project_id).order_by(PipelineStep.step_order)
+        )
+        original_steps = list(result.scalars().all())
+
+        for order, step_type in enumerate(STEP_ORDER):
+            original = next((s for s in original_steps if s.step_type == step_type.value), None)
+            if order <= branch_idx and original and original.status == StepStatus.completed.value:
+                step = PipelineStep(
+                    id=str(uuid4()),
+                    project_id=new_project.id,
+                    step_type=step_type.value,
+                    step_order=order,
+                    status=StepStatus.completed.value,
+                    output_data=original.output_data,
+                    selected_option=original.selected_option,
+                    llm_provider=original.llm_provider,
+                    token_count=original.token_count,
+                    duration_ms=original.duration_ms,
+                    started_at=original.started_at,
+                    completed_at=original.completed_at,
+                )
+            else:
+                step = PipelineStep(
+                    id=str(uuid4()),
+                    project_id=new_project.id,
+                    step_type=step_type.value,
+                    step_order=order,
+                    status=StepStatus.pending.value,
+                )
+            self.db.add(step)
+
+        await self.db.commit()
+        await self.db.refresh(new_project)
+        return new_project
