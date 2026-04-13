@@ -10,7 +10,7 @@ class ModalProvider(LLMProvider):
         self,
         api_key: str,
         base_url: str = "https://api.us-west-2.modal.direct/v1",
-        model: str = "glm-5.1",
+        model: str = "zai-org/GLM-5.1-FP8",
         priority: int = 1,
     ):
         self._api_key = api_key

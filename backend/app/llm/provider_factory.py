@@ -24,12 +24,21 @@ class ProviderFactory:
         providers: list[LLMProvider] = []
         if self._settings.modal_api_key:
             providers.append(
-                ModalProvider(api_key=self._settings.modal_api_key, base_url=self._settings.modal_base_url)
+                ModalProvider(
+                    api_key=self._settings.modal_api_key,
+                    base_url=self._settings.modal_base_url,
+                    model=self._settings.modal_model_name,
+                )
             )
         if self._settings.groq_api_key:
             providers.append(GroqProvider(api_key=self._settings.groq_api_key))
         if self._settings.gemini_api_key:
-            providers.append(GeminiProvider(api_key=self._settings.gemini_api_key))
+            providers.append(
+                GeminiProvider(
+                    api_key=self._settings.gemini_api_key,
+                    model=self._settings.gemini_model,
+                )
+            )
         if self._settings.ollama_enabled:
             providers.append(OllamaProvider(base_url=self._settings.ollama_base_url))
         self._providers = sorted(providers, key=lambda p: p.priority)

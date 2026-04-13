@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AppSettings(BaseSettings):
     modal_api_key: str = ""
     modal_base_url: str = "https://api.us-west-2.modal.direct/v1"
+    modal_model_name: str = "zai-org/GLM-5.1-FP8"
     groq_api_key: str = ""
     gemini_api_key: str = ""
     ollama_base_url: str = "http://localhost:11434"
@@ -18,6 +19,7 @@ class AppSettings(BaseSettings):
     google_cloud_project: str = ""
     google_cloud_location: str = "us"
     google_application_credentials: str = ""
+    gemini_model: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

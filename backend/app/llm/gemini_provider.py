@@ -7,7 +7,7 @@ from app.llm.base import LLMProvider
 
 
 class GeminiProvider(LLMProvider):
-    def __init__(self, api_key: str, model: str = "gemini-2.0-flash", priority: int = 3):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", priority: int = 3):
         self._api_key = api_key
         self._model_name = model
         self._priority = priority
@@ -26,19 +26,27 @@ class GeminiProvider(LLMProvider):
         return self._priority
 
     async def generate(self, prompt: str, system_prompt: str = "", model: str | None = None) -> str:
-        contents = self._build_contents(prompt, system_prompt)
+        model = model or self._model_name
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt if system_prompt else None,
+        )
         response = await self._client.aio.models.generate_content(
-            model=model or self._model_name,
-            contents=contents,
+            model=model,
+            contents=prompt,
+            config=config,
         )
         return response.text or ""
 
     async def stream(self, prompt: str, system_prompt: str = "", model: str | None = None) -> AsyncIterator[str]:
-        contents = self._build_contents(prompt, system_prompt)
+        model = model or self._model_name
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt if system_prompt else None,
+            candidate_count=1,
+        )
         response = await self._client.aio.models.generate_content(
-            model=model or self._model_name,
-            contents=contents,
-            config=types.GenerateContentConfig(candidate_count=1),
+            model=model,
+            contents=prompt,
+            config=config,
         )
         async for chunk in response:
             if chunk.text:
@@ -50,11 +58,3 @@ class GeminiProvider(LLMProvider):
             return True
         except Exception:
             return False
-
-    @staticmethod
-    def _build_contents(prompt: str, system_prompt: str) -> list[str]:
-        parts: list[str] = []
-        if system_prompt:
-            parts.append(system_prompt)
-        parts.append(prompt)
-        return parts

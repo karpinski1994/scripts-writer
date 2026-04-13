@@ -48,5 +48,10 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> ICPAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
+        if not raw or not raw.strip():
+            raise ValueError("LLM returned empty response")
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"LLM response is not valid JSON: {e}")
         return ICPAgentOutput.model_validate(data)
