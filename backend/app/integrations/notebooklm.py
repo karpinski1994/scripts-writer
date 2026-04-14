@@ -1,7 +1,6 @@
-import logging
-import os
-import subprocess
 import json
+import logging
+import subprocess
 
 from app.integrations.errors import NotebookLMAPIError
 

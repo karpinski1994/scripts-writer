@@ -1,23 +1,41 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
+
 import structlog
 
+try:
+    from piragi import Ragi as RagiClass
+except ImportError:
+    RagiClass = None
+
 from .config import (
-    STEP_CATEGORY_MAP,
-    PIRAGI_PERSIST_DIR,
     PIRAGI_DEFAULT_TOP_K,
+    PIRAGI_PERSIST_DIR,
+    STEP_CATEGORY_MAP,
 )
+
+if TYPE_CHECKING:
+    from piragi import Ragi
 
 logger = structlog.get_logger(__name__)
 
 
 class PiragiManager:
     def __init__(self, persist_dir: str = PIRAGI_PERSIST_DIR):
-        self._ragi_cache: dict[str, "Ragi"] = {}
+        self._ragi_cache: dict[str, Ragi] = {}
         self._persist_dir = Path(persist_dir)
         self._documents_base = Path("documents")
 
-    def get_or_create(self, category: str) -> "Ragi":
+    def is_available(self) -> bool:
+        return RagiClass is not None
+
+    def get_or_create(self, category: str) -> Ragi | None:
+        if RagiClass is None:
+            logger.warning("piragi_not_available", category=category)
+            return None
+
         if category in self._ragi_cache:
             return self._ragi_cache[category]
 
@@ -28,12 +46,10 @@ class PiragiManager:
         index_path.mkdir(parents=True, exist_ok=True)
 
         try:
-            from piragi import Ragi
-
-            ragi = Ragi(sources=[str(category_path)], persist_dir=str(index_path))
+            ragi = RagiClass(sources=[str(category_path)], persist_dir=str(index_path))
         except ImportError:
-            logger.warning("piragi_not_installed", category=category)
-            raise ImportError("Piragi package not installed. Run: uv add piragi")
+            logger.warning("piragi_init_failed", category=category)
+            return None
 
         self._ragi_cache[category] = ragi
         return ragi
@@ -44,6 +60,8 @@ class PiragiManager:
     async def query(self, category: str, query_text: str, top_k: int = PIRAGI_DEFAULT_TOP_K) -> list[str]:
         try:
             ragi = self.get_or_create(category)
+            if ragi is None:
+                return []
             results = ragi.query(query_text, top_k=top_k)
             return [r.chunk for r in results] if results else []
         except Exception as e:
@@ -52,6 +70,9 @@ class PiragiManager:
 
     async def add_documents(self, category: str, sources: list[str]) -> None:
         ragi = self.get_or_create(category)
+        if ragi is None:
+            logger.warning("piragi_not_available_skipping_index", category=category, count=len(sources))
+            return
         for source in sources:
             ragi.add_documents([source])
         logger.info("documents_added", category=category, count=len(sources))

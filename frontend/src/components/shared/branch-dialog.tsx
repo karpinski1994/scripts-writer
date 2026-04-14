@@ -116,7 +116,7 @@ export function BranchDialog({
             </Select>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter open={open} onOpenChange={onOpenChange}>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

@@ -1,5 +1,7 @@
 import json
+from pathlib import Path
 
+import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -110,35 +112,75 @@ async def update_icp(project_id: str, body: ICPUpdateRequest, db: AsyncSession =
     return _icp_profile_to_response(profile)
 
 
+DOCUMENTS_DIR = Path("/Users/karpinski94/projects/scripts-writer/documents/icp")
+
+
 @router.post("/upload", response_model=ICPProfileResponse)
 async def upload_icp(project_id: str, file: UploadFile, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+
     project_service = ProjectService(db)
     await project_service.get_by_id(project_id)
 
     content = await file.read()
+
+    DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = DOCUMENTS_DIR / file.filename
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(content)
+
+    demographics = {}
+    psychographics = {}
+    pain_points = []
+    desires = []
+    objections = []
+    language_style = "professional"
+
     if file.filename and file.filename.endswith(".json"):
         try:
             parsed = json.loads(content)
         except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid JSON file")
+        demographics = parsed.get("demographics", {})
+        psychographics = parsed.get("psychographics", {})
+        pain_points = parsed.get("pain_points", [])
+        desires = parsed.get("desires", [])
+        objections = parsed.get("objections", [])
+        language_style = parsed.get("language_style", "professional")
     else:
-        parsed = {"raw_text": content.decode("utf-8", errors="replace")}
+        raw_text = content.decode("utf-8", errors="replace")
+        demographics = {"raw_text": raw_text[:500]}
 
-    demographics = parsed.get("demographics", {})
-    psychographics = parsed.get("psychographics", {})
+    result = await db.execute(select(ICPProfile).where(ICPProfile.project_id == project_id))
+    existing = result.scalar_one_or_none()
 
-    profile = ICPProfile(
-        project_id=project_id,
-        demographics=json.dumps(demographics),
-        psychographics=json.dumps(psychographics),
-        pain_points=json.dumps(parsed.get("pain_points", [])),
-        desires=json.dumps(parsed.get("desires", [])),
-        objections=json.dumps(parsed.get("objections", [])),
-        language_style=parsed.get("language_style", "professional"),
-        source="uploaded",
-        approved=False,
-    )
-    db.add(profile)
+    if existing:
+        existing.demographics = json.dumps(demographics)
+        existing.psychographics = json.dumps(psychographics)
+        existing.pain_points = json.dumps(pain_points)
+        existing.desires = json.dumps(desires)
+        existing.objections = json.dumps(objections)
+        existing.language_style = language_style
+        existing.source = "uploaded"
+        existing.approved = False
+    else:
+        profile = ICPProfile(
+            project_id=project_id,
+            demographics=json.dumps(demographics),
+            psychographics=json.dumps(psychographics),
+            pain_points=json.dumps(pain_points),
+            desires=json.dumps(desires),
+            objections=json.dumps(objections),
+            language_style=language_style,
+            source="uploaded",
+            approved=False,
+        )
+        db.add(profile)
+
     await db.commit()
-    await db.refresh(profile)
-    return _icp_profile_to_response(profile)
+    if existing:
+        await db.refresh(existing)
+        return _icp_profile_to_response(existing)
+    else:
+        await db.refresh(profile)
+        return _icp_profile_to_response(profile)

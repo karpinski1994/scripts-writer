@@ -1,12 +1,12 @@
 from uuid import UUID
-import structlog
 
-from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.models import Project
 from ..rag import piragi_manager
-from ..rag.config import STEP_CATEGORY_MAP, StepType
+from ..rag.config import DEV_PROVIDED_CATEGORIES, STEP_CATEGORY_MAP, STEP_DEPENDENCIES, StepType
 
 logger = structlog.get_logger(__name__)
 
@@ -60,7 +60,7 @@ class PiragiService:
         if not project.piragi_document_paths:
             return None
 
-        category = STEP_CATEGORY_MAP.get(step_type, "icp")
+        dependencies = STEP_DEPENDENCIES.get(step_type, [step_type])
 
         default_queries = {
             StepType.ICP: "audience insights demographics pain points",
@@ -69,16 +69,35 @@ class PiragiService:
             StepType.RETENTION: "retention techniques engagement",
             StepType.CTA: "call to action urgency conversion",
         }
-        query = default_queries.get(step_type, "relevant context")
 
-        try:
-            chunks = await piragi_manager.query(category, query, top_k=3)
-            if not chunks:
-                return None
-            return "\n\n".join(chunks)
-        except Exception as e:
-            logger.warning("piragi_query_failed", project_id=str(project_id), error=str(e))
+        all_chunks = []
+
+        for dep_step in dependencies:
+            category = STEP_CATEGORY_MAP.get(dep_step, "icp")
+            query = default_queries.get(dep_step, "relevant context")
+
+            try:
+                chunks = await piragi_manager.query(category, query, top_k=3)
+                all_chunks.extend(chunks)
+            except Exception as e:
+                logger.warning("piragi_query_failed", project_id=str(project_id), category=category, error=str(e))
+
+        if step_type in DEV_PROVIDED_CATEGORIES:
+            dev_categories = DEV_PROVIDED_CATEGORIES[step_type]
+            for dev_category in dev_categories:
+                try:
+                    dev_chunks = await piragi_manager.query(
+                        dev_category, default_queries.get(step_type, "relevant context"), top_k=3
+                    )
+                    all_chunks.extend(dev_chunks)
+                except Exception as e:
+                    logger.warning(
+                        "piragi_dev_query_failed", project_id=str(project_id), category=dev_category, error=str(e)
+                    )
+
+        if not all_chunks:
             return None
+        return "\n\n".join(all_chunks)
 
     async def list_categories(self) -> dict[str, int]:
         return piragi_manager.list_categories()
@@ -87,8 +106,7 @@ class PiragiService:
         try:
             await piragi_manager.add_documents(category, [file_path])
         except Exception as e:
-            logger.warning("piragi_index_failed", file_path=file_path, error=str(e))
-            raise
+            logger.warning("piragi_index_failed_skipping", file_path=file_path, category=category, error=str(e))
 
     async def _get_project(self, project_id: UUID) -> Project:
         result = await self.db.execute(select(Project).where(Project.id == str(project_id)))

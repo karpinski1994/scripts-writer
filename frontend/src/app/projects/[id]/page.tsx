@@ -46,6 +46,21 @@ export default function ProjectDetailPage() {
 
   useAgentStream(id);
 
+  const hasRunningStep = pipeline?.steps?.some((s) => s.status === "running");
+  const hasFailedStep = pipeline?.steps?.some((s) => s.status === "failed");
+
+  useEffect(() => {
+    if (hasRunningStep && id) {
+      api.post(`/api/v1/projects/${id}/pipeline/cancel`, {}).catch(() => {});
+    }
+  }, [id, hasRunningStep]);
+
+  useEffect(() => {
+    if (hasFailedStep && id) {
+      api.post(`/api/v1/projects/${id}/pipeline/reset-errors`, {}).catch(() => {});
+    }
+  }, [id, hasFailedStep]);
+
   useEffect(() => {
     if (pipeline?.steps) {
       setSteps(pipeline.steps);
@@ -74,9 +89,11 @@ export default function ProjectDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
         <p className="text-lg text-muted-foreground">Project not found</p>
-        <Button variant="outline" render={<Link href="/" />}>
-          <ArrowLeft />
-          Back to Dashboard
+        <Button asChild variant="outline">
+          <Link href="/">
+            <ArrowLeft />
+            Back to Dashboard
+          </Link>
         </Button>
       </div>
     );
@@ -87,8 +104,10 @@ export default function ProjectDetailPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon-sm" render={<Link href="/" />}>
-          <ArrowLeft />
+        <Button asChild variant="ghost" size="icon-sm">
+          <Link href="/">
+            <ArrowLeft />
+          </Link>
         </Button>
         <h1 className="text-xl font-bold tracking-tight">{project.name}</h1>
         <Badge variant="secondary">{project.target_format}</Badge>

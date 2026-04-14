@@ -19,7 +19,7 @@ class AppSettings(BaseSettings):
     google_cloud_project: str = ""
     google_cloud_location: str = "us"
     google_application_credentials: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-2.0-flash"
     notebooklm_storage_path: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")

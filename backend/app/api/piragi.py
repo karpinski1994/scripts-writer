@@ -1,22 +1,21 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
+from app.rag.config import STEP_CATEGORY_MAP
 from app.schemas.piragi import (
+    ChunkResult,
     ConnectDocumentsRequest,
     ConnectDocumentsResponse,
+    DocumentSummary,
     PiragiDocumentsResponse,
     PiragiQueryRequest,
     PiragiQueryResponse,
-    DocumentSummary,
-    ChunkResult,
     UploadDocumentResponse,
 )
 from app.services.piragi_service import PiragiService
-from app.rag.config import STEP_CATEGORY_MAP
 
 router = APIRouter(prefix="/projects/{project_id}/rag", tags=["rag"])
 
@@ -28,7 +27,6 @@ async def list_documents(
 ) -> PiragiDocumentsResponse:
     service = PiragiService(db)
 
-    step_type_strs = [s.value for s in STEP_CATEGORY_MAP.keys()]
     categories = await service.list_categories()
 
     docs = []
@@ -88,6 +86,7 @@ async def upload_document(
     db: AsyncSession = Depends(get_db),
 ) -> UploadDocumentResponse:
     from pathlib import Path
+
     import aiofiles
 
     category = STEP_TO_CATEGORY.get(step_type)

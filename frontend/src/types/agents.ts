@@ -14,6 +14,8 @@ export interface NarrativePattern {
   description: string;
   structure: string[];
   fit_score?: number;
+  is_recommended?: boolean;
+  confidence?: number;
 }
 
 export interface NarrativeAgentOutput {

@@ -173,7 +173,7 @@ export function CreateProjectDialog({
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter open={open} onOpenChange={onOpenChange}>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="animate-spin" />}
               Create

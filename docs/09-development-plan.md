@@ -699,9 +699,55 @@ scripts-writer/
   - **Verify:** 78 tests pass, frontend build succeeds
   - **Date completed:** 2026-04-12
 
----
-  - **Verify:** All existing + new tests pass; frontend builds without errors
-  - **Date completed:** ___
+## Phase 8b: Cumulative RAG Context + Template Selection
+
+**Goal:** Each step gets cumulative documents from dependencies; Narrative/Retention/CTA show agent results first, then template options with explanations.
+
+**Test criteria for the whole phase:** Run ICP → Hook → Narrative: each step sees more context. Select template shows explanations.
+
+### Steps
+
+- [x] **8b.1** Add STEP_DEPENDENCIES and DEV_PROVIDED_CATEGORIES to rag/config.py
+  - **Verify:** Config defines correct dependencies
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.2** Update PiragiService.get_step_context() to query cumulative categories
+  - **Verify:** Hook step gets ICP + Hook context combined
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.3** Create dev-provided template documents in documents/narrative_patterns/ and documents/retention_tactics/
+  - **Verify:** Templates available to RAG query
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.4** Update Narrative panel — show agent results first, then template options (AIDA, PAS) with why_best
+  - **Verify:** Panel shows results, user can select template with explanation
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.5** Update Retention panel — show agent results first, then template options (Curiosity Gap, Teasers) with why_best
+  - **Verify:** Panel shows results, user can select template with explanation
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.6** Update CTA panel — show agent results first, then template options (Subscribe, Buy) with why_best
+  - **Verify:** Panel shows results, user can select template with explanation
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.7** Update Button component — support asChild prop for Link composition
+  - **Verify:** Button works with Next.js Link
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.8** Fix DialogFooter to use onOpenChange callback instead of asChild
+  - **Verify:** DialogFooter renders without type errors
+  - **Date completed:** 2026-04-13
+
+- [x] **8b.9** Change model to gemini-2.0-flash for faster testing
+  - **Verify:** Config uses gemini-2.0-flash
+  - **Date completed:** 2026-04-13
+
+- [ ] **8b.10** Test cumulative context flow end-to-end
+  - **Verify:** Each step sees cumulative documents
+
+- [ ] **8b.11** Test template selection with explanations
+  - **Verify:** why_best text displays for each option
 
 ---
 

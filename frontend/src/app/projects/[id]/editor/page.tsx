@@ -59,8 +59,10 @@ export default function EditorPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon-sm" render={<Link href={`/projects/${id}`} />}>
-          <ArrowLeft />
+        <Button asChild variant="ghost" size="icon-sm">
+          <Link href={`/projects/${id}`}>
+            <ArrowLeft />
+          </Link>
         </Button>
         <h1 className="text-xl font-bold tracking-tight">
           {project?.name ?? "Script Editor"}
@@ -74,9 +76,10 @@ export default function EditorPage() {
           <p className="text-sm text-muted-foreground">
             Generate a script from the pipeline first.
           </p>
-          <Button variant="outline" render={<Link href={`/projects/${id}`} />}>
-            <ArrowLeft />
-            Back to Pipeline
+          <Button asChild variant="outline">
+            <Link href={`/projects/${id}`}>
+              Back to Pipeline
+            </Link>
           </Button>
         </div>
       ) : (

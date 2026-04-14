@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 
 from google import genai
@@ -5,9 +6,11 @@ from google.genai import types
 
 from app.llm.base import LLMProvider
 
+logger = logging.getLogger(__name__)
+
 
 class GeminiProvider(LLMProvider):
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", priority: int = 3):
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash", priority: int = 1):
         self._api_key = api_key
         self._model_name = model
         self._priority = priority
@@ -27,6 +30,9 @@ class GeminiProvider(LLMProvider):
 
     async def generate(self, prompt: str, system_prompt: str = "", model: str | None = None) -> str:
         model = model or self._model_name
+        logger.info(
+            f"HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        )
         config = types.GenerateContentConfig(
             system_instruction=system_prompt if system_prompt else None,
         )

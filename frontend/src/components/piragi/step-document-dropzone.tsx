@@ -56,15 +56,23 @@ export function StepDocumentDropzone({
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch(
-          `${baseUrl}/api/v1/projects/${projectId}/rag/upload?step_type=${stepType}`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+
+        let endpoint = `${baseUrl}/api/v1/projects/${projectId}/rag/upload?step_type=${stepType}`;
+        if (stepType === "hook") {
+          endpoint = `${baseUrl}/api/v1/projects/${projectId}/hooks/upload`;
+        } else if (stepType === "icp") {
+          endpoint = `${baseUrl}/api/v1/projects/${projectId}/icp/upload`;
+        }
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
         if (res.ok) {
           setUploadedFiles((prev) => [...prev, file.name]);
+        } else {
+          const errText = await res.text();
+          console.error("Upload failed:", res.status, errText);
         }
       } catch (err) {
         console.error("Upload failed:", err);

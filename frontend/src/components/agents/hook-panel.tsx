@@ -15,10 +15,16 @@ interface HookPanelProps {
   onRerun: () => void;
   isRunning: boolean;
   projectId: string;
+  initialSelection?: HookSuggestion;
 }
 
-export function HookPanel({ data, onContinue, onRerun, isRunning, projectId }: HookPanelProps) {
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+export function HookPanel({ data, onContinue, onRerun, isRunning, projectId, initialSelection }: HookPanelProps) {
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(() => {
+    if (initialSelection) {
+      return data.hooks.findIndex(h => h.text === initialSelection.text);
+    }
+    return null;
+  });
   const [customText, setCustomText] = useState("");
 
   function handleContinue() {

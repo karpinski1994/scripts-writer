@@ -1,8 +1,11 @@
+import logging
 from collections.abc import AsyncIterator
 
 from openai import AsyncOpenAI
 
 from app.llm.base import LLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class GroqProvider(LLMProvider):
@@ -32,9 +35,13 @@ class GroqProvider(LLMProvider):
         return self._priority
 
     async def generate(self, prompt: str, system_prompt: str = "", model: str | None = None) -> str:
+        model = model or self._model
+        messages = self._build_messages(prompt, system_prompt)
+        logger.info(f"HTTP Request: POST {self._base_url}/chat/completions")
+        logger.debug(f"Request body: model={model}, messages={messages}")
         response = await self._client.chat.completions.create(
-            model=model or self._model,
-            messages=self._build_messages(prompt, system_prompt),
+            model=model,
+            messages=messages,
         )
         return response.choices[0].message.content or ""
 
