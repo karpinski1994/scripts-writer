@@ -28,9 +28,9 @@ class ICPProfile(BaseModel):
 
 
 class ICPAgentInput(BaseModel):
-    raw_notes: str
-    topic: str
-    target_format: str
+    raw_notes: str = ""
+    topic: str | None = None
+    target_format: str | None = None
     content_goal: str | None = None
     piragi_context: str | None = None
 
