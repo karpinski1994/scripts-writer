@@ -185,11 +185,16 @@ class PipelineOrchestrator:
         if step_type == StepType.subject:
             return {}, {}
 
+        project_slug = project.name.lower().replace(" ", "-")
+        docs_base = Path(f"/Users/karpinski94/projects/scripts-writer/documents/{project_slug}")
+        playbooks_base = Path("/Users/karpinski94/projects/scripts-writer/documents/playbooks")
+
         if step_type == StepType.icp:
             raw_notes = project.raw_notes or ""
-            icp_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/icp")
-            if icp_docs_dir.exists():
-                files = list(icp_docs_dir.glob("*"))
+
+            project_icp_dir = docs_base / "icp"
+            if project_icp_dir.exists():
+                files = list(project_icp_dir.glob("*"))
                 if files:
                     doc_content = []
                     for f in files[:1]:
@@ -197,7 +202,21 @@ class PipelineOrchestrator:
                             content = f.read_text()
                             doc_content.append(content)
                     if doc_content:
-                        raw_notes = f"Document content from files:\n{doc_content[0]}\n\nOriginal notes: {raw_notes}"
+                        raw_notes = (
+                            f"Document content from project files:\n{doc_content[0]}\n\nOriginal notes: {raw_notes}"
+                        )
+
+            playbook_icp_dir = playbooks_base / "icp"
+            if playbook_icp_dir.exists():
+                files = list(playbook_icp_dir.glob("*"))
+                if files:
+                    doc_content = []
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            content = f.read_text()
+                            doc_content.append(content)
+                    if doc_content:
+                        raw_notes = f"Document content from playbook:\n{doc_content[0]}\n\n" + raw_notes
 
             agent = ICPAgent()
             input_data = ICPAgentInput(
@@ -212,17 +231,24 @@ class PipelineOrchestrator:
         icp = self._extract_icp(step_map)
 
         if step_type == StepType.hook:
-            hook_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/hooks")
             hook_context = ""
-            if hook_docs_dir.exists():
-                files = list(hook_docs_dir.glob("*"))
+
+            project_hook_dir = docs_base / "hooks"
+            if project_hook_dir.exists():
+                files = list(project_hook_dir.glob("*"))
                 if files:
-                    doc_parts = []
                     for f in files[:1]:
                         if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            doc_parts.append(f.read_text())
-                    if doc_parts:
-                        hook_context = f"Reference material:\n{doc_parts[0]}\n\n"
+                            hook_context = f"Project hook reference:\n{f.read_text()}\n\n"
+
+            playbook_hook_dir = playbooks_base / "hooks"
+            if playbook_hook_dir.exists():
+                files = list(playbook_hook_dir.glob("*"))
+                if files:
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            hook_context = f"Hook playbook reference:\n{f.read_text()}\n\n" + hook_context
+
             agent = HookAgent()
             input_data = HookAgentInput(
                 icp=icp,
@@ -236,17 +262,26 @@ class PipelineOrchestrator:
         selected_hook = self._extract_selected(step_map, StepType.hook, HookSuggestion)
 
         if step_type == StepType.narrative:
-            narrative_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/narrative_patterns")
             narrative_context = ""
-            if narrative_docs_dir.exists():
-                files = list(narrative_docs_dir.glob("*"))
+
+            project_narrative_dir = docs_base / "narratives"
+            if project_narrative_dir.exists():
+                files = list(project_narrative_dir.glob("*"))
                 if files:
-                    doc_parts = []
                     for f in files[:1]:
                         if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            doc_parts.append(f.read_text())
-                    if doc_parts:
-                        narrative_context = f"Reference material:\n{doc_parts[0]}\n\n"
+                            narrative_context = f"Project narrative reference:\n{f.read_text()}\n\n"
+
+            playbook_narrative_dir = playbooks_base / "narratives"
+            if playbook_narrative_dir.exists():
+                files = list(playbook_narrative_dir.glob("*"))
+                if files:
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            narrative_context = (
+                                f"Narrative playbook reference:\n{f.read_text()}\n\n" + narrative_context
+                            )
+
             agent = NarrativeAgent()
             input_data = NarrativeAgentInput(
                 icp=icp,
@@ -260,23 +295,33 @@ class PipelineOrchestrator:
         selected_narrative = self._extract_selected(step_map, StepType.narrative, NarrativePattern)
 
         if step_type == StepType.retention:
-            retention_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/retention_tactics")
             retention_context = ""
-            if retention_docs_dir.exists():
-                files = list(retention_docs_dir.glob("*"))
+
+            project_retention_dir = docs_base / "retention"
+            if project_retention_dir.exists():
+                files = list(project_retention_dir.glob("*"))
                 if files:
-                    doc_parts = []
                     for f in files[:1]:
                         if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            doc_parts.append(f.read_text())
-                    if doc_parts:
-                        retention_context = f"Retention tactics reference:\n{doc_parts[0]}\n\n"
+                            retention_context = f"Project retention reference:\n{f.read_text()}\n\n"
+
+            playbook_retention_dir = playbooks_base / "retention"
+            if playbook_retention_dir.exists():
+                files = list(playbook_retention_dir.glob("*"))
+                if files:
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            retention_context = (
+                                f"Retention playbook reference:\n{f.read_text()}\n\n" + retention_context
+                            )
+
             agent = RetentionAgent()
             input_data = RetentionAgentInput(
                 icp=icp,
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 target_format=project.target_format,
+                content_goal=project.content_goal,
                 piragi_context=retention_context or piragi_context,
             )
             return agent, input_data

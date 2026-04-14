@@ -16,6 +16,7 @@ from app.schemas.piragi import (
     UploadDocumentResponse,
 )
 from app.services.piragi_service import PiragiService
+from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/rag", tags=["rag"])
 
@@ -74,6 +75,7 @@ async def disconnect_documents(
 
 ALLOWED_EXTENSIONS = {".txt", ".md", ".pdf"}
 DOCUMENTS_DIR = "documents"
+PLAYBOOKS_DIR = "playbooks"
 
 STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.keys()}
 
@@ -82,11 +84,11 @@ STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.
 async def upload_document(
     project_id: UUID,
     step_type: str,
+    is_playbook: bool = False,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ) -> UploadDocumentResponse:
     from pathlib import Path
-
     import aiofiles
 
     category = STEP_TO_CATEGORY.get(step_type)
@@ -103,10 +105,17 @@ async def upload_document(
             detail=f"File type not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
         )
 
-    category_dir = Path(DOCUMENTS_DIR) / category
-    category_dir.mkdir(parents=True, exist_ok=True)
+    if is_playbook:
+        base_dir = Path(DOCUMENTS_DIR) / PLAYBOOKS_DIR / category
+    else:
+        project_service = ProjectService(db)
+        project = await project_service.get_by_id(str(project_id))
+        project_slug = project.name.lower().replace(" ", "-")
+        base_dir = Path(DOCUMENTS_DIR) / project_slug / category
 
-    file_path = category_dir / file.filename
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = base_dir / file.filename
 
     content = await file.read()
     if file_ext == ".pdf":

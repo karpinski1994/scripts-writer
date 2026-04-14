@@ -5,18 +5,22 @@ from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
+from app.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/hooks", tags=["hooks"])
-
-DOCUMENTS_DIR = Path("/Users/karpinski94/projects/scripts-writer/documents/hooks")
 
 
 @router.post("/upload", status_code=200)
 async def upload_hook(project_id: str, file: UploadFile, db: AsyncSession = Depends(get_db)):
-    content = await file.read()
+    project_service = ProjectService(db)
+    project = await project_service.get_by_id(project_id)
+    project_slug = project.name.lower().replace(" ", "-")
 
-    DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
-    file_path = DOCUMENTS_DIR / file.filename
+    docs_dir = Path(f"/Users/karpinski94/projects/scripts-writer/documents/{project_slug}/hooks")
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = docs_dir / file.filename
+    content = await file.read()
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(content)
 

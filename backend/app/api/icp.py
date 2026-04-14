@@ -112,7 +112,7 @@ async def update_icp(project_id: str, body: ICPUpdateRequest, db: AsyncSession =
     return _icp_profile_to_response(profile)
 
 
-DOCUMENTS_DIR = Path("/Users/karpinski94/projects/scripts-writer/documents/icp")
+DOCUMENTS_DIR_BASE = "/Users/karpinski94/projects/scripts-writer/documents"
 
 
 @router.post("/upload", response_model=ICPProfileResponse)
@@ -120,12 +120,14 @@ async def upload_icp(project_id: str, file: UploadFile, db: AsyncSession = Depen
     from sqlalchemy import select
 
     project_service = ProjectService(db)
-    await project_service.get_by_id(project_id)
+    project = await project_service.get_by_id(project_id)
+    project_slug = project.name.lower().replace(" ", "-")
+
+    docs_dir = Path(DOCUMENTS_DIR_BASE) / project_slug / "icp"
+    docs_dir.mkdir(parents=True, exist_ok=True)
 
     content = await file.read()
-
-    DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
-    file_path = DOCUMENTS_DIR / file.filename
+    file_path = docs_dir / file.filename
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(content)
 
