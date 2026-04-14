@@ -90,11 +90,20 @@ def test_retention_agent_cache_key_deterministic():
 
 def test_cta_agent_build_prompt_contains_hook_and_narrative():
     agent = CTAAgent()
-    input_data = CTAAgentInput(icp=_icp(), selected_hook=_hook(), selected_narrative=_narrative(), content_goal="Sell")
+    input_data = CTAAgentInput(
+        icp=_icp(),
+        selected_hook=_hook(),
+        selected_narrative=_narrative(),
+        cta_purpose="Go to the course",
+        content_goal="Sell",
+    )
     prompt = agent.build_prompt(input_data)
+    assert "Primary CTA Goal (most important instruction)" in prompt
+    assert "Go to the course" in prompt
     assert "Selected Hook" in prompt
     assert "Selected Narrative" in prompt
-    assert "Sell" in prompt
+    assert "Content Goal (secondary context): Sell" in prompt
+    assert prompt.index("Primary CTA Goal (most important instruction)") < prompt.index("ICP Summary")
 
 
 def test_cta_agent_cache_key_deterministic():

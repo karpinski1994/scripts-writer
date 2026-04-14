@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert in calls-to-action (CTAs) for video and marketing content. "
-    "Given an ICP, a selected hook, a selected narrative pattern, and an optional content goal, "
+    "Given an ICP, a selected hook, a selected narrative pattern, a CTA purpose, and an optional content goal, "
     "generate CTA options that will drive the desired action from the audience. "
+    "The CTA purpose is the highest-priority instruction and defines the exact action the audience should take. "
+    "Every CTA must clearly drive that action and must not substitute a different conversion goal. "
     "Consider the ICP's objections and motivations. Vary CTA types (direct, soft, urgency, value-driven)."
 )
 
@@ -28,17 +30,28 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         return StepType.cta.value
 
     def build_prompt(self, input_data: CTAAgentInput) -> str:
-        parts = [
-            f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
-            f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
-            f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
-        ]
+        parts = []
         if input_data.cta_purpose:
-            parts.append(f"CTA Purpose: {input_data.cta_purpose}")
+            parts.append(
+                "Primary CTA Goal (most important instruction):\n"
+                f"- Exact audience action: {input_data.cta_purpose}\n"
+                "- Every CTA must drive this exact action.\n"
+                "- Do not replace it with a different or softer CTA goal."
+            )
         else:
-            parts.append("CTA Purpose: [Not specified - ask user to define their call-to-action goal]")
+            parts.append(
+                "Primary CTA Goal (most important instruction):\n"
+                "[Not specified - ask user to define the exact action they want the audience to take]"
+            )
+        parts.extend(
+            [
+                f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
+                f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
+                f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
+            ]
+        )
         if input_data.content_goal:
-            parts.append(f"Content Goal: {input_data.content_goal}")
+            parts.append(f"Content Goal (secondary context): {input_data.content_goal}")
         if input_data.piragi_context:
             parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)
