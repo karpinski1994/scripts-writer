@@ -335,6 +335,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
       );
     }
     case "writer": {
+      console.log("[DEBUG] writer step:", step);
       return (
         <WriterPanel
           projectId={projectId}

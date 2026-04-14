@@ -33,6 +33,8 @@ export function WriterPanel({
   const running = isRunning["writer"] ?? step.status === "running";
   const streaming = streamingOutput["writer"];
   const data = parseOutput(step);
+  console.log("[DEBUG] WriterPanel step.output_data:", step.output_data);
+  console.log("[DEBUG] WriterPanel parsed data:", data);
 
   if (running) {
     return (
