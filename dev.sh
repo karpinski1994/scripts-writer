@@ -10,7 +10,7 @@ BACKEND_CMD="uv run uvicorn app.main:app --reload"
 FRONTEND_CMD="npm run dev"
 
 BACKEND_PORT=8000
-FRONTEND_PORT=5173
+FRONTEND_PORT=3000
 
 LOG_DIR="/tmp/scripts-writer-logs"
 BACKEND_LOG="$LOG_DIR/backend.log"
