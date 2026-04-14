@@ -128,6 +128,11 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
 
   if (step?.status === "pending" || !step) {
     const showDropzone = activeStepType === "icp" || activeStepType === "hook";
+    
+    if (activeStepType === "subject") {
+      return <SubjectPanel projectId={projectId} />;
+    }
+
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
@@ -214,9 +219,6 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   };
 
   switch (activeStepType) {
-    case "subject": {
-      return <SubjectPanel projectId={projectId} />;
-    }
     case "icp": {
       const data = parseOutput<ICPAgentOutput>(step);
       if (!data) return null;
