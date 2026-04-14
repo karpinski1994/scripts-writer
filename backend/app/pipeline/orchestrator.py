@@ -388,7 +388,7 @@ class PipelineOrchestrator:
             from app.schemas.agents import CTASuggestion
 
             selected_cta = self._extract_selected(step_map, StepType.cta, CTASuggestion)
-            logger.debug(f"[ORCHESTRATOR] Selected CTA: {selected_cta.cta_text if selected_cta else 'None'}")
+            logger.debug(f"[ORCHESTRATOR] Selected CTA: {selected_cta.text if selected_cta else 'None'}")
 
             logger.info(f"[ORCHESTRATOR] Building Writer agent input")
             agent = WriterAgent()
