@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -22,7 +23,7 @@ from app.db.models import PipelineStep, Project, ScriptVersion
 from app.llm.cache import LLMCache
 from app.llm.provider_factory import ProviderFactory
 from app.pipeline.errors import AgentExecutionError
-from app.pipeline.state import STEP_ORDER, StepStatus, StepType, validate_step_ready, validate_transition
+from app.pipeline.state import STEP_ORDER, StepStatus, StepType, has_retention, validate_step_ready, validate_transition
 from app.schemas.agents import (
     CTAAgentInput,
     HookAgentInput,
@@ -62,6 +63,13 @@ class PipelineOrchestrator:
         step = await self._get_or_create_step(project_id, step_type)
         logger.debug(f"[ORCHESTRATOR] Current step status: {step.status}")
 
+        if step_type == StepType.retention and not has_retention(project.target_format):
+            logger.info(f"[ORCHESTRATOR] Skipping retention step for non-video format: {project.target_format}")
+            step.status = StepStatus.completed.value
+            step.completed_at = datetime.now(UTC).replace(tzinfo=None)
+            await self.db.commit()
+            return step
+
         completed_types = await self._get_completed_step_types(project_id)
         logger.debug(f"[ORCHESTRATOR] Completed steps: {[s.value for s in completed_types]}")
         validate_step_ready(step_type, completed_types, project.target_format)
@@ -77,7 +85,6 @@ class PipelineOrchestrator:
 
         validate_transition(step.step_type, StepStatus(step.status), StepStatus.running)
         step.status = StepStatus.running.value
-        from datetime import UTC, datetime
 
         step.started_at = datetime.now(UTC).replace(tzinfo=None)
         step.llm_provider = "default"
@@ -236,7 +243,7 @@ class PipelineOrchestrator:
         playbooks_base = Path("/Users/karpinski94/projects/scripts-writer/documents/playbooks")
 
         if step_type == StepType.icp:
-            logger.info(f"[ORCHESTRATOR] Building ICP agent input")
+            logger.info("[ORCHESTRATOR] Building ICP agent input")
             raw_notes = project.raw_notes or ""
             logger.debug(f"[ORCHESTRATOR] ICP raw_notes length: {len(raw_notes)}")
 
@@ -285,7 +292,7 @@ class PipelineOrchestrator:
         logger.debug(f"[ORCHESTRATOR] Extracted ICP: {type(icp).__name__ if icp else 'None'}")
 
         if step_type == StepType.hook:
-            logger.info(f"[ORCHESTRATOR] Building Hook agent input")
+            logger.info("[ORCHESTRATOR] Building Hook agent input")
             hook_context = ""
 
             project_hook_dir = docs_base / "hooks"
@@ -319,7 +326,7 @@ class PipelineOrchestrator:
         logger.debug(f"[ORCHESTRATOR] Selected hook: {selected_hook.text[:50] if selected_hook else 'None'}...")
 
         if step_type == StepType.narrative:
-            logger.info(f"[ORCHESTRATOR] Building Narrative agent input")
+            logger.info("[ORCHESTRATOR] Building Narrative agent input")
             narrative_context = ""
 
             project_narrative_dir = docs_base / "narratives"
@@ -357,7 +364,7 @@ class PipelineOrchestrator:
         )
 
         if step_type == StepType.retention:
-            logger.info(f"[ORCHESTRATOR] Building Retention agent input")
+            logger.info("[ORCHESTRATOR] Building Retention agent input")
             retention_context = ""
 
             project_retention_dir = docs_base / "retention"
@@ -387,7 +394,7 @@ class PipelineOrchestrator:
                 content_goal=project.content_goal,
                 piragi_context=retention_context or piragi_context,
             )
-            logger.info(f"[ORCHESTRATOR] Retention input built")
+            logger.info("[ORCHESTRATOR] Retention input built")
             return agent, input_data
 
         selected_retention = self._extract_selected(step_map, StepType.retention, RetentionTechnique)
@@ -399,7 +406,7 @@ class PipelineOrchestrator:
             )
 
         if step_type == StepType.cta:
-            logger.info(f"[ORCHESTRATOR] Building CTA agent input")
+            logger.info("[ORCHESTRATOR] Building CTA agent input")
             agent = CTAAgent()
             input_data = CTAAgentInput(
                 icp=icp,
@@ -409,7 +416,7 @@ class PipelineOrchestrator:
                 cta_purpose=project.cta_purpose,
                 piragi_context=piragi_context,
             )
-            logger.info(f"[ORCHESTRATOR] CTA input built")
+            logger.info("[ORCHESTRATOR] CTA input built")
             return agent, input_data
 
         if step_type == StepType.writer:
@@ -418,7 +425,7 @@ class PipelineOrchestrator:
             selected_cta = self._extract_selected(step_map, StepType.cta, CTASuggestion)
             logger.debug(f"[ORCHESTRATOR] Selected CTA: {selected_cta.text if selected_cta else 'None'}")
 
-            logger.info(f"[ORCHESTRATOR] Building Writer agent input")
+            logger.info("[ORCHESTRATOR] Building Writer agent input")
             agent = WriterAgent()
             input_data = WriterAgentInput(
                 icp=icp,
@@ -697,8 +704,9 @@ class PipelineOrchestrator:
             select(ScriptVersion)
             .where(ScriptVersion.project_id == project_id)
             .order_by(ScriptVersion.version_number.desc())
+            .limit(1)
         )
-        latest = existing.scalar_one_or_none()
+        latest = existing.scalars().first()
         version_number = (latest.version_number + 1) if latest else 1
 
         version = ScriptVersion(

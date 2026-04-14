@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import PipelineStep, Project
-from app.pipeline.state import STEP_ORDER, StepStatus, StepType
+from app.pipeline.state import STEP_ORDER, StepStatus, StepType, has_retention
 from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest, SubjectUpdateRequest
 
 logger = logging.getLogger(__name__)
@@ -47,15 +47,17 @@ class ProjectService:
     async def update_subject(self, project_id: str, data: SubjectUpdateRequest) -> Project:
         logger.info(f"[PROJECT-SERVICE] Updating subject for project: {project_id}")
         logger.debug(
-            f"[PROJECT-SERVICE] Subject update data: topic={data.topic[:50]}..., target_format={data.target_format}, content_goal={data.content_goal}"
+            f"[PROJECT-SERVICE] Subject update - format: {data.target_format}, "
+            f"content_goal: {data.content_goal}, topic: {data.topic[:50]}..."
         )
 
         project = await self.get_by_id(project_id)
+        old_format = project.target_format
         project.topic = data.topic
         project.target_format = data.target_format
         project.content_goal = data.content_goal
         project.raw_notes = data.raw_notes
-        logger.debug(f"[PROJECT-SERVICE] Project fields updated")
+        logger.debug("[PROJECT-SERVICE] Project fields updated")
 
         subject_step = await self.db.execute(
             select(PipelineStep).where(
@@ -67,7 +69,24 @@ class ProjectService:
         if step:
             step.status = StepStatus.completed.value
             step.completed_at = datetime.now(UTC).replace(tzinfo=None)
-            logger.debug(f"[PROJECT-SERVICE] Subject step marked as completed")
+            logger.debug("[PROJECT-SERVICE] Subject step marked as completed")
+
+        if old_format and not has_retention(old_format) and has_retention(data.target_format):
+            logger.debug("[PROJECT-SERVICE] Format changed from non-video to video, will run retention")
+        elif old_format and has_retention(old_format) and not has_retention(data.target_format):
+            result = await self.db.execute(
+                select(PipelineStep).where(
+                    PipelineStep.project_id == project_id,
+                    PipelineStep.step_type == StepType.retention.value,
+                )
+            )
+            retention_step = result.scalars().first()
+            if retention_step:
+                retention_step.status = StepStatus.completed.value
+                retention_step.completed_at = datetime.now(UTC).replace(tzinfo=None)
+                retention_step.output_data = None
+                retention_step.selected_option = None
+                logger.debug("[PROJECT-SERVICE] Retention step auto-completed for non-video format")
 
         await self.db.commit()
         await self.db.refresh(project)

@@ -85,7 +85,7 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
 
   const showRetention = targetFormat && new Set(["short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"]).has(targetFormat);
   const [rerunConfirm, setRerunConfirm] = useState<string | null>(null);
-  
+
   const { data: project } = useQuery<ProjectDetail>({
     queryKey: ["project", projectId],
     queryFn: () => api.get(`/api/v1/projects/${projectId}`),
@@ -139,32 +139,24 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
   }
 
   if (step?.status === "pending" || !step) {
-    const showDropzone = activeStepType === "icp" || activeStepType === "hook";
-    
     if (activeStepType === "subject") {
       return <SubjectPanel projectId={projectId} />;
     }
 
+    if (["factcheck", "readability", "copyright", "policy"].includes(activeStepType)) {
+      return (
+        <AnalysisPanelWrapper
+          projectId={projectId}
+          activeTab={activeStepType as AgentType}
+          steps={steps}
+        />
+      );
+    }
+
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
-          <p className="text-lg font-medium">{STEP_LABELS[activeStepType]}</p>
-          {showDropzone && (
-            <StepDocumentDropzone projectId={projectId} stepType={activeStepType} className="w-full max-w-md mb-4" />
-          )}
-          <p className="text-sm text-muted-foreground">This step hasn&apos;t been run yet.</p>
-          <Button
-            onClick={async () => {
-              try {
-                await api.post(`/api/v1/projects/${projectId}/pipeline/run/${activeStepType}`, {});
-              } catch {
-                // error handled by query invalidation
-              }
-              queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
-            }}
-          >
-            Run Agent
-          </Button>
+        <CardContent className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Waiting for previous steps...</p>
         </CardContent>
       </Card>
     );
@@ -229,12 +221,12 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
   const selectOption = async (selected: unknown) => {
     console.log(`[AGENT-PANEL] Selecting option for step: ${activeStepType}, stepId: ${step?.id}`);
     console.log(`[AGENT-PANEL] Selected data:`, selected);
-    
+
     await api.patch(`/api/v1/projects/${projectId}/pipeline/${step.id}`, {
       selected_option: selected,
     });
     console.log(`[AGENT-PANEL] Option selected successfully`);
-    
+
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
     const STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
     const currentIdx = STEP_ORDER.indexOf(activeStepType || "");
