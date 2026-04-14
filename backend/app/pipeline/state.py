@@ -34,6 +34,10 @@ STEP_ORDER: list[StepType] = [
     StepType.cta,
     StepType.writer,
     StepType.analysis,
+    StepType.factcheck,
+    StepType.readability,
+    StepType.copyright,
+    StepType.policy,
 ]
 
 TRANSITIONS: dict[StepStatus, list[StepStatus]] = {

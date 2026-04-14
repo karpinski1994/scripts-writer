@@ -106,10 +106,10 @@ class ReadabilityAgent(BaseAgent[ReadabilityAgentInput, ReadabilityAgentOutput])
 
         try:
             data = json.loads(raw)
-            logger.debug(f"[READABILITY-AGENT] Parsed JSON successfully")
+            logger.debug("[READABILITY-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
             logger.warning("[READABILITY-AGENT] Invalid JSON response, attempting to extract JSON")
-            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            match = re.search(r"\[[\s\S]*\]", raw)
             if match:
                 data = json.loads(match.group())
             else:
