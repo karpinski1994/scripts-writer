@@ -5,12 +5,19 @@ from pydantic import BaseModel, Field
 
 
 class TargetFormat(StrEnum):
+    Short_Video = "Short-form Video"
+    Long_Video = "Long-form Video"
     VSL = "VSL"
-    YouTube = "YouTube"
-    Tutorial = "Tutorial"
-    Facebook = "Facebook"
-    LinkedIn = "LinkedIn"
-    Blog = "Blog"
+    Blog_Post = "Blog Post"
+    LinkedIn_Post = "LinkedIn Post"
+    Facebook_Post = "Facebook Post"
+
+    @classmethod
+    def from_label(cls, label: str) -> "TargetFormat":
+        for f in cls:
+            if f.value == label:
+                return f
+        return cls.VSL
 
 
 class ContentGoal(StrEnum):
@@ -25,10 +32,10 @@ class ProjectCreateRequest(BaseModel):
 
 
 class SubjectUpdateRequest(BaseModel):
-    topic: str = Field(min_length=1, max_length=200)
-    target_format: TargetFormat
-    content_goal: ContentGoal | None = None
-    raw_notes: str = Field(min_length=1, max_length=10000)
+    topic: str = Field(default="", max_length=500)
+    target_format: str
+    content_goal: str | None = None
+    raw_notes: str = Field(default="", max_length=10000)
 
 
 class ProjectUpdateRequest(BaseModel):

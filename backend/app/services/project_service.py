@@ -39,8 +39,8 @@ class ProjectService:
     async def update_subject(self, project_id: str, data: SubjectUpdateRequest) -> Project:
         project = await self.get_by_id(project_id)
         project.topic = data.topic
-        project.target_format = data.target_format.value
-        project.content_goal = data.content_goal.value if data.content_goal else None
+        project.target_format = data.target_format
+        project.content_goal = data.content_goal
         project.raw_notes = data.raw_notes
 
         subject_step = await self.db.execute(

@@ -46,12 +46,8 @@ class Project(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "target_format IN ('VSL','YouTube','Tutorial','Facebook','LinkedIn','Blog') OR target_format IS NULL",
+            "target_format IS NOT NULL OR target_format IS NULL",
             name="ck_projects_target_format",
-        ),
-        CheckConstraint(
-            "content_goal IN ('Sell','Educate','Entertain','Build Authority') OR content_goal IS NULL",
-            name="ck_projects_content_goal",
         ),
         CheckConstraint(
             "status IN ('draft','in_progress','completed')",

@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react"
+import { useState, useRef, type DragEvent, type ChangeEvent } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod/v4"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { api, ApiError } from "@/lib/api"
 import { useQueryClient } from "@tanstack/react-query"
-import type { TargetFormat, ContentGoal } from "@/types/project"
 import {
   Card,
   CardContent,
@@ -18,25 +17,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, Upload, FileText, X } from "lucide-react"
+import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileTextIcon, MessageCircle, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const TARGET_FORMATS: TargetFormat[] = ["VSL", "YouTube", "Tutorial", "Facebook", "LinkedIn", "Blog"]
-const CONTENT_GOALS: ContentGoal[] = ["Sell", "Educate", "Entertain", "Build Authority"]
+const CONTENT_FORMATS = [
+  { id: "short_video", label: "Short-form Video", sublabel: "TikTok/Reels", icon: Video },
+  { id: "long_video", label: "Long-form Video", sublabel: "YouTube", icon: Globe },
+  { id: "vsl", label: "VSL", sublabel: "Video Sales Letter", icon: FileTextIcon },
+  { id: "blog", label: "Blog Post", sublabel: "Article", icon: FileTextIcon },
+  { id: "linkedin", label: "LinkedIn Post", sublabel: "Professional", icon: MessageCircle },
+  { id: "facebook", label: "Facebook Post", sublabel: "Social", icon: MessageCircle },
+] as const
+
+const ALLOWED_TYPES = [".txt", ".pdf", ".docx", ".md"]
 
 const schema = z.object({
-  topic: z.string().min(1, "Topic is required").max(200),
-  target_format: z.enum(TARGET_FORMATS),
-  content_goal: z.enum(CONTENT_GOALS).optional(),
-  raw_notes: z.string().max(10000),
+  content_format: z.enum(CONTENT_FORMATS.map(f => f.id) as [string, ...string[]]),
+  topic: z.string().max(500),
+  main_goal: z.string().max(200),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -51,6 +50,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [hasFile, setHasFile] = useState(false)
   
   const {
     register,
@@ -61,16 +61,22 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      content_format: undefined,
       topic: "",
-      target_format: undefined,
-      content_goal: undefined,
-      raw_notes: "",
+      main_goal: "",
     },
   })
 
-  const rawNotes = watch("raw_notes")
+  const watchedContentFormat = watch("content_format")
+  const watchedTopic = watch("topic")
 
   const uploadFile = async (file: File) => {
+    const ext = "." + file.name.split(".").pop()?.toLowerCase()
+    if (!ALLOWED_TYPES.includes(ext)) {
+      toast.error("Invalid file type. Use .txt, .pdf, .docx, or .md")
+      return
+    }
+
     setIsUploading(true)
     try {
       const formData = new FormData()
@@ -84,9 +90,11 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       
       if (res.ok) {
         const content = await file.text()
-        setValue("raw_notes", content, { shouldValidate: true })
+        const topicMatch = content.slice(0, 500).replace(/\n/g, " ").trim()
+        setValue("topic", topicMatch, { shouldValidate: true })
         setUploadedFilename(file.name)
-        toast.success(`Loaded content from ${file.name}`)
+        setHasFile(true)
+        toast.success("Brief uploaded! Manual fields are now optional.")
       } else {
         throw new Error("Upload failed")
       }
@@ -101,7 +109,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
     e.preventDefault()
     setIsDragActive(false)
     const file = e.dataTransfer.files[0]
-    if (file && (file.name.endsWith(".txt") || file.name.endsWith(".md"))) {
+    if (file) {
       uploadFile(file)
     }
   }
@@ -125,19 +133,21 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
 
   const clearFile = () => {
     setUploadedFilename(null)
-    setValue("raw_notes", "", { shouldValidate: true })
+    setHasFile(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
   const onSubmit = async (data: FormValues) => {
+    const formatLabel = CONTENT_FORMATS.find(f => f.id === data.content_format)?.label || data.content_format
+    
     try {
       await api.post(`/api/v1/projects/${projectId}/subject`, {
-        topic: data.topic,
-        target_format: data.target_format,
-        content_goal: data.content_goal ?? null,
-        raw_notes: data.raw_notes || "",
+        topic: data.topic || "",
+        target_format: formatLabel,
+        content_goal: data.main_goal || null,
+        raw_notes: watchedTopic || "",
       })
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
       toast.success("Subject saved!")
@@ -152,100 +162,55 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       <CardHeader>
         <CardTitle>Subject</CardTitle>
         <CardDescription>
-          Define the topic, format, and goals for your script. Upload a file with your notes or type them below.
+          Define what your content is about. Upload a brief file or fill in manually.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="topic">Topic</Label>
-            <Input id="topic" {...register("topic")} placeholder="What is the video/post about?" />
-            {errors.topic && (
-              <p className="text-xs text-destructive">{errors.topic.message}</p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Target Format</Label>
-            <Select
-              onValueChange={(v) =>
-                setValue("target_format", v as TargetFormat, {
-                  shouldValidate: true,
-                })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                {TARGET_FORMATS.map((f) => (
-                  <SelectItem key={f} value={f}>
-                    {f}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.target_format && (
-              <p className="text-xs text-destructive">
-                {errors.target_format.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Content Goal</Label>
-            <Select
-              onValueChange={(v) =>
-                setValue("content_goal", v as ContentGoal, {
-                  shouldValidate: true,
-                })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select goal (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {CONTENT_GOALS.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Section 1: The Fast Track - File Upload */}
           <div className="space-y-2">
-            <Label>Notes File</Label>
+            <Label className="text-base font-medium">The Fast Track</Label>
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                "cursor-pointer rounded-lg border-2 border-dashed p-4 transition-colors",
+                "cursor-pointer rounded-xl border-2 border-dashed p-8 transition-all",
                 isDragActive
-                  ? "border-primary bg-accent/50"
-                  : "border-border hover:border-muted-foreground"
+                  ? "border-primary bg-primary/5"
+                  : hasFile
+                    ? "border-green-500 bg-green-500/5"
+                    : "border-border hover:border-muted-foreground hover:bg-muted/50"
               )}
             >
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".txt,.md"
+                accept={ALLOWED_TYPES.join(",")}
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="flex flex-col items-center gap-2 text-center">
+              <div className="flex flex-col items-center gap-3 text-center">
                 {isUploading ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                ) : hasFile ? (
+                  <>
+                    <CheckCircle2 className="h-10 w-10 text-green-500" />
+                    <div>
+                      <p className="font-medium text-green-700">Brief uploaded!</p>
+                      <p className="text-sm text-muted-foreground">Manual fields are now optional</p>
+                    </div>
+                  </>
                 ) : (
-                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <>
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Drop your brief here</p>
+                      <p className="text-sm text-muted-foreground">.txt, .pdf, .docx, .md</p>
+                    </div>
+                  </>
                 )}
-                <p className="text-sm text-muted-foreground">
-                  {isDragActive
-                    ? "Drop file here..."
-                    : "Drag & drop .txt or .md file, or click to browse"}
-                </p>
               </div>
             </div>
 
@@ -267,25 +232,77 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
             )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="raw_notes">Notes</Label>
-            <Textarea 
-              id="raw_notes" 
-              {...register("raw_notes")} 
-              rows={5}
-              placeholder="Describe your content, key points, angles, or paste content from your file..."
-              value={rawNotes}
-              onChange={(e) => setValue("raw_notes", e.target.value)}
-            />
-            {errors.raw_notes && (
-              <p className="text-xs text-destructive">
-                {errors.raw_notes.message}
-              </p>
+          {/* Section 2: Core Setup - Content Format */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">
+              Content Format <span className="text-destructive">*</span>
+            </Label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {CONTENT_FORMATS.map((format) => {
+                const Icon = format.icon
+                const isSelected = watchedContentFormat === format.id
+                return (
+                  <button
+                    key={format.id}
+                    type="button"
+                    onClick={() => setValue("content_format", format.id, { shouldValidate: true })}
+                    className={cn(
+                      "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
+                      isSelected
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-muted-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <Icon className={cn("h-6 w-6", isSelected ? "text-primary" : "text-muted-foreground")} />
+                    <div className="text-center">
+                      <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{format.label}</p>
+                      <p className="text-xs text-muted-foreground">{format.sublabel}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            {errors.content_format && (
+              <p className="text-xs text-destructive">{errors.content_format.message}</p>
             )}
           </div>
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="animate-spin" />}
+          {/* Section 3: The Basics */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-base font-medium">
+                Topic / Core Premise
+                {!hasFile && <span className="text-destructive"> *</span>}
+              </Label>
+              <Textarea
+                {...register("topic")}
+                placeholder="e.g., 5 reasons why email marketing isn't dead in 2024..."
+                rows={3}
+                className={cn(!hasFile && errors.topic && "border-destructive")}
+              />
+              {!hasFile && errors.topic && (
+                <p className="text-xs text-destructive">{errors.topic.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-base font-medium">
+                Main Goal
+                {!hasFile && <span className="text-destructive"> *</span>}
+              </Label>
+              <Input
+                {...register("main_goal")}
+                placeholder="e.g., Encourage readers to contact us for a free consultation"
+                className={cn(!hasFile && errors.main_goal && "border-destructive")}
+              />
+              {!hasFile && errors.main_goal && (
+                <p className="text-xs text-destructive">{errors.main_goal.message}</p>
+              )}
+            </div>
+          </div>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting && <Loader2 className="animate-spin mr-2" />}
             Continue
           </Button>
         </form>
