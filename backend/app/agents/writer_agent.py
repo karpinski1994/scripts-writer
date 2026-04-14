@@ -31,7 +31,9 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
 
     def build_prompt(self, input_data: WriterAgentInput) -> str:
         retention_data = input_data.selected_retention
-        if isinstance(retention_data, list):
+        if retention_data is None:
+            retention_json = "N/A (not applicable for this format)"
+        elif isinstance(retention_data, list):
             retention_json = json.dumps([r.model_dump() for r in retention_data], indent=2)
         else:
             retention_json = retention_data.model_dump_json(indent=2)

@@ -397,7 +397,9 @@ class PipelineOrchestrator:
             logger.info("[ORCHESTRATOR] Retention input built")
             return agent, input_data
 
-        selected_retention = self._extract_selected(step_map, StepType.retention, RetentionTechnique)
+        selected_retention = None
+        if has_retention(project.target_format):
+            selected_retention = self._extract_selected(step_map, StepType.retention, RetentionTechnique)
         if isinstance(selected_retention, list):
             logger.debug(f"[ORCHESTRATOR] Selected retention: {len(selected_retention)} techniques")
         else:

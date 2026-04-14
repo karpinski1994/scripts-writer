@@ -91,7 +91,7 @@ class WriterAgentInput(BaseModel):
     icp: ICPProfile
     selected_hook: HookSuggestion
     selected_narrative: NarrativePattern
-    selected_retention: RetentionTechnique | list[RetentionTechnique]
+    selected_retention: RetentionTechnique | list[RetentionTechnique] | None = None
     selected_cta: CTASuggestion
     topic: str
     target_format: str
