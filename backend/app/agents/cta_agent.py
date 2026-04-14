@@ -63,7 +63,7 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
-            logger.warning(f"Invalid JSON from LLM, text response - attempting to parse as text")
+            logger.warning("Invalid JSON from LLM, text response - attempting to parse as text")
             ctas = self._parse_text_response(raw)
             if ctas:
                 data = {"ctas": ctas, "confidence": 0.7}

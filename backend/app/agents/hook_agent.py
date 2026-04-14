@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from pydantic_ai import Agent
 
@@ -58,12 +59,17 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
             if raw.startswith("json"):
                 raw = raw[4:]
             raw = raw.strip()
-        if not raw.startswith("{") and not raw.startswith("["):
-            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         try:
             data = json.loads(raw)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"LLM response is not valid JSON: {e}")
+        except json.JSONDecodeError:
+            logger.warning("HookAgent: Invalid JSON response, attempting to extract JSON")
+            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            if match:
+                data = json.loads(match.group())
+            else:
+                raise ValueError(f"LLM response is not valid JSON: {raw[:100]}...")
+        if not raw.startswith("{") and not raw.startswith("["):
+            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         # Add default confidence if missing
         if "confidence" not in data:
             data["confidence"] = 0.8

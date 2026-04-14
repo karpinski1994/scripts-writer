@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from app.agents.base import BaseAgent
 from app.llm.provider_factory import ProviderFactory
@@ -38,5 +39,13 @@ class CopyrightAgent(BaseAgent[CopyrightAgentInput, CopyrightAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> CopyrightAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            logger.warning("CopyrightAgent: Invalid JSON response, attempting to extract JSON")
+            match = re.search(r"\[.*\]", raw, re.DOTALL)
+            if match:
+                data = json.loads(match.group())
+            else:
+                raise
         return CopyrightAgentOutput.model_validate(data)

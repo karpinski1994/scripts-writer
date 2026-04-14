@@ -81,7 +81,7 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
             content = data.get("script", {}).get("content", raw) or raw
             word_count = data.get("script", {}).get("word_count", word_count) or word_count
         except json.JSONDecodeError:
-            logger.warning(f"Invalid JSON from LLM, using text response directly")
+            logger.warning("Invalid JSON from LLM, using text response directly")
 
         try:
             return WriterAgentOutput(

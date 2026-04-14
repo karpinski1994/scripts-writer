@@ -59,7 +59,7 @@ class RetentionAgent(BaseAgent[RetentionAgentInput, RetentionAgentOutput]):
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
-            logger.warning(f"Invalid JSON from LLM, text response - attempting to parse as text")
+            logger.warning("Invalid JSON from LLM, text response - attempting to parse as text")
             techniques = self._parse_text_response(raw)
             if techniques:
                 data = {"techniques": techniques, "confidence": 0.7}
@@ -83,7 +83,6 @@ class RetentionAgent(BaseAgent[RetentionAgentInput, RetentionAgentOutput]):
         techniques = []
         lines = text.split("\n")
         current_section = ""
-        skip_section = False
 
         cta_keywords = [
             "call to action",
