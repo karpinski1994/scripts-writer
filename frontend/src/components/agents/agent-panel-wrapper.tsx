@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -85,12 +85,63 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
 
   const showRetention = targetFormat && new Set(["short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"]).has(targetFormat);
   const [rerunConfirm, setRerunConfirm] = useState<string | null>(null);
+  // Tracks which step we already sent an auto-run request for (prevents duplicates)
+  const autoRunTriggeredRef = useRef<string | null>(null);
+  const prevActiveStepRef = useRef<string | null>(null);
 
   const { data: project } = useQuery<ProjectDetail>({
     queryKey: ["project", projectId],
     queryFn: () => api.get(`/api/v1/projects/${projectId}`),
     enabled: !!projectId,
   });
+
+  const step = activeStepType ? steps.find((s) => s.step_type === activeStepType) : undefined;
+
+  const getDependencies = (stepType: string): string[] => {
+    const deps = DEPENDENCY_MAP[stepType] ?? [];
+    if (!showRetention && (stepType === "cta" || stepType === "writer")) {
+      return deps.filter((d) => d !== "retention");
+    }
+    return deps;
+  };
+
+  const ready = activeStepType ? isStepReady(activeStepType, steps, getDependencies(activeStepType)) : false;
+  const running = activeStepType ? (isRunning[activeStepType] ?? step?.status === "running") : false;
+
+  // Auto-run agent steps that are pending and have all dependencies met
+  const AUTO_RUN_STEPS = ["hook", "narrative", "retention", "cta"];
+  const isPending = step?.status === "pending" || !step;
+  const shouldAutoRun =
+    !!activeStepType &&
+    AUTO_RUN_STEPS.includes(activeStepType) &&
+    ready &&
+    !running &&
+    isPending;
+
+  // Reset the auto-run guard when switching to a different step
+  if (activeStepType !== prevActiveStepRef.current) {
+    prevActiveStepRef.current = activeStepType;
+    autoRunTriggeredRef.current = null;
+  }
+
+  useEffect(() => {
+    if (!shouldAutoRun || !activeStepType) return;
+    // Prevent duplicate triggers for the same step
+    if (autoRunTriggeredRef.current === activeStepType) return;
+    autoRunTriggeredRef.current = activeStepType;
+
+    console.log(`[AGENT-PANEL] Auto-running agent for pending step: ${activeStepType}`);
+    api
+      .post(`/api/v1/projects/${projectId}/pipeline/run/${activeStepType}`, {})
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+      })
+      .catch((err) => {
+        console.error(`[AGENT-PANEL] Auto-run failed for ${activeStepType}:`, err);
+        autoRunTriggeredRef.current = null; // Allow retry on failure
+        queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+      });
+  }, [shouldAutoRun, activeStepType, projectId]);
 
   if (!activeStepType) {
     return (
@@ -101,19 +152,6 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
       </Card>
     );
   }
-
-  const step = steps.find((s) => s.step_type === activeStepType);
-
-  const getDependencies = (stepType: string): string[] => {
-    const deps = DEPENDENCY_MAP[stepType] ?? [];
-    if (!showRetention && (stepType === "cta" || stepType === "writer")) {
-      return deps.filter((d) => d !== "retention");
-    }
-    return deps;
-  };
-
-  const ready = isStepReady(activeStepType, steps, getDependencies(activeStepType));
-  const running = isRunning[activeStepType] ?? step?.status === "running";
 
   if (!ready && step?.status !== "completed" && step?.status !== "running" && step?.status !== "failed") {
     const deps = getDependencies(activeStepType);
@@ -150,6 +188,18 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
           activeTab={activeStepType as AgentType}
           steps={steps}
         />
+      );
+    }
+
+    // For auto-run steps, show loading while the agent is being triggered
+    if (AUTO_RUN_STEPS.includes(activeStepType) && ready) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
+            <Loader2 className="size-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Starting {STEP_LABELS[activeStepType]} agent...</p>
+          </CardContent>
+        </Card>
       );
     }
 
@@ -228,10 +278,11 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
     console.log(`[AGENT-PANEL] Option selected successfully`);
 
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
-    const STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
-    const currentIdx = STEP_ORDER.indexOf(activeStepType || "");
-    if (currentIdx >= 0 && currentIdx < STEP_ORDER.length - 1) {
-      const nextStep = STEP_ORDER[currentIdx + 1];
+    const FULL_STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
+    const stepOrder = showRetention ? FULL_STEP_ORDER : FULL_STEP_ORDER.filter((s) => s !== "retention");
+    const currentIdx = stepOrder.indexOf(activeStepType || "");
+    if (currentIdx >= 0 && currentIdx < stepOrder.length - 1) {
+      const nextStep = stepOrder[currentIdx + 1];
       console.log(`[AGENT-PANEL] Auto-advancing to next step: ${nextStep}`);
       usePipelineStore.getState().setActiveStepType(nextStep);
     }
