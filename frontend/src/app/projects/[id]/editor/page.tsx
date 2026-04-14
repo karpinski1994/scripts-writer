@@ -16,7 +16,7 @@ import { VersionDropdown } from "@/components/editor/version-dropdown";
 export default function EditorPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const { setCurrentVersionId, setVersionNumber, setContent, markClean, reset } =
+  const { setCurrentVersionId, setVersionNumber, setContent, markClean, reset, save } =
     useEditorStore();
 
   const { data: project, isLoading: projectLoading } = useQuery<ProjectDetail>({
@@ -45,8 +45,14 @@ export default function EditorPage() {
   }, [versions, setCurrentVersionId, setVersionNumber, setContent, markClean]);
 
   useEffect(() => {
-    return () => reset();
-  }, [reset]);
+    return () => {
+      const store = useEditorStore.getState();
+      if (store.isDirty) {
+        save();
+      }
+      reset();
+    };
+  }, [reset, save]);
 
   if (projectLoading || versionsLoading) {
     return (

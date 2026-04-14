@@ -116,6 +116,34 @@ class PipelineOrchestrator:
             step_map = await self._get_step_map(project_id)
             agent, input_data = await self._build_agent_inputs(project, step_type, step_map)
 
+            if agent is None and isinstance(input_data, dict):
+                step.output_data = json.dumps(input_data)
+                step.status = StepStatus.completed.value
+                step.completed_at = datetime.now(UTC).replace(tzinfo=None)
+                step.duration_ms = int((time.time() - start_ms) * 1000)
+
+                logger.info(
+                    "agent_step_completed",
+                    agent_name=step_type.value,
+                    step_type=step_type.value,
+                    project_id=project_id,
+                    duration_ms=step.duration_ms,
+                    status="completed",
+                )
+
+                if self.ws_manager:
+                    await self.ws_manager.broadcast(
+                        project_id,
+                        {
+                            "event": "agent_complete",
+                            "step_type": step_type.value,
+                            "output_data": input_data,
+                        },
+                    )
+                await self.db.commit()
+                await self.db.refresh(step)
+                return step
+
             logger.debug(f"[ORCHESTRATOR] Agent type: {type(agent).__name__}")
             logger.debug(f"[ORCHESTRATOR] Input data keys: {list(input_data.model_dump().keys())}")
 

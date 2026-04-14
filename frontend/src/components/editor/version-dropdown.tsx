@@ -17,7 +17,7 @@ interface VersionDropdownProps {
 }
 
 export function VersionDropdown({ projectId }: VersionDropdownProps) {
-  const { currentVersionId, versionNumber, cancelPendingSave, setCurrentVersionId, setVersionNumber, setContent, markClean } =
+  const { currentVersionId, versionNumber, isDirty, save, setCurrentVersionId, setVersionNumber, setContent, markClean } =
     useEditorStore();
 
   const { data: versions } = useQuery<ScriptVersion[]>({
@@ -26,11 +26,13 @@ export function VersionDropdown({ projectId }: VersionDropdownProps) {
     enabled: !!projectId,
   });
 
-  const handleVersionChange = (value: string | null) => {
+  const handleVersionChange = async (value: string | null) => {
     if (!value) return;
     const selected = versions?.find((v) => v.id === value);
     if (!selected) return;
-    cancelPendingSave();
+    if (isDirty) {
+      await save();
+    }
     setCurrentVersionId(selected.id);
     setVersionNumber(selected.version_number);
     setContent(selected.content);

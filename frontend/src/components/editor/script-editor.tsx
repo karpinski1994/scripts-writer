@@ -20,6 +20,8 @@ export function ScriptEditor({ className }: ScriptEditorProps) {
   const content = useEditorStore((s) => s.content);
   const isSaving = useEditorStore((s) => s.isSaving);
   const isDirty = useEditorStore((s) => s.isDirty);
+  const startAutoSave = useEditorStore((s) => s.startAutoSave);
+  const stopAutoSave = useEditorStore((s) => s.stopAutoSave);
 
   const editor = useEditor({
     extensions: [
@@ -50,6 +52,23 @@ export function ScriptEditor({ className }: ScriptEditorProps) {
     if (!editor) return;
     editor.setEditable(!isSaving);
   }, [editor, isSaving]);
+
+  useEffect(() => {
+    startAutoSave();
+    return () => stopAutoSave();
+  }, [startAutoSave, stopAutoSave]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const store = useEditorStore.getState();
+      if (store.isDirty && store.currentVersionId) {
+        store.save();
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   const wordCount = editor ? editor.getText().split(/\s+/).filter(Boolean).length : 0;
 

@@ -11,13 +11,18 @@ import {
   ListOrdered,
   Undo,
   Redo,
+  Save,
+  Loader2,
 } from "lucide-react";
+import { useEditorStore } from "@/stores/editor-store";
 
 interface ToolbarProps {
   editor: Editor | null;
 }
 
 export function Toolbar({ editor }: ToolbarProps) {
+  const { isDirty, isSaving, save } = useEditorStore();
+
   if (!editor) return null;
 
   return (
@@ -77,6 +82,21 @@ export function Toolbar({ editor }: ToolbarProps) {
         icon={<Redo className="size-4" />}
         tooltip="Redo"
       />
+      <div className="flex-1" />
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => save()}
+        disabled={!isDirty || isSaving}
+        className="gap-1.5"
+      >
+        {isSaving ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Save className="size-4" />
+        )}
+        {isSaving ? "Saving..." : "Save"}
+      </Button>
     </div>
   );
 }
