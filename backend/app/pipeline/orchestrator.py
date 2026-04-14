@@ -254,7 +254,7 @@ class PipelineOrchestrator:
             return agent, input_data
 
         icp = self._extract_icp(step_map)
-        logger.debug(f"[ORCHESTRATOR] Extracted ICP: {icp.profile_name if icp else 'None'}")
+        logger.debug(f"[ORCHESTRATOR] Extracted ICP: {type(icp).__name__ if icp else 'None'}")
 
         if step_type == StepType.hook:
             logger.info(f"[ORCHESTRATOR] Building Hook agent input")
