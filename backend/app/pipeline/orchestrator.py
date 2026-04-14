@@ -488,7 +488,8 @@ class PipelineOrchestrator:
                 copyright=results.get("copyright", {}),
                 policy=results.get("policy", {}),
             )
-            return output.model_dump()
+            logger.info(f"[ORCHESTRATOR] Analysis completed for project: {project.id}")
+            return None, output.model_dump()
 
         raise ValueError(f"No agent configured for step type: {step_type}")
 
