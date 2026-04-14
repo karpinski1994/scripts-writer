@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod/v4"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { api, ApiError } from "@/lib/api"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Card,
   CardContent,
@@ -30,6 +30,15 @@ const CONTENT_FORMATS = [
   { id: "facebook", label: "Facebook Post", sublabel: "Social", icon: MessageCircle, hasRetention: false },
 ] as const
 
+const TARGET_FORMAT_TO_ID: Record<string, string> = {
+  "Short-form Video": "short_video",
+  "Long-form Video": "long_video",
+  "VSL": "vsl",
+  "Blog Post": "blog",
+  "LinkedIn Post": "linkedin",
+  "Facebook Post": "facebook",
+}
+
 const ALLOWED_TYPES = [".txt", ".pdf", ".docx", ".md"]
 
 const schema = z.object({
@@ -51,7 +60,14 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
   const [hasFile, setHasFile] = useState(false)
-  
+  const [hasChanges, setHasChanges] = useState(false)
+
+  const { data: project, isLoading: projectLoading } = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: () => api.get(`/api/v1/projects/${projectId}`),
+    enabled: !!projectId,
+  })
+
   const {
     register,
     handleSubmit,
@@ -69,6 +85,20 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
 
   const watchedContentFormat = watch("content_format")
   const watchedTopic = watch("topic")
+
+  const existingFormatId = project?.target_format ? TARGET_FORMAT_TO_ID[project.target_format] : null
+  const hasInitialized = useRef(false)
+
+  if (project && !hasInitialized.current && existingFormatId) {
+    hasInitialized.current = true
+    setValue("content_format", existingFormatId as typeof CONTENT_FORMATS[number]["id"], { shouldValidate: false })
+    if (project.topic) {
+      setValue("topic", project.topic, { shouldValidate: false })
+    }
+    if (project.content_goal) {
+      setValue("main_goal", project.content_goal, { shouldValidate: false })
+    }
+  }
 
   const uploadFile = async (file: File) => {
     const ext = "." + file.name.split(".").pop()?.toLowerCase()
@@ -172,6 +202,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       })
       console.log("[SUBJECT-PANEL] Subject saved successfully, invalidating pipeline queries")
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] })
       toast.success("Subject saved!")
     } catch (err) {
       console.error("[SUBJECT-PANEL] Failed to save subject:", err)

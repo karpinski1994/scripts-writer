@@ -195,6 +195,10 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
     );
   }
 
+  if (activeStepType === "subject") {
+    return <SubjectPanel projectId={projectId} />;
+  }
+
   if (step.status !== "completed" || !step.output_data) {
     return null;
   }
