@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+from pathlib import Path
 from uuid import uuid4
 
 import structlog
@@ -17,9 +18,7 @@ from app.agents.policy_agent import PolicyAgent
 from app.agents.readability_agent import ReadabilityAgent
 from app.agents.retention_agent import RetentionAgent
 from app.agents.writer_agent import WriterAgent
-from app.config import get_settings
 from app.db.models import PipelineStep, Project, ScriptVersion
-from app.integrations.notebooklm import NotebookLMClientWrapper
 from app.llm.cache import LLMCache
 from app.llm.provider_factory import ProviderFactory
 from app.pipeline.errors import AgentExecutionError
@@ -41,7 +40,6 @@ from app.schemas.analysis import (
     ReadabilityAgentInput,
 )
 from app.schemas.icp import ICPAgentInput, ICPProfile
-from app.services.notebooklm_service import NotebookLMService
 from app.ws.handlers import ConnectionManager
 
 logger = structlog.get_logger()
@@ -165,9 +163,22 @@ class PipelineOrchestrator:
         piragi_context = await self._resolve_rag_context(project, step_type)
 
         if step_type == StepType.icp:
+            raw_notes = project.raw_notes or ""
+            icp_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/icp")
+            if icp_docs_dir.exists():
+                files = list(icp_docs_dir.glob("*"))
+                if files:
+                    doc_content = []
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            content = f.read_text()
+                            doc_content.append(content)
+                    if doc_content:
+                        raw_notes = f"Document content from files:\n{doc_content[0]}\n\nOriginal notes: {raw_notes}"
+
             agent = ICPAgent()
             input_data = ICPAgentInput(
-                raw_notes=project.raw_notes,
+                raw_notes=raw_notes,
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
@@ -178,39 +189,72 @@ class PipelineOrchestrator:
         icp = self._extract_icp(step_map)
 
         if step_type == StepType.hook:
+            hook_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/hooks")
+            hook_context = ""
+            if hook_docs_dir.exists():
+                files = list(hook_docs_dir.glob("*"))
+                if files:
+                    doc_parts = []
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            doc_parts.append(f.read_text())
+                    if doc_parts:
+                        hook_context = f"Reference material:\n{doc_parts[0]}\n\n"
             agent = HookAgent()
             input_data = HookAgentInput(
                 icp=icp,
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
-                piragi_context=piragi_context,
+                piragi_context=hook_context or piragi_context,
             )
             return agent, input_data
 
         selected_hook = self._extract_selected(step_map, StepType.hook, HookSuggestion)
 
         if step_type == StepType.narrative:
+            narrative_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/narrative_patterns")
+            narrative_context = ""
+            if narrative_docs_dir.exists():
+                files = list(narrative_docs_dir.glob("*"))
+                if files:
+                    doc_parts = []
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            doc_parts.append(f.read_text())
+                    if doc_parts:
+                        narrative_context = f"Reference material:\n{doc_parts[0]}\n\n"
             agent = NarrativeAgent()
             input_data = NarrativeAgentInput(
                 icp=icp,
                 selected_hook=selected_hook,
                 topic=project.topic,
                 target_format=project.target_format,
-                piragi_context=piragi_context,
+                piragi_context=narrative_context or piragi_context,
             )
             return agent, input_data
 
         selected_narrative = self._extract_selected(step_map, StepType.narrative, NarrativePattern)
 
         if step_type == StepType.retention:
+            retention_docs_dir = Path("/Users/karpinski94/projects/scripts-writer/documents/retention_tactics")
+            retention_context = ""
+            if retention_docs_dir.exists():
+                files = list(retention_docs_dir.glob("*"))
+                if files:
+                    doc_parts = []
+                    for f in files[:1]:
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
+                            doc_parts.append(f.read_text())
+                    if doc_parts:
+                        retention_context = f"Retention tactics reference:\n{doc_parts[0]}\n\n"
             agent = RetentionAgent()
             input_data = RetentionAgentInput(
                 icp=icp,
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 target_format=project.target_format,
-                piragi_context=piragi_context,
+                piragi_context=retention_context or piragi_context,
             )
             return agent, input_data
 
@@ -342,7 +386,12 @@ class PipelineOrchestrator:
         if step is None:
             raise ValueError(f"Step {step_type.value} not found in step map")
         if step.selected_option:
-            return model_cls.model_validate(json.loads(step.selected_option))
+            data = json.loads(step.selected_option)
+            if isinstance(data, list):
+                if step_type == StepType.retention:
+                    return [model_cls.model_validate(item) for item in data]
+                return model_cls.model_validate(data[0]) if data else None
+            return model_cls.model_validate(data)
         if step.output_data:
             data = json.loads(step.output_data)
             key_map = {
@@ -353,6 +402,8 @@ class PipelineOrchestrator:
             }
             items = data.get(key_map.get(step_type, ""), [])
             if items:
+                if step_type == StepType.retention:
+                    return [model_cls.model_validate(item) for item in items]
                 return model_cls.model_validate(items[0])
         raise ValueError(f"No selected option or output data for step {step_type.value}")
 

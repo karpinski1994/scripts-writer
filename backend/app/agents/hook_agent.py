@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert copywriter specializing in attention-grabbing hooks for video and marketing content. "
-    "Given an Ideal Customer Profile (ICP), topic, format, and goal, generate multiple hook options that "
-    "would immediately capture the target audience's attention. Each hook should be tailored to the ICP's "
-    "pain points, desires, and communication style. Vary the hook types (question, shock, story, statistic, etc.)."
+    "Given an Ideal Customer Profile (ICP), topic, format, and goal, generate multiple hook options in JSON format. "
+    "Output ONLY valid JSON with these exact fields: hooks[hook_type, text, reasoning], confidence (0.0-1.0). "
+    "Vary the hook types (question, shock, story, statistic, etc.)."
 )
 
 
@@ -49,5 +49,22 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> HookAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
+        if not raw or not raw.strip():
+            raise ValueError("LLM returned empty response")
+        raw = raw.strip()
+        # Strip markdown code blocks
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+        if not raw.startswith("{") and not raw.startswith("["):
+            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"LLM response is not valid JSON: {e}")
+        # Add default confidence if missing
+        if "confidence" not in data:
+            data["confidence"] = 0.8
         return HookAgentOutput.model_validate(data)

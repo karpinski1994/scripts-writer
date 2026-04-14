@@ -30,11 +30,17 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
         return StepType.writer.value
 
     def build_prompt(self, input_data: WriterAgentInput) -> str:
+        retention_data = input_data.selected_retention
+        if isinstance(retention_data, list):
+            retention_json = json.dumps([r.model_dump() for r in retention_data], indent=2)
+        else:
+            retention_json = retention_data.model_dump_json(indent=2)
+
         parts = [
             f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
             f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
             f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
-            f"Selected Retention Technique:\n{input_data.selected_retention.model_dump_json(indent=2)}",
+            f"Selected Retention Technique(s):\n{retention_json}",
             f"Selected CTA:\n{input_data.selected_cta.model_dump_json(indent=2)}",
             f"Topic: {input_data.topic}",
             f"Target Format: {input_data.target_format}",

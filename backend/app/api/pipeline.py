@@ -31,3 +31,15 @@ async def update_step(
 ):
     service = PipelineService(db, ws_manager=connection_manager)
     return await service.update_step(project_id, step_id, body)
+
+
+@router.post("/cancel", status_code=204)
+async def cancel_pipeline(project_id: str, db: AsyncSession = Depends(get_db)):
+    service = PipelineService(db, ws_manager=connection_manager)
+    await service.cancel_all_steps(project_id)
+
+
+@router.post("/reset-errors", status_code=204)
+async def reset_errors(project_id: str, db: AsyncSession = Depends(get_db)):
+    service = PipelineService(db, ws_manager=connection_manager)
+    await service.reset_failed_steps(project_id)

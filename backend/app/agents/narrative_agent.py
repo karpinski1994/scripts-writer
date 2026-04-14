@@ -10,12 +10,10 @@ from app.schemas.agents import NarrativeAgentInput, NarrativeAgentOutput
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = (
-    "You are an expert storytelling consultant specializing in narrative structures for video and marketing content. "
-    "Given an ICP, a selected hook, topic, and format, generate narrative pattern options that will carry the "
-    "audience from the hook through to the conclusion. Each pattern should outline the key beats and flow. "
-    "Consider the ICP's values, objections, and desired outcomes when structuring the narrative."
-)
+SYSTEM_PROMPT = """You are an expert storytelling consultant.
+Given ICP, hook, topic, format, generate narrative patterns in JSON.
+Output ONLY valid JSON: patterns[pattern_name, description, structure], confidence(0.0-1.0).
+Each pattern outlines key beats and flow."""
 
 
 class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
@@ -47,5 +45,40 @@ class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> NarrativeAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
-        return NarrativeAgentOutput.model_validate(data)
+        if not raw or not raw.strip():
+            raise ValueError("LLM returned empty response")
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+        if not raw.startswith("{"):
+            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"LLM response is not valid JSON: {e}")
+        if "confidence" not in data:
+            data["confidence"] = 0.8
+        if "patterns" in data:
+            for pattern in data["patterns"]:
+                if "structure" in pattern and isinstance(pattern["structure"], list):
+                    new_structure = []
+                    for item in pattern["structure"]:
+                        if isinstance(item, dict):
+                            if "beat" in item and "description" in item:
+                                new_structure.append(f"{item['beat']}: {item['description']}")
+                            elif "beat" in item:
+                                new_structure.append(item["beat"])
+                            elif "description" in item:
+                                new_structure.append(item["description"])
+                            else:
+                                new_structure.append(str(item))
+                        elif isinstance(item, str):
+                            new_structure.append(item)
+                    pattern["structure"] = new_structure
+        try:
+            return NarrativeAgentOutput.model_validate(data)
+        except Exception:
+            return NarrativeAgentOutput(patterns=[], confidence=0.5)

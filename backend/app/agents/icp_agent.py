@@ -11,10 +11,13 @@ from app.schemas.icp import ICPAgentInput, ICPAgentOutput
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
-    "You are an expert marketing analyst specializing in Ideal Customer Profile (ICP) generation. "
-    "Given raw notes about a product or service, generate a detailed ICP that includes demographics, "
-    "psychographics, pain points, desires, objections, and recommended language style. "
-    "Be specific and actionable. Base your analysis on the provided notes and context."
+    "You are an expert marketing analyst specializing in ICP generation. "
+    "Given raw notes about a product/service, generate ICP in JSON format. "
+    "Output ONLY valid JSON with exact fields: icp.demographics(age_range,gender,income_level,"
+    "education,location,occupation), icp.psychographics(values:list[str],interests:list[str],"
+    "lifestyle:str,media_consumption:list[str],personality_traits:list[str]), "
+    "icp.pain_points:list[str], icp.desires:list[str], icp.objections:list[str], "
+    "icp.language_style:str, confidence:float(0.0-1.0). Be specific and actionable."
 )
 
 
@@ -51,10 +54,28 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
         if not raw or not raw.strip():
             raise ValueError("LLM returned empty response")
         raw = raw.strip()
+        # Strip markdown code blocks
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
         if not raw.startswith("{") and not raw.startswith("["):
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         try:
             data = json.loads(raw)
-        except json.JSONDecodeError as e:
+        except json.JSONError as e:
             raise ValueError(f"LLM response is not valid JSON: {e}")
+        # Normalize: convert strings to arrays where needed
+        icp = data.get("icp", {})
+        psychographics = icp.get("psychographics", {})
+        for field in ["values", "interests", "media_consumption", "personality_traits"]:
+            val = psychographics.get(field)
+            if isinstance(val, str):
+                psychographics[field] = [x.strip() for x in val.split(",") if x.strip()]
+        for field in ["pain_points", "desires", "objections"]:
+            val = icp.get(field)
+            if isinstance(val, str):
+                icp[field] = [x.strip() for x in val.split(",") if x.strip()]
+        data["icp"] = icp
         return ICPAgentOutput.model_validate(data)

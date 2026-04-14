@@ -48,5 +48,79 @@ class RetentionAgent(BaseAgent[RetentionAgentInput, RetentionAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> RetentionAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
-        return RetentionAgentOutput.model_validate(data)
+        raw = raw.strip()
+        if raw.startswith("```json"):
+            raw = raw[7:]
+        elif raw.startswith("```"):
+            raw = raw[3:]
+        if raw.endswith("```"):
+            raw = raw[:-3]
+        raw = raw.strip()
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            logger.warning(f"Invalid JSON from LLM, text response - attempting to parse as text")
+            techniques = self._parse_text_response(raw)
+            if techniques:
+                data = {"techniques": techniques, "confidence": 0.7}
+            else:
+                start = raw.find("{")
+                end = raw.rfind("}") + 1
+                if start >= 0 and end > start:
+                    raw = raw[start:end]
+                    data = json.loads(raw)
+                else:
+                    data = {"techniques": [], "confidence": 0.5}
+        try:
+            return RetentionAgentOutput.model_validate(data)
+        except Exception:
+            techniques = self._parse_text_response(raw) if isinstance(raw, str) else []
+            if techniques:
+                return RetentionAgentOutput(techniques=techniques, confidence=0.7)
+            return RetentionAgentOutput(techniques=[], confidence=0.5)
+
+    def _parse_text_response(self, text: str) -> list[dict]:
+        techniques = []
+        lines = text.split("\n")
+        current_section = ""
+        skip_section = False
+
+        cta_keywords = [
+            "call to action",
+            "cta",
+            "schedule",
+            "consultation",
+            "book your",
+            "risk-free",
+            "guarantee",
+            "follow-up",
+            "reward",
+        ]
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            line_lower = line.lower()
+
+            if any(kw in line_lower for kw in cta_keywords) and any(
+                kw in line_lower for kw in ["action", "schedule", "book", "risk", "consultation"]
+            ):
+                continue
+
+            if "**" in line and "(" in line and line.strip().startswith("**"):
+                current_section = line
+                continue
+
+            if line.startswith(("1.", "2.", "3.", "1 ", "2 ", "3 ")) or line.startswith("-"):
+                item = line.lstrip("123.- ").strip()
+                if item and "**" in item:
+                    parts = item.split(":", 1)
+                    if len(parts) >= 2:
+                        name = parts[0].replace("**", "").strip()
+                        desc = parts[1].strip()[:200]
+                        techniques.append(
+                            {"technique_name": name, "description": desc, "placement_hint": current_section}
+                        )
+
+        return techniques

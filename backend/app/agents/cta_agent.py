@@ -48,5 +48,73 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> CTAAgentOutput:
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
-        data = json.loads(raw)
-        return CTAAgentOutput.model_validate(data)
+        raw = raw.strip()
+        if raw.startswith("```json"):
+            raw = raw[7:]
+        elif raw.startswith("```"):
+            raw = raw[3:]
+        if raw.endswith("```"):
+            raw = raw[:-3]
+        raw = raw.strip()
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            logger.warning(f"Invalid JSON from LLM, text response - attempting to parse as text")
+            ctas = self._parse_text_response(raw)
+            if ctas:
+                data = {"ctas": ctas, "confidence": 0.7}
+            else:
+                start = raw.find("{")
+                end = raw.rfind("}") + 1
+                if start >= 0 and end > start:
+                    raw = raw[start:end]
+                    data = json.loads(raw)
+                else:
+                    data = {"ctas": [], "confidence": 0.5}
+        try:
+            return CTAAgentOutput.model_validate(data)
+        except Exception:
+            ctas = self._parse_text_response(raw)
+            if ctas:
+                return CTAAgentOutput(ctas=ctas, confidence=0.7)
+            return CTAAgentOutput(ctas=[], confidence=0.5)
+
+    def _parse_text_response(self, text: str) -> list[dict]:
+        ctas = []
+        lines = text.split("\n")
+        current_type = "direct"
+
+        type_keywords = {
+            "direct ctas": "direct",
+            "soft ctas": "soft",
+            "urgency ctas": "urgency",
+            "value-driven ctas": "value-driven",
+        }
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            line_lower = line.lower()
+            for kw, ctype in type_keywords.items():
+                if kw in line_lower:
+                    current_type = ctype
+                    continue
+
+            if line.startswith(("1.", "2.", "3.", "1 ", "2 ", "3 ")) or line.startswith("-"):
+                item = line.lstrip("123.- ").strip()
+                if item and "**" in item:
+                    parts = item.split(":", 1)
+                    if len(parts) >= 2:
+                        name = parts[0].replace("**", "").strip()
+                        desc = parts[1].strip()
+                        ctas.append(
+                            {
+                                "cta_type": current_type,
+                                "text": f"{name}: {desc}",
+                                "reasoning": "Extracted from text response",
+                            }
+                        )
+
+        return ctas

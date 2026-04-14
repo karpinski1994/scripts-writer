@@ -54,10 +54,19 @@ class ProviderFactory:
         if not self._providers:
             raise AllProvidersFailedError({"factory": "No providers configured"})
 
+        logger.info("=== LLM REQUEST ===")
+        logger.info(f"Provider order: {[p.provider_name for p in self._providers]}")
+        logger.info(f"System prompt:\n{system_prompt}")
+        logger.info(f"User prompt:\n{prompt}")
+
         errors: dict[str, str] = {}
         for provider in self._providers:
             try:
-                return await self._execute_with_retry(provider, prompt, system_prompt)
+                logger.info(f"Calling provider: {provider.provider_name} ({provider.model_name})")
+                result = await self._execute_with_retry(provider, prompt, system_prompt)
+                logger.info(f"=== LLM RESPONSE from {provider.provider_name} ===")
+                logger.info(f"Response:\n{result}")
+                return result
             except AuthenticationError:
                 logger.warning(f"Auth error for {provider.provider_name}, skipping")
                 errors[provider.provider_name] = "Authentication failed"

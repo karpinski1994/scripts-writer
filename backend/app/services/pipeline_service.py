@@ -48,3 +48,41 @@ class PipelineService:
         await self.db.commit()
         await self.db.refresh(step)
         return PipelineStepResponse.model_validate(step)
+
+    async def cancel_all_steps(self, project_id: str) -> None:
+        result = await self.db.execute(
+            select(PipelineStep).where(
+                PipelineStep.project_id == project_id,
+                PipelineStep.status == StepStatus.running.value,
+            )
+        )
+        steps = result.scalars().all()
+        for step in steps:
+            step.status = StepStatus.failed.value
+            step.error_message = None
+            logger.info(f"Cancelled step {step.step_type} for project {project_id}")
+        await self.db.commit()
+        if self.ws_manager:
+            await self.ws_manager.broadcast(
+                project_id,
+                {"event": "pipeline_cancelled", "project_id": project_id},
+            )
+
+    async def reset_failed_steps(self, project_id: str) -> None:
+        result = await self.db.execute(
+            select(PipelineStep).where(
+                PipelineStep.project_id == project_id,
+                PipelineStep.status == StepStatus.failed.value,
+            )
+        )
+        steps = result.scalars().all()
+        for step in steps:
+            step.status = StepStatus.pending.value
+            step.error_message = None
+            logger.info(f"Reset step {step.step_type} for project {project_id}")
+        await self.db.commit()
+        if self.ws_manager:
+            await self.ws_manager.broadcast(
+                project_id,
+                {"event": "pipeline_reset", "project_id": project_id},
+            )

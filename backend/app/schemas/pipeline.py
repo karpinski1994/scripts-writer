@@ -15,7 +15,7 @@ class PipelineStepResponse(BaseModel):
 
 
 class StepUpdateRequest(BaseModel):
-    selected_option: dict | None = None
+    selected_option: dict | list[dict] | None = None
 
 
 class PipelineResponse(BaseModel):

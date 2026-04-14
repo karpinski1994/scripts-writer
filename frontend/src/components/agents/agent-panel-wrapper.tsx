@@ -117,11 +117,14 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   }
 
   if (step?.status === "pending" || !step) {
+    const showDropzone = activeStepType === "icp" || activeStepType === "hook";
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
           <p className="text-lg font-medium">{STEP_LABELS[activeStepType]}</p>
-          <StepDocumentDropzone projectId={projectId} stepType={activeStepType} className="w-full max-w-md mb-4" />
+          {showDropzone && (
+            <StepDocumentDropzone projectId={projectId} stepType={activeStepType} className="w-full max-w-md mb-4" />
+          )}
           <p className="text-sm text-muted-foreground">This step hasn&apos;t been run yet.</p>
           <Button
             onClick={async () => {
@@ -192,6 +195,12 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
       selected_option: selected,
     });
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+    const STEP_ORDER = ["icp", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
+    const currentIdx = STEP_ORDER.indexOf(activeStepType || "");
+    if (currentIdx >= 0 && currentIdx < STEP_ORDER.length - 1) {
+      const nextStep = STEP_ORDER[currentIdx + 1];
+      usePipelineStore.getState().setActiveStepType(nextStep);
+    }
   };
 
   switch (activeStepType) {
@@ -240,6 +249,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
     case "narrative": {
       const data = parseOutput<NarrativeAgentOutput>(step);
       if (!data) return null;
+      const initialNarrative = step.selected_option ? JSON.parse(step.selected_option) : undefined;
       return (
         <>
           <NarrativePanel
@@ -248,6 +258,8 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             onRerun={handleRerun}
             isRunning={running}
             projectId={projectId}
+            stepType={activeStepType}
+            initialSelection={initialNarrative}
           />
           <RerunConfirmDialog
             open={rerunConfirm === activeStepType}
@@ -261,6 +273,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
     case "retention": {
       const data = parseOutput<RetentionAgentOutput>(step);
       if (!data) return null;
+      const initialRetentions = step.selected_option ? JSON.parse(step.selected_option) : undefined;
       return (
         <>
           <RetentionPanel
@@ -269,6 +282,8 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             onRerun={handleRerun}
             isRunning={running}
             projectId={projectId}
+            stepType={activeStepType}
+            initialSelections={initialRetentions}
           />
           <RerunConfirmDialog
             open={rerunConfirm === activeStepType}
@@ -282,6 +297,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
     case "cta": {
       const data = parseOutput<CTAAgentOutput>(step);
       if (!data) return null;
+      const initialCTA = step.selected_option ? JSON.parse(step.selected_option) : undefined;
       return (
         <>
           <CTAPanel
@@ -290,6 +306,8 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             onRerun={handleRerun}
             isRunning={running}
             projectId={projectId}
+            stepType={activeStepType}
+            initialSelection={initialCTA}
           />
           <RerunConfirmDialog
             open={rerunConfirm === activeStepType}
@@ -421,7 +439,7 @@ function RerunConfirmDialog({
             ))}
           </ul>
         )}
-        <DialogFooter>
+        <DialogFooter open={open} onOpenChange={onOpenChange}>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
