@@ -57,6 +57,7 @@ class ProjectService:
         project.target_format = data.target_format
         project.content_goal = data.content_goal
         project.raw_notes = data.raw_notes
+        project.draft = data.draft
         logger.debug("[PROJECT-SERVICE] Project fields updated")
 
         subject_step = await self.db.execute(
@@ -131,6 +132,7 @@ class ProjectService:
             target_format=project.target_format,
             content_goal=project.content_goal,
             raw_notes=project.raw_notes,
+            draft=project.draft,
         )
         self.db.add(new_project)
         await self.db.flush()

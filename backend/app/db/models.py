@@ -37,6 +37,7 @@ class Project(Base):
     content_goal: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cta_purpose: Mapped[str | None] = mapped_column(String(100), nullable=True)
     raw_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    draft: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     notebooklm_notebook_id: Mapped[str | None] = mapped_column(String(100), nullable=True)

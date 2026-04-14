@@ -45,6 +45,7 @@ const ALLOWED_TYPES = [".txt", ".pdf", ".docx", ".md"]
 const schema = z.object({
   content_format: z.enum(CONTENT_FORMATS.map(f => f.id) as [string, ...string[]]),
   topic: z.string().max(500),
+  draft: z.string().max(10000),
   main_goal: z.string().max(200),
 })
 
@@ -81,6 +82,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
     defaultValues: {
       content_format: undefined,
       topic: "",
+      draft: "",
       main_goal: "",
     },
   })
@@ -96,6 +98,9 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
         setValue("content_format", existingFormatId as typeof CONTENT_FORMATS[number]["id"], { shouldValidate: false })
         if (project.topic) {
           setValue("topic", project.topic, { shouldValidate: false })
+        }
+        if (project.draft) {
+          setValue("draft", project.draft, { shouldValidate: false })
         }
         if (project.content_goal) {
           setValue("main_goal", project.content_goal, { shouldValidate: false })
@@ -191,6 +196,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
     
     console.log("[SUBJECT-PANEL] Submitting subject data:", {
       topic: data.topic,
+      draft: data.draft,
       target_format: formatLabel,
       content_goal: data.main_goal,
       raw_notes: watchedTopic?.slice(0, 100) + "...",
@@ -203,6 +209,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
         target_format: formatLabel,
         content_goal: data.main_goal || null,
         raw_notes: watchedTopic || "",
+        draft: data.draft || "",
       })
       console.log("[SUBJECT-PANEL] Subject saved successfully, invalidating pipeline queries")
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
@@ -349,6 +356,22 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
               />
               {!hasFile && errors.topic && (
                 <p className="text-xs text-destructive">{errors.topic.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-base font-medium">
+                Draft
+                {!hasFile && <span className="text-destructive"> *</span>}
+              </Label>
+              <Textarea
+                {...register("draft")}
+                placeholder="Paste your draft, notes, or rough ideas here..."
+                rows={5}
+                className={cn(!hasFile && errors.draft && "border-destructive")}
+              />
+              {!hasFile && errors.draft && (
+                <p className="text-xs text-destructive">{errors.draft.message}</p>
               )}
             </div>
 
