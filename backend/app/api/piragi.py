@@ -1,3 +1,5 @@
+import logging
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -6,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.rag.config import STEP_CATEGORY_MAP
 from app.schemas.piragi import (
+    ALLOWED_EXTENSIONS,
     ChunkResult,
     ConnectDocumentsRequest,
     ConnectDocumentsResponse,
@@ -18,7 +21,14 @@ from app.schemas.piragi import (
 from app.services.piragi_service import PiragiService
 from app.services.project_service import ProjectService
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/projects/{project_id}/rag", tags=["rag"])
+
+DOCUMENTS_DIR = "/Users/karpinski94/projects/scripts-writer/documents"
+PLAYBOOKS_DIR = "playbooks"
+
+STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.keys()}
 
 
 @router.get("/documents", response_model=PiragiDocumentsResponse)
@@ -71,37 +81,6 @@ async def disconnect_documents(
         await service.disconnect_documents(project_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-
-ALLOWED_EXTENSIONS = {".txt", ".md", ".pdf"}
-DOCUMENTS_DIR = "documents"
-PLAYBOOKS_DIR = "playbooks"
-
-import logging
-from pathlib import Path
-from uuid import UUID
-
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.api import get_db
-from app.db.models import Project
-from app.services.piragi_service import PiragiService
-from app.schemas.piragi import (
-    ALLOWED_EXTENSIONS,
-    PiragiQueryRequest,
-    PiragiQueryResponse,
-    STEP_CATEGORY_MAP,
-    ChunkResult,
-    UploadDocumentResponse,
-)
-
-logger = logging.getLogger(__name__)
-
-DOCUMENTS_DIR = "/Users/karpinski94/projects/scripts-writer/documents"
-PLAYBOOKS_DIR = "playbooks"
-
-STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.keys()}
 
 
 @router.post("/upload", response_model=UploadDocumentResponse)
