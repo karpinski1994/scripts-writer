@@ -267,6 +267,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 selected_narrative=selected_narrative,
                 content_goal=project.content_goal,
+                cta_purpose=project.cta_purpose,
                 piragi_context=piragi_context,
             )
             return agent, input_data

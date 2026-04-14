@@ -71,6 +71,7 @@ class CTAAgentInput(BaseModel):
     selected_hook: HookSuggestion
     selected_narrative: NarrativePattern
     content_goal: str | None = None
+    cta_purpose: str | None = None
     piragi_context: str | None = None
 
 

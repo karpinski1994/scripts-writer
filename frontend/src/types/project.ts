@@ -26,6 +26,7 @@ export interface ProjectDetail {
   topic: string;
   target_format: TargetFormat;
   content_goal: ContentGoal | null;
+  cta_purpose: string | null;
   raw_notes: string;
   status: string;
   current_step: number;

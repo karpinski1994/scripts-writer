@@ -33,6 +33,10 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
             f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
             f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
         ]
+        if input_data.cta_purpose:
+            parts.append(f"CTA Purpose: {input_data.cta_purpose}")
+        else:
+            parts.append("CTA Purpose: [Not specified - ask user to define their call-to-action goal]")
         if input_data.content_goal:
             parts.append(f"Content Goal: {input_data.content_goal}")
         if input_data.piragi_context:

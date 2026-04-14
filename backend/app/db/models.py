@@ -35,6 +35,7 @@ class Project(Base):
     topic: Mapped[str] = mapped_column(String(200), nullable=False)
     target_format: Mapped[str] = mapped_column(String(20), nullable=False)
     content_goal: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    cta_purpose: Mapped[str | None] = mapped_column(String(100), nullable=True)
     raw_notes: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

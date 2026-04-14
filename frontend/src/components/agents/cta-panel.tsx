@@ -22,9 +22,11 @@ interface CTAPanelProps {
   projectId: string;
   stepType?: string;
   initialSelection?: CTASuggestion;
+  ctaPurpose?: string;
+  onUpdateCtaPurpose: (purpose: string) => void;
 }
 
-export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, stepType, initialSelection }: CTAPanelProps) {
+export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, stepType, initialSelection, ctaPurpose, onUpdateCtaPurpose }: CTAPanelProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(() => {
     if (initialSelection) {
       return data.ctas.findIndex(c => c.text === initialSelection.text);
@@ -32,6 +34,7 @@ export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, step
     return null;
   });
   const [showTemplates, setShowTemplates] = useState(false);
+  const [localPurpose, setLocalPurpose] = useState(ctaPurpose || "");
 
   function handleContinue() {
     if (selectedIdx !== null && data.ctas[selectedIdx]) {
@@ -39,14 +42,39 @@ export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, step
     }
   }
 
+  function handleRun() {
+    if (!localPurpose.trim()) {
+      alert("Please specify the CTA purpose before running the agent");
+      return;
+    }
+    onUpdateCtaPurpose(localPurpose.trim());
+    onRerun();
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Call to Action</h3>
-        <Button variant="outline" size="sm" onClick={onRerun} disabled={isRunning}>
-          Re-run
-        </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>CTA Purpose</CardTitle>
+          <CardDescription>What do you want the audience to do? (e.g., join free course, download ebook, book consultation)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input 
+            placeholder="e.g., Join our free masterclass, Download free ebook, Book a consultation" 
+            value={localPurpose}
+            onChange={(e) => setLocalPurpose(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleRun()}
+          />
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleRun} disabled={isRunning || !localPurpose.trim()} className="w-full">
+        Run Agent {!localPurpose.trim() && "(enter CTA purpose first)"}
+      </Button>
 
       <Card>
         <CardHeader>

@@ -33,6 +33,7 @@ class ProjectUpdateRequest(BaseModel):
     topic: str | None = Field(default=None, min_length=1, max_length=200)
     target_format: TargetFormat | None = None
     content_goal: ContentGoal | None = None
+    cta_purpose: str | None = Field(default=None, max_length=100)
     raw_notes: str | None = Field(default=None, min_length=1, max_length=10000)
 
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { PipelineStep } from "@/types/pipeline";
@@ -32,6 +32,7 @@ import type { HookAgentOutput, HookSuggestion } from "@/types/agents";
 import type { NarrativeAgentOutput, NarrativePattern } from "@/types/agents";
 import type { RetentionAgentOutput, RetentionTechnique } from "@/types/agents";
 import type { CTAAgentOutput, CTASuggestion } from "@/types/agents";
+import type { ProjectDetail } from "@/types/project";
 
 const STEP_LABELS: Record<string, string> = {
   icp: "ICP Profile",
@@ -78,6 +79,12 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   const queryClient = useQueryClient();
   const router = useRouter();
   const [rerunConfirm, setRerunConfirm] = useState<string | null>(null);
+  
+  const { data: project } = useQuery<ProjectDetail>({
+    queryKey: ["project", projectId],
+    queryFn: () => api.get(`/api/v1/projects/${projectId}`),
+    enabled: !!projectId,
+  });
 
   if (!activeStepType) {
     return (
@@ -312,6 +319,11 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             projectId={projectId}
             stepType={activeStepType}
             initialSelection={initialCTA}
+            ctaPurpose={project?.cta_purpose || undefined}
+            onUpdateCtaPurpose={async (purpose: string) => {
+              await api.patch(`/api/v1/projects/${projectId}`, { cta_purpose: purpose });
+              queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+            }}
           />
           <RerunConfirmDialog
             open={rerunConfirm === activeStepType}
