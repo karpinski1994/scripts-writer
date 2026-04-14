@@ -2,24 +2,9 @@
 
 Agentic AI pipeline for generating high-converting video scripts and marketing posts.
 
-## Prerequisites
-
-- **Python 3.11+**
-- **[uv](https://docs.astral.sh/uv/)** — Python package manager
-
-Install uv (macOS):
-
-```bash
-brew install uv
-```
-
-Or via pip:
-
-```bash
-pip install uv
-```
-
 ## Quick Start
+
+For a complete setup guide including the frontend and dev script, see the [root README](../README.md).
 
 ```bash
 # From the backend/ directory
@@ -33,6 +18,12 @@ cp ../.env.example .env
 
 # 3. Start the dev server
 uv run uvicorn app.main:app --reload
+```
+
+Or use the root `dev.sh` script to run both backend and frontend:
+
+```bash
+../dev.sh start
 ```
 
 The server starts at **http://localhost:8000**.
