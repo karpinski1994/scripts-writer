@@ -48,4 +48,11 @@ class FactCheckAgent(BaseAgent[FactCheckAgentInput, FactCheckAgentOutput]):
                 data = json.loads(match.group())
             else:
                 raise
+        if isinstance(data, list):
+            data = {"findings": data, "confidence": 0.7}
+        elif isinstance(data, dict):
+            if "findings" not in data:
+                data = {"findings": data.get("issues", []) or [], "confidence": data.get("confidence", 0.7)}
+            if "confidence" not in data:
+                data["confidence"] = 0.7
         return FactCheckAgentOutput.model_validate(data)

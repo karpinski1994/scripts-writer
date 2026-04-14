@@ -48,4 +48,6 @@ class CopyrightAgent(BaseAgent[CopyrightAgentInput, CopyrightAgentOutput]):
                 data = json.loads(match.group())
             else:
                 raise
+        if isinstance(data, list):
+            data = {"findings": data, "confidence": 0.7}
         return CopyrightAgentOutput.model_validate(data)

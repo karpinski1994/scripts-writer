@@ -67,4 +67,6 @@ class PolicyAgent(BaseAgent[PolicyAgentInput, PolicyAgentOutput]):
                 data = json.loads(match.group())
             else:
                 raise
+        if isinstance(data, list):
+            data = {"findings": data, "confidence": 0.7}
         return PolicyAgentOutput.model_validate(data)

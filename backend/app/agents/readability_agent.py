@@ -108,6 +108,8 @@ class ReadabilityAgent(BaseAgent[ReadabilityAgentInput, ReadabilityAgentOutput])
                 data = json.loads(match.group())
             else:
                 raise
+        if isinstance(data, list):
+            data = {"findings": data, "confidence": 0.7}
         return ReadabilityAgentOutput(
             findings=data.get("findings", []),
             flesch_kincaid_score=0.0,
