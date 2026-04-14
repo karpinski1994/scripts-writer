@@ -31,8 +31,11 @@ npm install
 Use the provided `dev.sh` script:
 
 ```bash
-# Start both servers
+# Start both servers in background
 ./dev.sh start
+
+# Start both servers with live logs in terminal (Ctrl+C to stop)
+./dev.sh start --logs
 
 # Stop both servers
 ./dev.sh stop
@@ -47,7 +50,7 @@ Use the provided `dev.sh` script:
 ./dev.sh status
 ```
 
-The backend runs on **http://localhost:8000** (API docs at `/docs`) and the frontend on **http://localhost:5173** (or 5173, check the output).
+The backend runs on **http://localhost:8000** (API docs at `/docs`) and the frontend on **http://localhost:3000**.
 
 ---
 

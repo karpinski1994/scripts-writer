@@ -32,11 +32,11 @@ class Project(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid_str)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    topic: Mapped[str] = mapped_column(String(200), nullable=False)
-    target_format: Mapped[str] = mapped_column(String(20), nullable=False)
+    topic: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    target_format: Mapped[str | None] = mapped_column(String(20), nullable=True)
     content_goal: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cta_purpose: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    raw_notes: Mapped[str] = mapped_column(Text, nullable=False)
+    raw_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     notebooklm_notebook_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -46,7 +46,7 @@ class Project(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "target_format IN ('VSL','YouTube','Tutorial','Facebook','LinkedIn','Blog')",
+            "target_format IN ('VSL','YouTube','Tutorial','Facebook','LinkedIn','Blog') OR target_format IS NULL",
             name="ck_projects_target_format",
         ),
         CheckConstraint(
@@ -115,13 +115,6 @@ class PipelineStep(Base):
     completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     __table_args__ = (
-        CheckConstraint(
-            "step_type IN ("
-            "'icp','hook','narrative','retention','cta',"
-            "'writer','factcheck','readability','copyright','policy'"
-            ")",
-            name="ck_pipeline_steps_step_type",
-        ),
         CheckConstraint(
             "status IN ('pending','running','completed','failed')",
             name="ck_pipeline_steps_status",

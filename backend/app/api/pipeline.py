@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
@@ -6,6 +8,8 @@ from app.pipeline.state import StepType
 from app.schemas.pipeline import PipelineResponse, PipelineStepResponse, StepUpdateRequest
 from app.services.pipeline_service import PipelineService
 from app.ws.connection import connection_manager
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects/{project_id}/pipeline", tags=["pipeline"])
 
@@ -17,9 +21,15 @@ async def get_pipeline(project_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/run/{step_type}", response_model=PipelineStepResponse)
-async def run_step(project_id: str, step_type: StepType, db: AsyncSession = Depends(get_db)):
+async def run_step(project_id: str, step_type: str, db: AsyncSession = Depends(get_db)):
+    logger.error(f"DEBUG: run_step called with step_type='{step_type}'")
     service = PipelineService(db, ws_manager=connection_manager)
-    return await service.run_step(project_id, step_type)
+    try:
+        step_type_enum = StepType(step_type)
+    except ValueError as e:
+        logger.error(f"DEBUG: Invalid step_type '{step_type}': {e}")
+        raise HTTPException(status_code=422, detail=f"Invalid step type: {step_type}")
+    return await service.run_step(project_id, step_type_enum)
 
 
 @router.patch("/{step_id}", response_model=PipelineStepResponse)

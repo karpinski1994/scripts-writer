@@ -15,6 +15,7 @@ import { RetentionPanel } from "./retention-panel";
 import { CTAPanel } from "./cta-panel";
 import { WriterPanel } from "./writer-panel";
 import { AnalysisPanel } from "./analysis-panel";
+import { SubjectPanel } from "./subject-panel";
 import { StepDocumentDropzone } from "@/components/piragi/step-document-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,12 +36,14 @@ import type { CTAAgentOutput, CTASuggestion } from "@/types/agents";
 import type { ProjectDetail } from "@/types/project";
 
 const STEP_LABELS: Record<string, string> = {
+  subject: "Subject",
   icp: "ICP Profile",
   hook: "Hook",
   narrative: "Narrative",
   retention: "Retention",
   cta: "CTA",
   writer: "Writer",
+  analysis: "Analysis",
   factcheck: "Fact Check",
   readability: "Readability",
   copyright: "Copyright",
@@ -48,8 +51,8 @@ const STEP_LABELS: Record<string, string> = {
 };
 
 const STEP_ORDER_LIST = [
-  "icp", "hook", "narrative", "retention", "cta", "writer",
-  "factcheck", "readability", "copyright", "policy",
+  "subject", "icp", "hook", "narrative", "retention", "cta", "writer",
+  "analysis", "factcheck", "readability", "copyright", "policy",
 ];
 
 function getDownstreamSteps(stepType: string, steps: PipelineStep[]): string[] {
@@ -202,7 +205,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
       selected_option: selected,
     });
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
-    const STEP_ORDER = ["icp", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
+    const STEP_ORDER = ["subject", "icp", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
     const currentIdx = STEP_ORDER.indexOf(activeStepType || "");
     if (currentIdx >= 0 && currentIdx < STEP_ORDER.length - 1) {
       const nextStep = STEP_ORDER[currentIdx + 1];
@@ -211,6 +214,9 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   };
 
   switch (activeStepType) {
+    case "subject": {
+      return <SubjectPanel projectId={projectId} />;
+    }
     case "icp": {
       const data = parseOutput<ICPAgentOutput>(step);
       if (!data) return null;

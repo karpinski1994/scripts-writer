@@ -4,12 +4,14 @@ from app.pipeline.errors import DependencyNotMetError, InvalidStateTransitionErr
 
 
 class StepType(StrEnum):
+    subject = "subject"
     icp = "icp"
     hook = "hook"
     narrative = "narrative"
     retention = "retention"
     cta = "cta"
     writer = "writer"
+    analysis = "analysis"
     factcheck = "factcheck"
     readability = "readability"
     copyright = "copyright"
@@ -24,16 +26,14 @@ class StepStatus(StrEnum):
 
 
 STEP_ORDER: list[StepType] = [
+    StepType.subject,
     StepType.icp,
     StepType.hook,
     StepType.narrative,
     StepType.retention,
     StepType.cta,
     StepType.writer,
-    StepType.factcheck,
-    StepType.readability,
-    StepType.copyright,
-    StepType.policy,
+    StepType.analysis,
 ]
 
 TRANSITIONS: dict[StepStatus, list[StepStatus]] = {
@@ -44,12 +44,14 @@ TRANSITIONS: dict[StepStatus, list[StepStatus]] = {
 }
 
 DEPENDENCY_MAP: dict[StepType, list[StepType]] = {
-    StepType.icp: [],
+    StepType.subject: [],
+    StepType.icp: [StepType.subject],
     StepType.hook: [StepType.icp],
     StepType.narrative: [StepType.hook],
     StepType.retention: [StepType.narrative],
     StepType.cta: [StepType.retention],
     StepType.writer: [StepType.cta],
+    StepType.analysis: [StepType.writer],
     StepType.factcheck: [StepType.writer],
     StepType.readability: [StepType.writer],
     StepType.copyright: [StepType.writer],

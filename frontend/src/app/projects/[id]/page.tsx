@@ -134,7 +134,7 @@ export default function ProjectDetailPage() {
           <ErrorBoundary>
             {pipeline.steps.every((s) => s.status === "pending") && (
               <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-8">
-                <p className="text-sm text-muted-foreground">Run ICP Agent to get started</p>
+                <p className="text-sm text-muted-foreground">Complete the Subject step to get started</p>
               </div>
             )}
             <AgentPanelWrapper projectId={id} steps={pipeline.steps} />

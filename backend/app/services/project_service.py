@@ -1,3 +1,4 @@
+from datetime import datetime, UTC
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -5,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import PipelineStep, Project
-from app.pipeline.state import STEP_ORDER, StepStatus
-from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest
+from app.pipeline.state import STEP_ORDER, StepStatus, StepType
+from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest, SubjectUpdateRequest
 
 
 class ProjectService:
@@ -17,10 +18,6 @@ class ProjectService:
         project = Project(
             id=str(uuid4()),
             name=data.name,
-            topic=data.topic,
-            target_format=data.target_format.value,
-            content_goal=data.content_goal.value if data.content_goal else None,
-            raw_notes=data.raw_notes,
         )
         self.db.add(project)
         await self.db.flush()
@@ -34,6 +31,28 @@ class ProjectService:
                 status=StepStatus.pending.value,
             )
             self.db.add(step)
+
+        await self.db.commit()
+        await self.db.refresh(project)
+        return project
+
+    async def update_subject(self, project_id: str, data: SubjectUpdateRequest) -> Project:
+        project = await self.get_by_id(project_id)
+        project.topic = data.topic
+        project.target_format = data.target_format.value
+        project.content_goal = data.content_goal.value if data.content_goal else None
+        project.raw_notes = data.raw_notes
+
+        subject_step = await self.db.execute(
+            select(PipelineStep).where(
+                PipelineStep.project_id == project_id,
+                PipelineStep.step_type == StepType.subject.value,
+            )
+        )
+        step = subject_step.scalar_one_or_none()
+        if step:
+            step.status = StepStatus.completed.value
+            step.completed_at = datetime.now(UTC).replace(tzinfo=None)
 
         await self.db.commit()
         await self.db.refresh(project)

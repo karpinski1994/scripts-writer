@@ -9,6 +9,7 @@ from app.schemas.project import (
     ProjectResponse,
     ProjectSummaryResponse,
     ProjectUpdateRequest,
+    SubjectUpdateRequest,
 )
 from app.services.project_service import ProjectService
 
@@ -19,6 +20,12 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 async def create_project(body: ProjectCreateRequest, db: AsyncSession = Depends(get_db)):
     service = ProjectService(db)
     return await service.create(body)
+
+
+@router.post("/{project_id}/subject", response_model=ProjectResponse)
+async def update_subject(project_id: str, body: SubjectUpdateRequest, db: AsyncSession = Depends(get_db)):
+    service = ProjectService(db)
+    return await service.update_subject(project_id, body)
 
 
 @router.get("", response_model=list[ProjectSummaryResponse])

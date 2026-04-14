@@ -56,6 +56,13 @@ class PolicyAgentOutput(BaseModel):
     confidence: float = Field(ge=0, le=1)
 
 
+class AnalysisOutput(BaseModel):
+    factcheck: dict = Field(default_factory=dict)
+    readability: dict = Field(default_factory=dict)
+    copyright: dict = Field(default_factory=dict)
+    policy: dict = Field(default_factory=dict)
+
+
 class AnalysisResultResponse(BaseModel):
     id: str
     project_id: str

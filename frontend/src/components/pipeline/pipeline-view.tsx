@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 import type { PipelineStep } from "@/types/pipeline";
 import { usePipelineStore, isStepReady, ANALYSIS_STEPS } from "@/stores/pipeline-store";
 
-const CREATIVE_STEPS = ["icp", "hook", "narrative", "retention", "cta", "writer"];
+const CREATIVE_STEPS = ["subject", "icp", "hook", "narrative", "retention", "cta", "writer"];
 const ANALYSIS_STEP = "analysis";
 
 const STEP_LABELS: Record<string, string> = {
+  subject: "Subject",
   icp: "ICP",
   hook: "Hook",
   narrative: "Narrative",

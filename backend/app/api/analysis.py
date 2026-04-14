@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +11,8 @@ from app.pipeline.state import StepStatus, StepType
 from app.schemas.analysis import AnalysisResultResponse
 from app.services.analysis_service import AnalysisService
 from app.ws.connection import connection_manager
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects/{project_id}/analysis", tags=["analysis"])
 
@@ -46,6 +50,7 @@ async def run_analysis(
     agent_type: str,
     db: AsyncSession = Depends(get_db),
 ):
+    logger.error(f"DEBUG: run_analysis called with agent_type='{agent_type}'")
     if agent_type not in VALID_AGENT_TYPES:
         raise HTTPException(status_code=400, detail=f"Invalid agent type: {agent_type}")
     await _verify_writer_completed(project_id, db)

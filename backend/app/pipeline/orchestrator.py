@@ -86,6 +86,23 @@ class PipelineOrchestrator:
             )
 
         start_ms = time.time()
+
+        if step_type == StepType.subject:
+            step.output_data = "{}"
+            step.status = StepStatus.completed.value
+            step.completed_at = datetime.now(UTC).replace(tzinfo=None)
+            step.duration_ms = int((time.time() - start_ms) * 1000)
+            await self.db.commit()
+            if self.ws_manager:
+                await self.ws_manager.broadcast(
+                    project_id,
+                    {
+                        "event": "agent_complete",
+                        "step_type": step_type.value,
+                    },
+                )
+            return step
+
         try:
             step_map = await self._get_step_map(project_id)
             agent, input_data = await self._build_agent_inputs(project, step_type, step_map)
@@ -164,6 +181,9 @@ class PipelineOrchestrator:
         self, project: Project, step_type: StepType, step_map: dict[StepType, PipelineStep]
     ) -> tuple:
         piragi_context = await self._resolve_rag_context(project, step_type)
+
+        if step_type == StepType.subject:
+            return {}, {}
 
         if step_type == StepType.icp:
             raw_notes = project.raw_notes or ""
@@ -294,44 +314,86 @@ class PipelineOrchestrator:
             )
             return agent, input_data
 
+        def _build_single_analysis_agent(agent_type: StepType, project: Project, script_content: str):
+            if agent_type == StepType.factcheck:
+                agent = FactCheckAgent()
+                input_data = FactCheckAgentInput(
+                    script_content=script_content,
+                    topic=project.topic,
+                    target_format=project.target_format,
+                )
+                return agent, input_data
+            if agent_type == StepType.readability:
+                agent = ReadabilityAgent()
+                input_data = ReadabilityAgentInput(
+                    script_content=script_content,
+                    target_format=project.target_format,
+                )
+                return agent, input_data
+            if agent_type == StepType.copyright:
+                agent = CopyrightAgent()
+                input_data = CopyrightAgentInput(
+                    script_content=script_content,
+                    topic=project.topic,
+                    target_format=project.target_format,
+                )
+                return agent, input_data
+            if agent_type == StepType.policy:
+                agent = PolicyAgent()
+                input_data = PolicyAgentInput(
+                    script_content=script_content,
+                    topic=project.topic,
+                    target_format=project.target_format,
+                )
+                return agent, input_data
+            raise ValueError(f"Unknown analysis agent type: {agent_type}")
+
         if step_type == StepType.factcheck:
             script_content = await self._get_latest_script_content(project.id)
-            agent = FactCheckAgent()
-            input_data = FactCheckAgentInput(
-                script_content=script_content,
-                topic=project.topic,
-                target_format=project.target_format,
-            )
+            agent, input_data = _build_single_analysis_agent(StepType.factcheck, project, script_content)
             return agent, input_data
 
         if step_type == StepType.readability:
             script_content = await self._get_latest_script_content(project.id)
-            agent = ReadabilityAgent()
-            input_data = ReadabilityAgentInput(
-                script_content=script_content,
-                target_format=project.target_format,
-            )
+            agent, input_data = _build_single_analysis_agent(StepType.readability, project, script_content)
             return agent, input_data
 
         if step_type == StepType.copyright:
             script_content = await self._get_latest_script_content(project.id)
-            agent = CopyrightAgent()
-            input_data = CopyrightAgentInput(
-                script_content=script_content,
-                topic=project.topic,
-                target_format=project.target_format,
-            )
+            agent, input_data = _build_single_analysis_agent(StepType.copyright, project, script_content)
             return agent, input_data
 
         if step_type == StepType.policy:
             script_content = await self._get_latest_script_content(project.id)
-            agent = PolicyAgent()
-            input_data = PolicyAgentInput(
-                script_content=script_content,
-                topic=project.topic,
-                target_format=project.target_format,
-            )
+            agent, input_data = _build_single_analysis_agent(StepType.policy, project, script_content)
             return agent, input_data
+
+        if step_type == StepType.analysis:
+            script_content = await self._get_latest_script_content(project.id)
+            results = {}
+            for agent_type in [StepType.factcheck, StepType.readability, StepType.copyright, StepType.policy]:
+                try:
+                    agent, input_data = self._build_single_analysis_agent(agent_type, project, script_content)
+                    from app.config import get_settings
+
+                    factory = ProviderFactory(get_settings())
+                    cache = LLMCache(
+                        max_size=get_settings().cache_max_size, ttl_seconds=get_settings().cache_ttl_seconds
+                    )
+                    result = await agent.execute(input_data, cache, factory)
+                    results[agent_type.value] = result.model_dump()
+                except Exception as e:
+                    logger.warning("Analysis step %s failed: %s", agent_type.value, e)
+                    results[agent_type.value] = {"error": str(e)}
+            from app.schemas.analysis import AnalysisOutput
+
+            output = AnalysisOutput(
+                factcheck=results.get("factcheck", {}),
+                readability=results.get("readability", {}),
+                copyright=results.get("copyright", {}),
+                policy=results.get("policy", {}),
+            )
+            return output.model_dump()
 
         raise ValueError(f"No agent configured for step type: {step_type}")
 

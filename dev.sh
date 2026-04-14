@@ -6,7 +6,7 @@
 BACKEND_DIR="/Users/karpinski94/projects/scripts-writer/backend"
 FRONTEND_DIR="/Users/karpinski94/projects/scripts-writer/frontend"
 
-BACKEND_CMD="uv run uvicorn app.main:app --reload"
+BACKEND_CMD="uv run uvicorn app.main:app --reload --use-colors"
 FRONTEND_CMD="npm run dev"
 
 BACKEND_PORT=8000
@@ -19,6 +19,11 @@ FRONTEND_LOG="$LOG_DIR/frontend.log"
 mkdir -p "$LOG_DIR"
 touch "$BACKEND_LOG"
 touch "$FRONTEND_LOG"
+
+# Force instant logging and colors
+export PYTHONUNBUFFERED=1
+export FORCE_COLOR=1
+export UV_FORCE_COLOR=1
 
 # ==========================================
 # Helper Functions
@@ -56,16 +61,12 @@ start_background() {
 start_foreground() {
     echo "🚀 Starting servers in FOREGROUND..."
     
-    # Clean up ports first to prevent "Address already in use" errors
     stop_servers >/dev/null
 
     echo "=========================================="
     echo "🟢 Backend & Frontend logs live below."
     echo "🛑 Press Ctrl+C to stop both servers."
     echo "=========================================="
-
-    # Force colors for terminal outputs
-    export FORCE_COLOR=1
 
     # Start Backend in current terminal
     cd "$BACKEND_DIR" && $BACKEND_CMD &
@@ -75,10 +76,9 @@ start_foreground() {
     cd "$FRONTEND_DIR" && $FRONTEND_CMD &
     FRONTEND_PID=$!
 
-    # TRAP: Catch Ctrl+C and shut them both down cleanly
+    # Catch Ctrl+C and shut them both down cleanly
     trap "echo -e '\n🛑 Ctrl+C detected. Stopping servers...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" INT TERM
 
-    # Keep script running and attached to these processes
     wait $BACKEND_PID $FRONTEND_PID
 }
 

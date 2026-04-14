@@ -22,6 +22,9 @@ class ContentGoal(StrEnum):
 
 class ProjectCreateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100)
+
+
+class SubjectUpdateRequest(BaseModel):
     topic: str = Field(min_length=1, max_length=200)
     target_format: TargetFormat
     content_goal: ContentGoal | None = None
@@ -45,8 +48,8 @@ class BranchRequest(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     name: str
-    topic: str
-    target_format: str
+    topic: str | None
+    target_format: str | None
     content_goal: str | None
     status: str
     current_step: int
@@ -59,7 +62,7 @@ class ProjectResponse(BaseModel):
 class ProjectSummaryResponse(BaseModel):
     id: str
     name: str
-    target_format: str
+    target_format: str | None
     status: str
     updated_at: datetime
 
@@ -69,10 +72,10 @@ class ProjectSummaryResponse(BaseModel):
 class ProjectDetailResponse(BaseModel):
     id: str
     name: str
-    topic: str
-    target_format: str
+    topic: str | None
+    target_format: str | None
     content_goal: str | None
-    raw_notes: str
+    raw_notes: str | None
     status: str
     current_step: int
     created_at: datetime
