@@ -114,6 +114,9 @@ class PipelineOrchestrator:
             if step_type == StepType.icp:
                 await self._save_icp_profile(project_id, result)
 
+            if step_type == StepType.writer:
+                await self._save_script_version(project_id, result)
+
             if self.ws_manager:
                 await self.ws_manager.broadcast(
                     project_id,
@@ -496,4 +499,28 @@ class PipelineOrchestrator:
             profile.source = "generated"
             profile.approved = False
 
+        await self.db.commit()
+
+    async def _save_script_version(self, project_id: str, result) -> None:
+        from app.db.models import ScriptVersion
+
+        script_data = result.script
+        content = script_data.content if hasattr(script_data, "content") else str(script_data)
+
+        existing = await self.db.execute(
+            select(ScriptVersion)
+            .where(ScriptVersion.project_id == project_id)
+            .order_by(ScriptVersion.version_number.desc())
+        )
+        latest = existing.scalar_one_or_none()
+        version_number = (latest.version_number + 1) if latest else 1
+
+        version = ScriptVersion(
+            id=str(uuid4()),
+            project_id=project_id,
+            version_number=version_number,
+            content=content,
+            format="VSL",
+        )
+        self.db.add(version)
         await self.db.commit()

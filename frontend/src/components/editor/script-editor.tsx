@@ -31,6 +31,7 @@ export function ScriptEditor({ className }: ScriptEditorProps) {
     ],
     content,
     editable: !isSaving,
+    immediatelyRender: false,
     onUpdate: ({ editor: ed }) => {
       const text = ed.getText();
       useEditorStore.getState().setContent(text);
