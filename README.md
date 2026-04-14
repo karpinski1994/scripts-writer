@@ -115,8 +115,24 @@ See `backend/README.md` for full environment variable documentation.
 
 | Command | Description |
 |---------|-------------|
-| `./dev.sh start` | Start backend and frontend servers |
+| `./dev.sh start` | Start servers in background (invisible) |
+| `./dev.sh start --logs` | Start servers in foreground with live logs (Ctrl+C to stop) |
 | `./dev.sh stop` | Stop both servers |
-| `./dev.sh restart` | Restart both servers |
+| `./dev.sh restart` | Restart servers in background |
+| `./dev.sh restart --logs` | Restart servers in foreground |
 | `./dev.sh logs` | Tail server logs |
 | `./dev.sh status` | Check if servers are running |
+
+### Usage Modes
+
+**Background Mode (default):**
+```bash
+./dev.sh start
+```
+Servers start silently in the background. Use `./dev.sh logs` to view output or `./dev.sh stop` to shut them down.
+
+**Foreground Mode (interactive):**
+```bash
+./dev.sh start --logs
+```
+Both servers boot inside your terminal with full color output. Press `Ctrl+C` to stop both servers cleanly.
