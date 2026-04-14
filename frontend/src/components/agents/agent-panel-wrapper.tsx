@@ -16,7 +16,6 @@ import { CTAPanel } from "./cta-panel";
 import { WriterPanel } from "./writer-panel";
 import { AnalysisPanel } from "./analysis-panel";
 import { SubjectPanel } from "./subject-panel";
-import { StepDocumentDropzone } from "@/components/piragi/step-document-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -118,11 +117,12 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
     !running &&
     isPending;
 
-  // Reset the auto-run guard when switching to a different step
-  if (activeStepType !== prevActiveStepRef.current) {
-    prevActiveStepRef.current = activeStepType;
-    autoRunTriggeredRef.current = null;
-  }
+  useEffect(() => {
+    if (activeStepType !== prevActiveStepRef.current) {
+      prevActiveStepRef.current = activeStepType;
+      autoRunTriggeredRef.current = null;
+    }
+  }, [activeStepType]);
 
   useEffect(() => {
     if (!shouldAutoRun || !activeStepType) return;
@@ -141,7 +141,7 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
         autoRunTriggeredRef.current = null; // Allow retry on failure
         queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
       });
-  }, [shouldAutoRun, activeStepType, projectId]);
+  }, [shouldAutoRun, activeStepType, projectId, queryClient]);
 
   if (!activeStepType) {
     return (
@@ -179,6 +179,25 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
   if (step?.status === "pending" || !step) {
     if (activeStepType === "subject") {
       return <SubjectPanel projectId={projectId} />;
+    }
+
+    if (activeStepType === "writer" && step && ready) {
+      return (
+        <WriterPanel
+          projectId={projectId}
+          step={step}
+          onRun={async () => {
+            try {
+              await api.post(`/api/v1/projects/${projectId}/pipeline/run/writer`, {});
+            } catch {
+              // error handled by query invalidation
+            }
+            queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+            queryClient.invalidateQueries({ queryKey: ["scripts", projectId] });
+          }}
+          onNavigateToEditor={() => router.push(`/projects/${projectId}/editor`)}
+        />
+      );
     }
 
     if (["factcheck", "readability", "copyright", "policy"].includes(activeStepType)) {
