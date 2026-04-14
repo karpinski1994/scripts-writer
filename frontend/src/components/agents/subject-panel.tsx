@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react"
+import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod/v4"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileTextIcon, MessageCircle, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePipelineStore } from "@/stores/pipeline-store"
 
 const CONTENT_FORMATS = [
   { id: "short_video", label: "Short-form Video", sublabel: "TikTok/Reels", icon: Video, hasRetention: true },
@@ -55,12 +56,13 @@ interface SubjectPanelProps {
 
 export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const queryClient = useQueryClient()
+  const setActiveStepType = usePipelineStore((s) => s.setActiveStepType)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
   const [hasFile, setHasFile] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -86,19 +88,21 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const watchedContentFormat = watch("content_format")
   const watchedTopic = watch("topic")
 
-  const existingFormatId = project?.target_format ? TARGET_FORMAT_TO_ID[project.target_format] : null
-  const hasInitialized = useRef(false)
-
-  if (project && !hasInitialized.current && existingFormatId) {
-    hasInitialized.current = true
-    setValue("content_format", existingFormatId as typeof CONTENT_FORMATS[number]["id"], { shouldValidate: false })
-    if (project.topic) {
-      setValue("topic", project.topic, { shouldValidate: false })
+  useEffect(() => {
+    if (project && !hasInitialized) {
+      const existingFormatId = project.target_format ? TARGET_FORMAT_TO_ID[project.target_format] : null
+      if (existingFormatId) {
+        setHasInitialized(true)
+        setValue("content_format", existingFormatId as typeof CONTENT_FORMATS[number]["id"], { shouldValidate: false })
+        if (project.topic) {
+          setValue("topic", project.topic, { shouldValidate: false })
+        }
+        if (project.content_goal) {
+          setValue("main_goal", project.content_goal, { shouldValidate: false })
+        }
+      }
     }
-    if (project.content_goal) {
-      setValue("main_goal", project.content_goal, { shouldValidate: false })
-    }
-  }
+  }, [project, hasInitialized, setValue])
 
   const uploadFile = async (file: File) => {
     const ext = "." + file.name.split(".").pop()?.toLowerCase()
@@ -204,11 +208,23 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
       queryClient.invalidateQueries({ queryKey: ["project", projectId] })
       toast.success("Subject saved!")
+      
+      setActiveStepType("hook")
     } catch (err) {
       console.error("[SUBJECT-PANEL] Failed to save subject:", err)
       const msg = err instanceof ApiError ? err.message : "Failed to save subject"
       toast.error(msg)
     }
+  }
+
+  if (projectLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -221,7 +237,6 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Section 1: The Fast Track - File Upload */}
           <div className="space-y-2">
             <Label className="text-base font-medium">The Fast Track</Label>
             <div
@@ -286,7 +301,6 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
             )}
           </div>
 
-          {/* Section 2: Core Setup - Content Format */}
           <div className="space-y-3">
             <Label className="text-base font-medium">
               Content Format <span className="text-destructive">*</span>
@@ -321,7 +335,6 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
             )}
           </div>
 
-          {/* Section 3: The Basics */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-base font-medium">
