@@ -70,18 +70,24 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
         if raw.endswith("```"):
             raw = raw[:-3]
         raw = raw.strip()
+
+        title = "VSL Script"
+        content = raw
+        word_count = len(raw.split())
+
         try:
             data = json.loads(raw)
+            title = data.get("script", {}).get("title", "VSL Script") or title
+            content = data.get("script", {}).get("content", raw) or raw
+            word_count = data.get("script", {}).get("word_count", word_count) or word_count
         except json.JSONDecodeError:
-            logger.warning(f"Invalid JSON from LLM, attempting to extract JSON")
-            start = raw.find("{")
-            end = raw.rfind("}") + 1
-            if start >= 0 and end > start:
-                raw = raw[start:end]
-                data = json.loads(raw)
-            else:
-                data = {"script": {"title": "", "content": "", "word_count": 0, "notes": ""}, "confidence": 0.5}
+            logger.warning(f"Invalid JSON from LLM, using text response directly")
+
         try:
-            return WriterAgentOutput.model_validate(data)
+            return WriterAgentOutput(
+                script={"title": title, "content": content, "word_count": word_count, "notes": ""}, confidence=0.7
+            )
         except Exception:
-            return WriterAgentOutput(script={"title": "", "content": "", "word_count": 0, "notes": ""}, confidence=0.5)
+            return WriterAgentOutput(
+                script={"title": title, "content": content, "word_count": word_count, "notes": ""}, confidence=0.5
+            )
