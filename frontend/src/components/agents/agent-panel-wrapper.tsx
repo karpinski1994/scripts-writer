@@ -219,6 +219,9 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   };
 
   switch (activeStepType) {
+    case "subject": {
+      return <SubjectPanel projectId={projectId} />;
+    }
     case "icp": {
       const data = parseOutput<ICPAgentOutput>(step);
       if (!data) return null;
