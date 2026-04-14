@@ -46,7 +46,7 @@ class Project(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "target_format IS NOT NULL OR target_format IS NULL",
+            "target_format IN ('Short-form Video','Long-form Video','VSL','Blog Post','LinkedIn Post','Facebook Post') OR target_format IS NULL",
             name="ck_projects_target_format",
         ),
         CheckConstraint(
