@@ -228,6 +228,8 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
     case "hook": {
       const data = parseOutput<HookAgentOutput>(step);
       if (!data) return null;
+      const initialHook = step.selected_option ? JSON.parse(step.selected_option) : undefined;
+      console.log("[DEBUG] hook initialSelection:", initialHook, "hooks:", data.hooks?.map(h => h.text?.slice(0, 30)));
       return (
         <>
           <HookPanel
@@ -236,6 +238,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             onRerun={handleRerun}
             isRunning={running}
             projectId={projectId}
+            initialSelection={initialHook}
           />
           <RerunConfirmDialog
             open={rerunConfirm === activeStepType}
@@ -250,6 +253,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
       const data = parseOutput<NarrativeAgentOutput>(step);
       if (!data) return null;
       const initialNarrative = step.selected_option ? JSON.parse(step.selected_option) : undefined;
+      console.log("[DEBUG] narrative initialSelection:", initialNarrative, "patterns:", data.patterns?.map(p => p.pattern_name));
       return (
         <>
           <NarrativePanel

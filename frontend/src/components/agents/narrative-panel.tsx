@@ -25,8 +25,11 @@ interface NarrativePanelProps {
 
 export function NarrativePanel({ data, onContinue, onRerun, isRunning, projectId, stepType, initialSelection }: NarrativePanelProps) {
   const [selectedPattern, setSelectedPattern] = useState<number | null>(() => {
-    if (initialSelection) {
-      return data.patterns.findIndex(p => p.pattern_name === initialSelection.pattern_name);
+    if (initialSelection && initialSelection.pattern_name) {
+      const target = initialSelection.pattern_name.toLowerCase();
+      return data.patterns.findIndex(p => 
+        p.pattern_name && p.pattern_name.toLowerCase() === target
+      );
     }
     return null;
   });

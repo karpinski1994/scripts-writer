@@ -26,9 +26,12 @@ interface RetentionPanelProps {
 export function RetentionPanel({ data, onContinue, onRerun, isRunning, projectId, stepType, initialSelections }: RetentionPanelProps) {
   const [selectedIds, setSelectedIds] = useState<number[]>(() => {
     if (initialSelections && initialSelections.length > 0) {
-      return initialSelections.map(selected => 
-        data.techniques.findIndex(t => t.technique_name === selected.technique_name)
-      ).filter(idx => idx >= 0);
+      return initialSelections.map(selected => {
+        const target = selected.technique_name?.toLowerCase();
+        return data.techniques.findIndex(t => 
+          t.technique_name && t.technique_name.toLowerCase() === target
+        );
+      }).filter(idx => idx >= 0);
     }
     return [];
   });
