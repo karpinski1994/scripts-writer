@@ -51,16 +51,23 @@ class PipelineOrchestrator:
         self.ws_manager = ws_manager
 
     async def run_step(self, project_id: str, step_type: StepType) -> PipelineStep:
+        logger.info(f"[ORCHESTRATOR] Starting step: {step_type.value} for project: {project_id}")
+
         project = await self.db.get(Project, project_id)
         if project is None:
             raise ValueError(f"Project {project_id} not found")
 
+        logger.debug(f"[ORCHESTRATOR] Project details - topic: {project.topic}, target_format: {project.target_format}")
+
         step = await self._get_or_create_step(project_id, step_type)
+        logger.debug(f"[ORCHESTRATOR] Current step status: {step.status}")
 
         completed_types = await self._get_completed_step_types(project_id)
-        validate_step_ready(step_type, completed_types)
+        logger.debug(f"[ORCHESTRATOR] Completed steps: {[s.value for s in completed_types]}")
+        validate_step_ready(step_type, completed_types, project.target_format)
 
         if StepStatus(step.status) == StepStatus.completed:
+            logger.info(f"[ORCHESTRATOR] Step {step_type.value} was completed, resetting to pending")
             step.status = StepStatus.pending.value
             step.output_data = None
             step.selected_option = None
@@ -85,6 +92,7 @@ class PipelineOrchestrator:
                 },
             )
 
+        logger.info(f"[ORCHESTRATOR] Step {step_type.value} set to running")
         start_ms = time.time()
 
         if step_type == StepType.subject:
@@ -104,12 +112,19 @@ class PipelineOrchestrator:
             return step
 
         try:
+            logger.info(f"[ORCHESTRATOR] Building agent inputs for step: {step_type.value}")
             step_map = await self._get_step_map(project_id)
             agent, input_data = await self._build_agent_inputs(project, step_type, step_map)
+
+            logger.debug(f"[ORCHESTRATOR] Agent type: {type(agent).__name__}")
+            logger.debug(f"[ORCHESTRATOR] Input data keys: {list(input_data.model_dump().keys())}")
+
             from app.config import get_settings
 
             factory = ProviderFactory(get_settings())
             cache = LLMCache(max_size=get_settings().cache_max_size, ttl_seconds=get_settings().cache_ttl_seconds)
+            logger.info(f"[ORCHESTRATOR] Executing agent for step: {step_type.value}")
+
             result = await agent.execute(input_data, cache, factory)
 
             step.output_data = json.dumps(result.model_dump())
@@ -180,7 +195,10 @@ class PipelineOrchestrator:
     async def _build_agent_inputs(
         self, project: Project, step_type: StepType, step_map: dict[StepType, PipelineStep]
     ) -> tuple:
+        logger.info(f"[ORCHESTRATOR] Building agent inputs for step: {step_type.value}")
+
         piragi_context = await self._resolve_rag_context(project, step_type)
+        logger.debug(f"[ORCHESTRATOR] PIRAGI context length: {len(piragi_context) if piragi_context else 0}")
 
         if step_type == StepType.subject:
             return {}, {}
@@ -190,7 +208,9 @@ class PipelineOrchestrator:
         playbooks_base = Path("/Users/karpinski94/projects/scripts-writer/documents/playbooks")
 
         if step_type == StepType.icp:
+            logger.info(f"[ORCHESTRATOR] Building ICP agent input")
             raw_notes = project.raw_notes or ""
+            logger.debug(f"[ORCHESTRATOR] ICP raw_notes length: {len(raw_notes)}")
 
             project_icp_dir = docs_base / "icp"
             if project_icp_dir.exists():
@@ -205,6 +225,7 @@ class PipelineOrchestrator:
                         raw_notes = (
                             f"Document content from project files:\n{doc_content[0]}\n\nOriginal notes: {raw_notes}"
                         )
+                        logger.debug(f"[ORCHESTRATOR] Added project ICP document, new length: {len(raw_notes)}")
 
             playbook_icp_dir = playbooks_base / "icp"
             if playbook_icp_dir.exists():
@@ -217,6 +238,7 @@ class PipelineOrchestrator:
                             doc_content.append(content)
                     if doc_content:
                         raw_notes = f"Document content from playbook:\n{doc_content[0]}\n\n" + raw_notes
+                        logger.debug(f"[ORCHESTRATOR] Added playbook ICP document, new length: {len(raw_notes)}")
 
             agent = ICPAgent()
             input_data = ICPAgentInput(
@@ -226,11 +248,16 @@ class PipelineOrchestrator:
                 content_goal=project.content_goal,
                 piragi_context=piragi_context,
             )
+            logger.info(
+                f"[ORCHESTRATOR] ICP input built - topic: {project.topic}, target_format: {project.target_format}"
+            )
             return agent, input_data
 
         icp = self._extract_icp(step_map)
+        logger.debug(f"[ORCHESTRATOR] Extracted ICP: {icp.profile_name if icp else 'None'}")
 
         if step_type == StepType.hook:
+            logger.info(f"[ORCHESTRATOR] Building Hook agent input")
             hook_context = ""
 
             project_hook_dir = docs_base / "hooks"
@@ -257,11 +284,14 @@ class PipelineOrchestrator:
                 content_goal=project.content_goal,
                 piragi_context=hook_context or piragi_context,
             )
+            logger.info(f"[ORCHESTRATOR] Hook input built - topic: {project.topic}, has_icp: {bool(icp)}")
             return agent, input_data
 
         selected_hook = self._extract_selected(step_map, StepType.hook, HookSuggestion)
+        logger.debug(f"[ORCHESTRATOR] Selected hook: {selected_hook.text[:50] if selected_hook else 'None'}...")
 
         if step_type == StepType.narrative:
+            logger.info(f"[ORCHESTRATOR] Building Narrative agent input")
             narrative_context = ""
 
             project_narrative_dir = docs_base / "narratives"
@@ -290,11 +320,16 @@ class PipelineOrchestrator:
                 target_format=project.target_format,
                 piragi_context=narrative_context or piragi_context,
             )
+            logger.info(f"[ORCHESTRATOR] Narrative input built - topic: {project.topic}")
             return agent, input_data
 
         selected_narrative = self._extract_selected(step_map, StepType.narrative, NarrativePattern)
+        logger.debug(
+            f"[ORCHESTRATOR] Selected narrative: {selected_narrative.pattern_name if selected_narrative else 'None'}"
+        )
 
         if step_type == StepType.retention:
+            logger.info(f"[ORCHESTRATOR] Building Retention agent input")
             retention_context = ""
 
             project_retention_dir = docs_base / "retention"
@@ -324,11 +359,16 @@ class PipelineOrchestrator:
                 content_goal=project.content_goal,
                 piragi_context=retention_context or piragi_context,
             )
+            logger.info(f"[ORCHESTRATOR] Retention input built")
             return agent, input_data
 
         selected_retention = self._extract_selected(step_map, StepType.retention, RetentionTechnique)
+        logger.debug(
+            f"[ORCHESTRATOR] Selected retention: {selected_retention.technique_name if selected_retention else 'None'}"
+        )
 
         if step_type == StepType.cta:
+            logger.info(f"[ORCHESTRATOR] Building CTA agent input")
             agent = CTAAgent()
             input_data = CTAAgentInput(
                 icp=icp,
@@ -338,12 +378,16 @@ class PipelineOrchestrator:
                 cta_purpose=project.cta_purpose,
                 piragi_context=piragi_context,
             )
+            logger.info(f"[ORCHESTRATOR] CTA input built")
             return agent, input_data
 
         if step_type == StepType.writer:
             from app.schemas.agents import CTASuggestion
 
             selected_cta = self._extract_selected(step_map, StepType.cta, CTASuggestion)
+            logger.debug(f"[ORCHESTRATOR] Selected CTA: {selected_cta.cta_text if selected_cta else 'None'}")
+
+            logger.info(f"[ORCHESTRATOR] Building Writer agent input")
             agent = WriterAgent()
             input_data = WriterAgentInput(
                 icp=icp,
@@ -356,6 +400,9 @@ class PipelineOrchestrator:
                 content_goal=project.content_goal,
                 raw_notes=project.raw_notes,
                 piragi_context=piragi_context,
+            )
+            logger.info(
+                f"[ORCHESTRATOR] Writer input built - topic: {project.topic}, has_retention: {bool(selected_retention)}, has_cta: {bool(selected_cta)}"
             )
             return agent, input_data
 
@@ -495,7 +542,7 @@ class PipelineOrchestrator:
     def _extract_selected(self, step_map: dict[StepType, PipelineStep], step_type: StepType, model_cls):
         step = step_map.get(step_type)
         if step is None:
-            raise ValueError(f"Step {step_type.value} not found in step map")
+            return None
         if step.selected_option:
             data = json.loads(step.selected_option)
             if isinstance(data, list):

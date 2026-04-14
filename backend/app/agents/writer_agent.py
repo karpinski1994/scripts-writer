@@ -61,8 +61,14 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
         )
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> WriterAgentOutput:
+        logger.info(f"[WRITER-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[WRITER-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
         raw = raw.strip()
+        logger.debug(f"[WRITER-AGENT] Raw LLM response length: {len(raw)}")
+        logger.debug(f"[WRITER-AGENT] Raw response preview: {raw[:200]}...")
+
         if raw.startswith("```json"):
             raw = raw[7:]
         elif raw.startswith("```"):
@@ -77,17 +83,19 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
 
         try:
             data = json.loads(raw)
-            title = data.get("script", {}).get("title", "VSL Script") or title
+            logger.debug(f"[WRITER-AGENT] Parsed JSON successfully")
             content = data.get("script", {}).get("content", raw) or raw
             word_count = data.get("script", {}).get("word_count", word_count) or word_count
         except json.JSONDecodeError:
-            logger.warning("Invalid JSON from LLM, using text response directly")
+            logger.warning("[WRITER-AGENT] Invalid JSON from LLM, using text response directly")
 
         try:
+            logger.info(f"[WRITER-AGENT] LLM call completed, word_count: {word_count}")
             return WriterAgentOutput(
                 script={"title": title, "content": content, "word_count": word_count, "notes": ""}, confidence=0.7
             )
-        except Exception:
+        except Exception as e:
+            logger.warning(f"[WRITER-AGENT] Validation failed: {e}")
             return WriterAgentOutput(
                 script={"title": title, "content": content, "word_count": word_count, "notes": ""}, confidence=0.5
             )

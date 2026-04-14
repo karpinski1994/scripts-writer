@@ -98,18 +98,28 @@ class ReadabilityAgent(BaseAgent[ReadabilityAgentInput, ReadabilityAgentOutput])
         return result
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> ReadabilityAgentOutput:
+        logger.info(f"[READABILITY-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[READABILITY-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
+        logger.debug(f"[READABILITY-AGENT] Raw LLM response length: {len(raw)}")
+
         try:
             data = json.loads(raw)
+            logger.debug(f"[READABILITY-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
-            logger.warning("ReadabilityAgent: Invalid JSON response, attempting to extract JSON")
+            logger.warning("[READABILITY-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\{.*\}", raw, re.DOTALL)
             if match:
                 data = json.loads(match.group())
             else:
+                logger.error("[READABILITY-AGENT] Failed to extract JSON")
                 raise
         if isinstance(data, list):
             data = {"findings": data, "confidence": 0.7}
+
+        findings_count = len(data.get("findings", []))
+        logger.info(f"[READABILITY-AGENT] LLM call completed, findings: {findings_count}")
         return ReadabilityAgentOutput(
             findings=data.get("findings", []),
             flesch_kincaid_score=0.0,

@@ -43,6 +43,13 @@ TRANSITIONS: dict[StepStatus, list[StepStatus]] = {
     StepStatus.completed: [],
 }
 
+VIDEO_FORMATS = {"short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"}
+
+
+def has_retention(target_format: str | None) -> bool:
+    return target_format in VIDEO_FORMATS
+
+
 DEPENDENCY_MAP: dict[StepType, list[StepType]] = {
     StepType.icp: [],
     StepType.subject: [StepType.icp],
@@ -68,8 +75,22 @@ def validate_transition(step_type: str, from_status: StepStatus, to_status: Step
         raise InvalidStateTransitionError(step_type, from_status.value, to_status.value)
 
 
-def validate_step_ready(step_type: StepType, completed_steps: set[StepType]) -> None:
+def validate_step_ready(
+    step_type: StepType,
+    completed_steps: set[StepType],
+    target_format: str | None = None,
+) -> None:
+    if step_type == StepType.retention:
+        if not has_retention(target_format):
+            return
+
     required = DEPENDENCY_MAP.get(step_type, [])
-    missing = [dep.value for dep in required if dep not in completed_steps]
+
+    if step_type in (StepType.cta, StepType.writer) and not has_retention(target_format):
+        deps = {StepType.icp, StepType.subject, StepType.narrative}
+    else:
+        deps = set(required)
+
+    missing = [dep.value for dep in deps if dep not in completed_steps]
     if missing:
         raise DependencyNotMetError(step_type.value, missing)

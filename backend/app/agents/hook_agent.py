@@ -49,10 +49,18 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
         )
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> HookAgentOutput:
+        logger.info(f"[HOOK-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[HOOK-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
+
         if not raw or not raw.strip():
+            logger.error("[HOOK-AGENT] LLM returned empty response")
             raise ValueError("LLM returned empty response")
         raw = raw.strip()
+        logger.debug(f"[HOOK-AGENT] Raw LLM response length: {len(raw)}")
+        logger.debug(f"[HOOK-AGENT] Raw response preview: {raw[:200]}...")
+
         # Strip markdown code blocks
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -61,16 +69,22 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
             raw = raw.strip()
         try:
             data = json.loads(raw)
+            logger.debug(f"[HOOK-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
-            logger.warning("HookAgent: Invalid JSON response, attempting to extract JSON")
+            logger.warning("[HOOK-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\{.*\}", raw, re.DOTALL)
             if match:
                 data = json.loads(match.group())
             else:
+                logger.error(f"[HOOK-AGENT] Failed to extract valid JSON: {raw[:100]}...")
                 raise ValueError(f"LLM response is not valid JSON: {raw[:100]}...")
         if not raw.startswith("{") and not raw.startswith("["):
+            logger.error(f"[HOOK-AGENT] LLM response is not JSON: {raw[:100]}...")
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         # Add default confidence if missing
         if "confidence" not in data:
             data["confidence"] = 0.8
+
+        hook_count = len(data.get("hooks", []))
+        logger.info(f"[HOOK-AGENT] LLM call completed, generated {hook_count} hooks")
         return HookAgentOutput.model_validate(data)

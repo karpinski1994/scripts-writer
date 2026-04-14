@@ -22,12 +22,12 @@ import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileText
 import { cn } from "@/lib/utils"
 
 const CONTENT_FORMATS = [
-  { id: "short_video", label: "Short-form Video", sublabel: "TikTok/Reels", icon: Video },
-  { id: "long_video", label: "Long-form Video", sublabel: "YouTube", icon: Globe },
-  { id: "vsl", label: "VSL", sublabel: "Video Sales Letter", icon: FileTextIcon },
-  { id: "blog", label: "Blog Post", sublabel: "Article", icon: FileTextIcon },
-  { id: "linkedin", label: "LinkedIn Post", sublabel: "Professional", icon: MessageCircle },
-  { id: "facebook", label: "Facebook Post", sublabel: "Social", icon: MessageCircle },
+  { id: "short_video", label: "Short-form Video", sublabel: "TikTok/Reels", icon: Video, hasRetention: true },
+  { id: "long_video", label: "Long-form Video", sublabel: "YouTube", icon: Globe, hasRetention: true },
+  { id: "vsl", label: "VSL", sublabel: "Video Sales Letter", icon: FileTextIcon, hasRetention: true },
+  { id: "blog", label: "Blog Post", sublabel: "Article", icon: FileTextIcon, hasRetention: false },
+  { id: "linkedin", label: "LinkedIn Post", sublabel: "Professional", icon: MessageCircle, hasRetention: false },
+  { id: "facebook", label: "Facebook Post", sublabel: "Social", icon: MessageCircle, hasRetention: false },
 ] as const
 
 const ALLOWED_TYPES = [".txt", ".pdf", ".docx", ".md"]
@@ -72,33 +72,46 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
 
   const uploadFile = async (file: File) => {
     const ext = "." + file.name.split(".").pop()?.toLowerCase()
+    console.log("[SUBJECT-PANEL] File upload started:", { fileName: file.name, ext })
+    
     if (!ALLOWED_TYPES.includes(ext)) {
+      console.warn("[SUBJECT-PANEL] Invalid file type:", ext)
       toast.error("Invalid file type. Use .txt, .pdf, .docx, or .md")
       return
     }
 
     setIsUploading(true)
     try {
+      console.log("[SUBJECT-PANEL] Preparing FormData for upload")
       const formData = new FormData()
       formData.append("file", file)
       
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-      const res = await fetch(`${baseUrl}/api/v1/projects/${projectId}/rag/upload?step_type=subject`, {
+      const uploadUrl = `${baseUrl}/api/v1/projects/${projectId}/rag/upload?step_type=subject`
+      console.log("[SUBJECT-PANEL] Uploading file to:", uploadUrl)
+      
+      const res = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
       })
+      console.log("[SUBJECT-PANEL] Upload response status:", res.status)
       
       if (res.ok) {
         const content = await file.text()
+        console.log("[SUBJECT-PANEL] File content length:", content.length)
         const topicMatch = content.slice(0, 500).replace(/\n/g, " ").trim()
+        console.log("[SUBJECT-PANEL] Setting topic from file:", topicMatch.slice(0, 50) + "...")
         setValue("topic", topicMatch, { shouldValidate: true })
         setUploadedFilename(file.name)
         setHasFile(true)
+        console.log("[SUBJECT-PANEL] File upload successful")
         toast.success("Brief uploaded! Manual fields are now optional.")
       } else {
+        console.error("[SUBJECT-PANEL] Upload failed with status:", res.status)
         throw new Error("Upload failed")
       }
     } catch (err) {
+      console.error("[SUBJECT-PANEL] File upload error:", err)
       toast.error("Failed to upload file")
     } finally {
       setIsUploading(false)
@@ -142,16 +155,26 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const onSubmit = async (data: FormValues) => {
     const formatLabel = CONTENT_FORMATS.find(f => f.id === data.content_format)?.label || data.content_format
     
+    console.log("[SUBJECT-PANEL] Submitting subject data:", {
+      topic: data.topic,
+      target_format: formatLabel,
+      content_goal: data.main_goal,
+      raw_notes: watchedTopic?.slice(0, 100) + "...",
+    })
+    
     try {
+      console.log("[SUBJECT-PANEL] Sending POST to /api/v1/projects/{projectId}/subject")
       await api.post(`/api/v1/projects/${projectId}/subject`, {
         topic: data.topic || "",
         target_format: formatLabel,
         content_goal: data.main_goal || null,
         raw_notes: watchedTopic || "",
       })
+      console.log("[SUBJECT-PANEL] Subject saved successfully, invalidating pipeline queries")
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
       toast.success("Subject saved!")
     } catch (err) {
+      console.error("[SUBJECT-PANEL] Failed to save subject:", err)
       const msg = err instanceof ApiError ? err.message : "Failed to save subject"
       toast.error(msg)
     }

@@ -77,6 +77,30 @@ ALLOWED_EXTENSIONS = {".txt", ".md", ".pdf"}
 DOCUMENTS_DIR = "documents"
 PLAYBOOKS_DIR = "playbooks"
 
+import logging
+from pathlib import Path
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import get_db
+from app.db.models import Project
+from app.services.piragi_service import PiragiService
+from app.schemas.piragi import (
+    ALLOWED_EXTENSIONS,
+    PiragiQueryRequest,
+    PiragiQueryResponse,
+    STEP_CATEGORY_MAP,
+    ChunkResult,
+    UploadDocumentResponse,
+)
+
+logger = logging.getLogger(__name__)
+
+DOCUMENTS_DIR = "/Users/karpinski94/projects/scripts-writer/documents"
+PLAYBOOKS_DIR = "playbooks"
+
 STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.keys()}
 
 
@@ -88,18 +112,25 @@ async def upload_document(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ) -> UploadDocumentResponse:
-    from pathlib import Path
     import aiofiles
+
+    logger.info(
+        f"[PIRAGI-UPLOAD] Starting upload - project_id: {project_id}, step_type: {step_type}, filename: {file.filename}, is_playbook: {is_playbook}"
+    )
 
     category = STEP_TO_CATEGORY.get(step_type)
     if not category:
+        logger.error(f"[PIRAGI-UPLOAD] Invalid step_type: {step_type}")
         raise HTTPException(
             status_code=400,
             detail=f"Invalid step_type. Must be one of: {list(STEP_TO_CATEGORY.keys())}",
         )
 
     file_ext = Path(file.filename).suffix.lower()
+    logger.debug(f"[PIRAGI-UPLOAD] File extension: {file_ext}")
+
     if file_ext not in ALLOWED_EXTENSIONS:
+        logger.error(f"[PIRAGI-UPLOAD] File type not allowed: {file_ext}")
         raise HTTPException(
             status_code=400,
             detail=f"File type not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
@@ -107,25 +138,34 @@ async def upload_document(
 
     if is_playbook:
         base_dir = Path(DOCUMENTS_DIR) / PLAYBOOKS_DIR / category
+        logger.debug(f"[PIRAGI-UPLOAD] Using playbook directory: {base_dir}")
     else:
         project_service = ProjectService(db)
         project = await project_service.get_by_id(str(project_id))
         project_slug = project.name.lower().replace(" ", "-")
         base_dir = Path(DOCUMENTS_DIR) / project_slug / category
+        logger.debug(f"[PIRAGI-UPLOAD] Using project directory: {base_dir}")
 
     base_dir.mkdir(parents=True, exist_ok=True)
+    logger.debug(f"[PIRAGI-UPLOAD] Directory created/verified")
 
     file_path = base_dir / file.filename
 
     content = await file.read()
+    logger.debug(f"[PIRAGI-UPLOAD] File content size: {len(content)} bytes")
+
     if file_ext == ".pdf":
+        logger.error("[PIRAGI-UPLOAD] PDF support not available")
         raise HTTPException(status_code=400, detail="PDF support coming soon")
 
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(content)
+    logger.debug(f"[PIRAGI-UPLOAD] File written to: {file_path}")
 
+    logger.info(f"[PIRAGI-UPLOAD] Indexing document: {file_path}")
     service = PiragiService(db)
     await service.index_document(str(file_path), category)
+    logger.info(f"[PIRAGI-UPLOAD] Document indexed successfully")
 
     return UploadDocumentResponse(
         filename=file.filename,

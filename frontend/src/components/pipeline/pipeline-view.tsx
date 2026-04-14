@@ -7,6 +7,12 @@ import { usePipelineStore, isStepReady, ANALYSIS_STEPS } from "@/stores/pipeline
 const CREATIVE_STEPS = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer"];
 const ANALYSIS_STEP = "analysis";
 
+const VIDEO_FORMATS = new Set(["short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"]);
+
+function hasRetention(targetFormat: string | undefined): boolean {
+  return targetFormat ? VIDEO_FORMATS.has(targetFormat) : false;
+}
+
 const STEP_LABELS: Record<string, string> = {
   icp: "ICP",
   subject: "Subject",
@@ -35,10 +41,32 @@ function StatusIcon({ status }: { status: string }) {
 
 interface PipelineViewProps {
   steps: PipelineStep[];
+  targetFormat?: string;
 }
 
-export function PipelineView({ steps }: PipelineViewProps) {
+export function PipelineView({ steps, targetFormat }: PipelineViewProps) {
   const { activeStepType, setActiveStepType } = usePipelineStore();
+
+  const showRetention = hasRetention(targetFormat);
+  const visibleSteps = showRetention
+    ? CREATIVE_STEPS
+    : CREATIVE_STEPS.filter((s) => s !== "retention");
+
+  function getDependencies(stepType: string): string[] {
+    const DEPENDENCY_MAP: Record<string, string[]> = {
+      icp: [],
+      subject: ["icp"],
+      hook: ["icp", "subject"],
+      narrative: ["icp", "subject", "hook"],
+      retention: ["icp", "subject", "narrative"],
+      cta: ["icp", "subject", "narrative", "retention"],
+      writer: ["icp", "subject", "narrative", "retention", "cta"],
+    };
+    if (!showRetention && (stepType === "cta" || stepType === "writer")) {
+      return DEPENDENCY_MAP[stepType].filter((d) => d !== "retention");
+    }
+    return DEPENDENCY_MAP[stepType] ?? [];
+  }
 
   function getStepStatus(stepType: string): string {
     const step = steps.find((s) => s.step_type === stepType);
@@ -46,7 +74,7 @@ export function PipelineView({ steps }: PipelineViewProps) {
     if (step.status === "running") return "running";
     if (step.status === "completed") return "completed";
     if (step.status === "failed") return "failed";
-    if (isStepReady(stepType, steps)) return "pending";
+    if (isStepReady(stepType, steps, getDependencies(stepType))) return "pending";
     return "locked";
   }
 
@@ -110,7 +138,7 @@ export function PipelineView({ steps }: PipelineViewProps) {
 
   return (
     <div className="space-y-3">
-      {renderRow(CREATIVE_STEPS, "Creative")}
+      {renderRow(visibleSteps, "Creative")}
       {renderRow([ANALYSIS_STEP], "Analysis")}
     </div>
   );

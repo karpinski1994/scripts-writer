@@ -5,9 +5,9 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import PipelineStep
+from app.db.models import PipelineStep, Project
 from app.pipeline.orchestrator import PipelineOrchestrator
-from app.pipeline.state import StepStatus, StepType
+from app.pipeline.state import StepStatus, StepType, has_retention
 from app.schemas.pipeline import PipelineResponse, PipelineStepResponse, StepUpdateRequest
 from app.ws.handlers import ConnectionManager
 
@@ -20,10 +20,19 @@ class PipelineService:
         self.ws_manager = ws_manager
 
     async def get_pipeline(self, project_id: str) -> PipelineResponse:
+        project = await self.db.get(Project, project_id)
+        if project is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+
         result = await self.db.execute(
             select(PipelineStep).where(PipelineStep.project_id == project_id).order_by(PipelineStep.step_order)
         )
         steps = result.scalars().all()
+
+        show_retention = has_retention(project.target_format)
+        if not show_retention:
+            steps = [s for s in steps if s.step_type != StepType.retention.value]
+
         step_responses = [PipelineStepResponse.model_validate(s) for s in steps]
         current_step = 0
         for s in steps:

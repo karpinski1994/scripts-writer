@@ -66,6 +66,7 @@ function getDownstreamSteps(stepType: string, steps: PipelineStep[]): string[] {
 interface AgentPanelWrapperProps {
   projectId: string;
   steps: PipelineStep[];
+  targetFormat?: string;
 }
 
 function parseOutput<T>(step: PipelineStep): T | null {
@@ -77,10 +78,12 @@ function parseOutput<T>(step: PipelineStep): T | null {
   }
 }
 
-export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) {
+export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanelWrapperProps) {
   const { activeStepType, isRunning } = usePipelineStore();
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const showRetention = targetFormat && new Set(["short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"]).has(targetFormat);
   const [rerunConfirm, setRerunConfirm] = useState<string | null>(null);
   
   const { data: project } = useQuery<ProjectDetail>({
@@ -100,11 +103,20 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   }
 
   const step = steps.find((s) => s.step_type === activeStepType);
-  const ready = isStepReady(activeStepType, steps);
+
+  const getDependencies = (stepType: string): string[] => {
+    const deps = DEPENDENCY_MAP[stepType] ?? [];
+    if (!showRetention && (stepType === "cta" || stepType === "writer")) {
+      return deps.filter((d) => d !== "retention");
+    }
+    return deps;
+  };
+
+  const ready = isStepReady(activeStepType, steps, getDependencies(activeStepType));
   const running = isRunning[activeStepType] ?? step?.status === "running";
 
   if (!ready && step?.status !== "completed" && step?.status !== "running" && step?.status !== "failed") {
-    const deps = DEPENDENCY_MAP[activeStepType] ?? [];
+    const deps = getDependencies(activeStepType);
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-2 py-12">
@@ -188,9 +200,13 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   }
 
   const runAgent = async () => {
+    console.log(`[AGENT-PANEL] Running agent for step: ${activeStepType}, projectId: ${projectId}`);
     try {
+      console.log(`[AGENT-PANEL] Sending POST to /api/v1/projects/{projectId}/pipeline/run/${activeStepType}`);
       await api.post(`/api/v1/projects/${projectId}/pipeline/run/${activeStepType}`, {});
-    } catch {
+      console.log(`[AGENT-PANEL] Agent triggered successfully for step: ${activeStepType}`);
+    } catch (err) {
+      console.error(`[AGENT-PANEL] Failed to run agent for ${activeStepType}:`, err);
       // error handled by query invalidation
     }
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
@@ -198,6 +214,7 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
 
   const handleRerun = () => {
     const downstream = getDownstreamSteps(activeStepType!, steps);
+    console.log(`[AGENT-PANEL] HandleRerun - step: ${activeStepType}, downstream: ${downstream.join(", ")}`);
     if (downstream.length > 0) {
       setRerunConfirm(activeStepType);
     } else {
@@ -206,14 +223,20 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
   };
 
   const selectOption = async (selected: unknown) => {
+    console.log(`[AGENT-PANEL] Selecting option for step: ${activeStepType}, stepId: ${step?.id}`);
+    console.log(`[AGENT-PANEL] Selected data:`, selected);
+    
     await api.patch(`/api/v1/projects/${projectId}/pipeline/${step.id}`, {
       selected_option: selected,
     });
+    console.log(`[AGENT-PANEL] Option selected successfully`);
+    
     queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
     const STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "factcheck", "readability", "copyright", "policy"];
     const currentIdx = STEP_ORDER.indexOf(activeStepType || "");
     if (currentIdx >= 0 && currentIdx < STEP_ORDER.length - 1) {
       const nextStep = STEP_ORDER[currentIdx + 1];
+      console.log(`[AGENT-PANEL] Auto-advancing to next step: ${nextStep}`);
       usePipelineStore.getState().setActiveStepType(nextStep);
     }
   };

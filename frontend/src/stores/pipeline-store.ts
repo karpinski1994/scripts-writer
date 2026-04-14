@@ -77,8 +77,8 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
     }),
 }));
 
-export function isStepReady(stepType: string, steps: PipelineStep[]): boolean {
-  const deps = DEPENDENCY_MAP[stepType] ?? [];
+export function isStepReady(stepType: string, steps: PipelineStep[], customDeps?: string[]): boolean {
+  const deps = customDeps ?? (DEPENDENCY_MAP[stepType] ?? []);
   return deps.every((dep) =>
     steps.some((s) => s.step_type === dep && s.status === "completed")
   );

@@ -51,8 +51,14 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         )
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> CTAAgentOutput:
+        logger.info(f"[CTA-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[CTA-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
         raw = raw.strip()
+        logger.debug(f"[CTA-AGENT] Raw LLM response length: {len(raw)}")
+        logger.debug(f"[CTA-AGENT] Raw response preview: {raw[:200]}...")
+
         if raw.startswith("```json"):
             raw = raw[7:]
         elif raw.startswith("```"):
@@ -62,8 +68,9 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         raw = raw.strip()
         try:
             data = json.loads(raw)
+            logger.debug(f"[CTA-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
-            logger.warning("Invalid JSON from LLM, text response - attempting to parse as text")
+            logger.warning("[CTA-AGENT] Invalid JSON from LLM, text response - attempting to parse as text")
             ctas = self._parse_text_response(raw)
             if ctas:
                 data = {"ctas": ctas, "confidence": 0.7}
@@ -76,6 +83,7 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
                 else:
                     data = {"ctas": [], "confidence": 0.5}
         try:
+            logger.info(f"[CTA-AGENT] LLM call completed, generated {len(data.get('ctas', []))} CTAs")
             return CTAAgentOutput.model_validate(data)
         except Exception:
             ctas = self._parse_text_response(raw)

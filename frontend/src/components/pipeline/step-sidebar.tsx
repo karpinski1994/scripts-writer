@@ -18,8 +18,15 @@ const STEP_LABELS: Record<string, string> = {
 
 const STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "analysis"];
 
+const VIDEO_FORMATS = new Set(["short_video", "long_video", "vsl", "Short-form Video", "Long-form Video", "VSL"]);
+
+function hasRetention(targetFormat: string | undefined): boolean {
+  return targetFormat ? VIDEO_FORMATS.has(targetFormat) : false;
+}
+
 interface StepSidebarProps {
   steps: PipelineStep[];
+  targetFormat?: string;
 }
 
 function getAnalysisStatus(steps: PipelineStep[]): string {
@@ -37,12 +44,25 @@ function StatusIcon({ status }: { status: string }) {
   return <span className="size-2 rounded-full bg-muted-foreground/30" />;
 }
 
-export function StepSidebar({ steps }: StepSidebarProps) {
+export function StepSidebar({ steps, targetFormat }: StepSidebarProps) {
   const { activeStepType, setActiveStepType } = usePipelineStore();
+
+  const showRetention = hasRetention(targetFormat);
+
+  const getDependencies = (stepType: string): string[] => {
+    if (!showRetention && (stepType === "cta" || stepType === "writer")) {
+      return DEPENDENCY_MAP[stepType].filter((d) => d !== "retention");
+    }
+    return DEPENDENCY_MAP[stepType] ?? [];
+  };
+
+  const visibleStepTypes = showRetention
+    ? STEP_ORDER
+    : STEP_ORDER.filter((s) => s !== "retention");
 
   return (
     <div className="w-48 shrink-0 space-y-1">
-      {STEP_ORDER.map((stepType) => {
+      {visibleStepTypes.map((stepType) => {
         const step = steps.find((s) => s.step_type === stepType);
         let status = step?.status ?? "pending";
         
@@ -50,7 +70,7 @@ export function StepSidebar({ steps }: StepSidebarProps) {
           status = getAnalysisStatus(steps);
         }
         
-        const ready = isStepReady(stepType, steps);
+        const ready = isStepReady(stepType, steps, getDependencies(stepType));
         const isActive = activeStepType === stepType;
         const isLocked = !ready && status !== "completed" && status !== "running" && status !== "failed";
 
@@ -71,7 +91,7 @@ export function StepSidebar({ steps }: StepSidebarProps) {
         );
 
         if (isLocked) {
-          const deps = DEPENDENCY_MAP[stepType] ?? [];
+          const deps = getDependencies(stepType);
           return (
             <Tooltip key={stepType}>
               <TooltipTrigger render={button} />

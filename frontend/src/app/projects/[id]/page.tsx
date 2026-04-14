@@ -126,10 +126,10 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      <PipelineView steps={pipeline.steps} />
+      <PipelineView steps={pipeline.steps} targetFormat={project.target_format} />
 
       <div className="flex gap-4">
-        <StepSidebar steps={pipeline.steps} />
+        <StepSidebar steps={pipeline.steps} targetFormat={project.target_format} />
         <div className="flex-1 min-w-0">
           <ErrorBoundary>
             {pipeline.steps.every((s) => s.status === "pending") && (
@@ -137,7 +137,7 @@ export default function ProjectDetailPage() {
                 <p className="text-sm text-muted-foreground">Complete the ICP Profile to get started</p>
               </div>
             )}
-            <AgentPanelWrapper projectId={id} steps={pipeline.steps} />
+            <AgentPanelWrapper projectId={id} steps={pipeline.steps} targetFormat={project.target_format} />
           </ErrorBoundary>
         </div>
       </div>

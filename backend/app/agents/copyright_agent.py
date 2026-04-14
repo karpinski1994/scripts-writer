@@ -38,16 +38,26 @@ class CopyrightAgent(BaseAgent[CopyrightAgentInput, CopyrightAgentOutput]):
         return "\n\n".join(parts)
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> CopyrightAgentOutput:
+        logger.info(f"[COPYRIGHT-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[COPYRIGHT-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
+        logger.debug(f"[COPYRIGHT-AGENT] Raw LLM response length: {len(raw)}")
+
         try:
             data = json.loads(raw)
+            logger.debug(f"[COPYRIGHT-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
-            logger.warning("CopyrightAgent: Invalid JSON response, attempting to extract JSON")
+            logger.warning("[COPYRIGHT-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\[.*\]", raw, re.DOTALL)
             if match:
                 data = json.loads(match.group())
             else:
+                logger.error("[COPYRIGHT-AGENT] Failed to extract JSON")
                 raise
         if isinstance(data, list):
             data = {"findings": data, "confidence": 0.7}
+
+        findings_count = len(data.get("findings", []))
+        logger.info(f"[COPYRIGHT-AGENT] LLM call completed, findings: {findings_count}")
         return CopyrightAgentOutput.model_validate(data)

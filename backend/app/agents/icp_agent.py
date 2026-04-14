@@ -50,10 +50,18 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
         )
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> ICPAgentOutput:
+        logger.info(f"[ICP-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[ICP-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
+
         if not raw or not raw.strip():
+            logger.error("[ICP-AGENT] LLM returned empty response")
             raise ValueError("LLM returned empty response")
+
         raw = raw.strip()
+        logger.debug(f"[ICP-AGENT] Raw LLM response length: {len(raw)}")
+        logger.debug(f"[ICP-AGENT] Raw response preview: {raw[:200]}...")
         # Strip markdown code blocks
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -61,10 +69,13 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
                 raw = raw[4:]
             raw = raw.strip()
         if not raw.startswith("{") and not raw.startswith("["):
+            logger.error(f"[ICP-AGENT] LLM response is not JSON: {raw[:100]}...")
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         try:
             data = json.loads(raw)
+            logger.debug(f"[ICP-AGENT] Parsed JSON successfully")
         except json.JSONError as e:
+            logger.error(f"[ICP-AGENT] LLM response is not valid JSON: {e}")
             raise ValueError(f"LLM response is not valid JSON: {e}")
         # Normalize: convert strings to arrays where needed
         icp = data.get("icp", {})
@@ -78,4 +89,6 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
             if isinstance(val, str):
                 icp[field] = [x.strip() for x in val.split(",") if x.strip()]
         data["icp"] = icp
+
+        logger.info(f"[ICP-AGENT] LLM call completed, ICP profile: {icp.get('demographics', {})}")
         return ICPAgentOutput.model_validate(data)

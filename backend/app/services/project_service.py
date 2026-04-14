@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, UTC
 from uuid import uuid4
 
@@ -9,18 +10,23 @@ from app.db.models import PipelineStep, Project
 from app.pipeline.state import STEP_ORDER, StepStatus, StepType
 from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest, SubjectUpdateRequest
 
+logger = logging.getLogger(__name__)
+
 
 class ProjectService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
     async def create(self, data: ProjectCreateRequest) -> Project:
+        logger.info(f"[PROJECT-SERVICE] Creating project with name: {data.name}")
         project = Project(
             id=str(uuid4()),
             name=data.name,
         )
+        logger.debug(f"[PROJECT-SERVICE] Generated project ID: {project.id}")
         self.db.add(project)
         await self.db.flush()
+        logger.debug(f"[PROJECT-SERVICE] Project flushed, creating {len(STEP_ORDER)} pipeline steps")
 
         for order, step_type in enumerate(STEP_ORDER):
             step = PipelineStep(
@@ -30,18 +36,26 @@ class ProjectService:
                 step_order=order,
                 status=StepStatus.pending.value,
             )
+            logger.debug(f"[PROJECT-SERVICE] Creating step: {step_type.value} (order: {order})")
             self.db.add(step)
 
         await self.db.commit()
         await self.db.refresh(project)
+        logger.info(f"[PROJECT-SERVICE] Project created successfully: {project.id}")
         return project
 
     async def update_subject(self, project_id: str, data: SubjectUpdateRequest) -> Project:
+        logger.info(f"[PROJECT-SERVICE] Updating subject for project: {project_id}")
+        logger.debug(
+            f"[PROJECT-SERVICE] Subject update data: topic={data.topic[:50]}..., target_format={data.target_format}, content_goal={data.content_goal}"
+        )
+
         project = await self.get_by_id(project_id)
         project.topic = data.topic
         project.target_format = data.target_format
         project.content_goal = data.content_goal
         project.raw_notes = data.raw_notes
+        logger.debug(f"[PROJECT-SERVICE] Project fields updated")
 
         subject_step = await self.db.execute(
             select(PipelineStep).where(
@@ -53,9 +67,11 @@ class ProjectService:
         if step:
             step.status = StepStatus.completed.value
             step.completed_at = datetime.now(UTC).replace(tzinfo=None)
+            logger.debug(f"[PROJECT-SERVICE] Subject step marked as completed")
 
         await self.db.commit()
         await self.db.refresh(project)
+        logger.info(f"[PROJECT-SERVICE] Subject updated successfully for project: {project_id}")
         return project
 
     async def list_all(self, skip: int = 0, limit: int = 50) -> list[Project]:

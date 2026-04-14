@@ -57,16 +57,26 @@ class PolicyAgent(BaseAgent[PolicyAgentInput, PolicyAgentOutput]):
         return "\n\n".join(parts)
 
     async def _call_llm(self, prompt: str, factory: ProviderFactory) -> PolicyAgentOutput:
+        logger.info(f"[POLICY-AGENT] Calling LLM with prompt length: {len(prompt)}")
+        logger.debug(f"[POLICY-AGENT] Prompt preview: {prompt[:200]}...")
+
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
+        logger.debug(f"[POLICY-AGENT] Raw LLM response length: {len(raw)}")
+
         try:
             data = json.loads(raw)
+            logger.debug(f"[POLICY-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
-            logger.warning("PolicyAgent: Invalid JSON response, attempting to extract JSON")
+            logger.warning("[POLICY-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\[.*\]", raw, re.DOTALL)
             if match:
                 data = json.loads(match.group())
             else:
+                logger.error("[POLICY-AGENT] Failed to extract JSON")
                 raise
         if isinstance(data, list):
             data = {"findings": data, "confidence": 0.7}
+
+        findings_count = len(data.get("findings", []))
+        logger.info(f"[POLICY-AGENT] LLM call completed, findings: {findings_count}")
         return PolicyAgentOutput.model_validate(data)
