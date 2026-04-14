@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.rag.config import STEP_CATEGORY_MAP
 from app.schemas.piragi import (
-    ALLOWED_EXTENSIONS,
     ChunkResult,
     ConnectDocumentsRequest,
     ConnectDocumentsResponse,
@@ -27,6 +26,7 @@ router = APIRouter(prefix="/projects/{project_id}/rag", tags=["rag"])
 
 DOCUMENTS_DIR = "/Users/karpinski94/projects/scripts-writer/documents"
 PLAYBOOKS_DIR = "playbooks"
+ALLOWED_EXTENSIONS = {".txt", ".md", ".pdf"}
 
 STEP_TO_CATEGORY: dict[str, str] = {s.value: s.value for s in STEP_CATEGORY_MAP.keys()}
 
