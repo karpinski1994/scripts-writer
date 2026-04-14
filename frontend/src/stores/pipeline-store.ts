@@ -8,11 +8,14 @@ export const DEPENDENCY_MAP: Record<string, string[]> = {
   retention: ["icp", "narrative"],
   cta: ["icp", "hook", "narrative"],
   writer: ["icp", "hook", "narrative", "retention", "cta"],
+  analysis: ["writer"],
   factcheck: ["writer"],
   readability: ["writer"],
   copyright: ["writer"],
   policy: ["writer"],
 };
+
+export const ANALYSIS_STEPS = ["factcheck", "readability", "copyright", "policy"];
 
 interface PipelineStore {
   activeStepType: string | null;

@@ -2,10 +2,10 @@
 
 import { cn } from "@/lib/utils";
 import type { PipelineStep } from "@/types/pipeline";
-import { usePipelineStore, isStepReady } from "@/stores/pipeline-store";
+import { usePipelineStore, isStepReady, ANALYSIS_STEPS } from "@/stores/pipeline-store";
 
 const CREATIVE_STEPS = ["icp", "hook", "narrative", "retention", "cta", "writer"];
-const ANALYSIS_STEPS = ["factcheck", "readability", "copyright", "policy"];
+const ANALYSIS_STEP = "analysis";
 
 const STEP_LABELS: Record<string, string> = {
   icp: "ICP",
@@ -14,11 +14,16 @@ const STEP_LABELS: Record<string, string> = {
   retention: "Retention",
   cta: "CTA",
   writer: "Writer",
-  factcheck: "Fact Check",
-  readability: "Readability",
-  copyright: "Copyright",
-  policy: "Policy",
+  analysis: "Analysis",
 };
+
+function getAnalysisStatus(steps: PipelineStep[]): string {
+  const statuses = ANALYSIS_STEPS.map((type) => steps.find((s) => s.step_type === type)?.status ?? "pending");
+  if (statuses.some((s) => s === "running")) return "running";
+  if (statuses.some((s) => s === "failed")) return "failed";
+  if (statuses.every((s) => s === "completed")) return "completed";
+  return "pending";
+}
 
 function StatusIcon({ status }: { status: string }) {
   if (status === "completed") return <span className="text-green-500">✓</span>;
@@ -44,15 +49,30 @@ export function PipelineView({ steps }: PipelineViewProps) {
     return "locked";
   }
 
+  function getAnalysisStepStatus(): string {
+    return getAnalysisStatus(steps);
+  }
+
   function renderRow(stepTypes: string[], label: string) {
     return (
       <div className="space-y-1.5">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <div className="flex items-center gap-1.5">
           {stepTypes.map((stepType, i) => {
-            const status = getStepStatus(stepType);
-            const isActive = activeStepType === stepType;
-            const isLocked = status === "locked";
+            let status: string;
+            let isLocked: boolean;
+            
+            if (stepType === ANALYSIS_STEP) {
+              status = getAnalysisStepStatus();
+              isLocked = !isStepReady("analysis", steps) && status !== "completed" && status !== "running" && status !== "failed";
+            } else {
+              status = getStepStatus(stepType);
+              isLocked = status === "locked";
+            }
+            
+            const isActive = activeStepType === stepType || 
+              (stepType === ANALYSIS_STEP && (activeStepType === "factcheck" || activeStepType === "readability" || activeStepType === "copyright" || activeStepType === "policy"));
+            
             return (
               <div key={stepType} className="flex items-center gap-1.5">
                 {i > 0 && (
@@ -90,7 +110,7 @@ export function PipelineView({ steps }: PipelineViewProps) {
   return (
     <div className="space-y-3">
       {renderRow(CREATIVE_STEPS, "Creative")}
-      {renderRow(ANALYSIS_STEPS, "Analysis")}
+      {renderRow([ANALYSIS_STEP], "Analysis")}
     </div>
   );
 }

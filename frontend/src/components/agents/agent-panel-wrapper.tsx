@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import type { PipelineStep } from "@/types/pipeline";
 import type { AnalysisResult } from "@/types/analysis";
 import type { AgentType } from "@/types/analysis";
-import { usePipelineStore, isStepReady, DEPENDENCY_MAP } from "@/stores/pipeline-store";
+import { usePipelineStore, isStepReady, DEPENDENCY_MAP, ANALYSIS_STEPS } from "@/stores/pipeline-store";
 import { ICPPanel } from "./icp-panel";
 import { HookPanel } from "./hook-panel";
 import { NarrativePanel } from "./narrative-panel";
@@ -350,6 +350,16 @@ export function AgentPanelWrapper({ projectId, steps }: AgentPanelWrapperProps) 
             queryClient.invalidateQueries({ queryKey: ["scripts", projectId] });
           }}
           onNavigateToEditor={() => router.push(`/projects/${projectId}/editor`)}
+        />
+      );
+    }
+    case "analysis": {
+      const lastTab = ANALYSIS_STEPS.find((t) => steps.find((s) => s.step_type === t)?.status === "completed") || "factcheck";
+      return (
+        <AnalysisPanelWrapper
+          projectId={projectId}
+          activeTab={lastTab as AgentType}
+          steps={steps}
         />
       );
     }
