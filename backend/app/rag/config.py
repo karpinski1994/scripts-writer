@@ -3,6 +3,7 @@ from enum import StrEnum
 
 class StepType(StrEnum):
     ICP = "icp"
+    SUBJECT = "subject"
     HOOK = "hook"
     NARRATIVE = "narrative"
     RETENTION = "retention"
@@ -16,6 +17,7 @@ class StepType(StrEnum):
 
 STEP_CATEGORY_MAP: dict[StepType, str] = {
     StepType.ICP: "icp",
+    StepType.SUBJECT: "subject",
     StepType.HOOK: "hooks",
     StepType.NARRATIVE: "narratives",
     StepType.RETENTION: "retention",
@@ -28,11 +30,12 @@ STEP_CATEGORY_MAP: dict[StepType, str] = {
 
 STEP_DEPENDENCIES: dict[StepType, list[StepType]] = {
     StepType.ICP: [StepType.ICP],
-    StepType.HOOK: [StepType.ICP, StepType.HOOK],
-    StepType.NARRATIVE: [StepType.ICP, StepType.HOOK],
-    StepType.RETENTION: [StepType.ICP, StepType.HOOK],
-    StepType.CTA: [StepType.ICP, StepType.HOOK],
-    StepType.WRITER: [StepType.ICP, StepType.HOOK, StepType.NARRATIVE, StepType.RETENTION, StepType.CTA],
+    StepType.SUBJECT: [StepType.ICP],
+    StepType.HOOK: [StepType.ICP, StepType.SUBJECT],
+    StepType.NARRATIVE: [StepType.ICP, StepType.SUBJECT, StepType.HOOK],
+    StepType.RETENTION: [StepType.ICP, StepType.SUBJECT, StepType.HOOK],
+    StepType.CTA: [StepType.ICP, StepType.SUBJECT, StepType.HOOK],
+    StepType.WRITER: [StepType.ICP, StepType.SUBJECT, StepType.NARRATIVE, StepType.RETENTION, StepType.CTA],
 }
 
 DEV_PROVIDED_CATEGORIES: dict[StepType, list[str]] = {

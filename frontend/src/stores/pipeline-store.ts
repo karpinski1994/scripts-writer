@@ -2,13 +2,13 @@ import { create } from "zustand";
 import type { PipelineStep } from "@/types/pipeline";
 
 export const DEPENDENCY_MAP: Record<string, string[]> = {
-  icp: ["subject"],
-  hook: ["icp"],
-  narrative: ["icp", "hook"],
-  retention: ["icp", "narrative"],
-  cta: ["icp", "hook", "narrative"],
-  writer: ["icp", "hook", "narrative", "retention", "cta"],
-  subject: [],
+  icp: [],
+  subject: ["icp"],
+  hook: ["icp", "subject"],
+  narrative: ["icp", "subject", "hook"],
+  retention: ["icp", "subject", "narrative"],
+  cta: ["icp", "subject", "narrative", "retention"],
+  writer: ["icp", "subject", "narrative", "retention", "cta"],
   analysis: ["writer"],
   factcheck: ["writer"],
   readability: ["writer"],
@@ -17,7 +17,7 @@ export const DEPENDENCY_MAP: Record<string, string[]> = {
 };
 
 export const ANALYSIS_STEPS = ["factcheck", "readability", "copyright", "policy"];
-export const CREATIVE_STEPS = ["subject", "icp", "hook", "narrative", "retention", "cta", "writer"];
+export const CREATIVE_STEPS = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer"];
 
 interface PipelineStore {
   activeStepType: string | null;

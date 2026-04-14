@@ -16,6 +16,10 @@ const STEP_HINTS: Record<string, { title: string; info: string }> = {
     title: "Ideal Customer Profile",
     info: "Upload documents with demographic data, pain points, desires, or buyer persona research. If not uploaded, describe your ICP in the text area below.",
   },
+  subject: {
+    title: "Subject Notes",
+    info: "Upload a .txt or .md file with your subject notes, or type them manually in the notes field below.",
+  },
   hook: {
     title: "Hook Formulas",
     info: "Upload high-performing hooks, viral opener examples, or transcript analysis. If not uploaded, use your intuition and best practices.",

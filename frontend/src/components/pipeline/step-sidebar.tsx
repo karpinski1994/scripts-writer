@@ -6,8 +6,8 @@ import { usePipelineStore, isStepReady, DEPENDENCY_MAP, ANALYSIS_STEPS } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const STEP_LABELS: Record<string, string> = {
-  subject: "Subject",
   icp: "ICP Profile",
+  subject: "Subject",
   hook: "Hook",
   narrative: "Narrative",
   retention: "Retention",
@@ -16,7 +16,7 @@ const STEP_LABELS: Record<string, string> = {
   analysis: "Analysis",
 };
 
-const STEP_ORDER = ["subject", "icp", "hook", "narrative", "retention", "cta", "writer", "analysis"];
+const STEP_ORDER = ["icp", "subject", "hook", "narrative", "retention", "cta", "writer", "analysis"];
 
 interface StepSidebarProps {
   steps: PipelineStep[];

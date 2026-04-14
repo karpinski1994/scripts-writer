@@ -26,8 +26,8 @@ class StepStatus(StrEnum):
 
 
 STEP_ORDER: list[StepType] = [
-    StepType.subject,
     StepType.icp,
+    StepType.subject,
     StepType.hook,
     StepType.narrative,
     StepType.retention,
@@ -44,13 +44,13 @@ TRANSITIONS: dict[StepStatus, list[StepStatus]] = {
 }
 
 DEPENDENCY_MAP: dict[StepType, list[StepType]] = {
-    StepType.subject: [],
-    StepType.icp: [StepType.subject],
-    StepType.hook: [StepType.icp],
-    StepType.narrative: [StepType.hook],
-    StepType.retention: [StepType.narrative],
-    StepType.cta: [StepType.retention],
-    StepType.writer: [StepType.cta],
+    StepType.icp: [],
+    StepType.subject: [StepType.icp],
+    StepType.hook: [StepType.icp, StepType.subject],
+    StepType.narrative: [StepType.icp, StepType.subject, StepType.hook],
+    StepType.retention: [StepType.icp, StepType.subject, StepType.narrative],
+    StepType.cta: [StepType.icp, StepType.subject, StepType.narrative, StepType.retention],
+    StepType.writer: [StepType.icp, StepType.subject, StepType.narrative, StepType.retention, StepType.cta],
     StepType.analysis: [StepType.writer],
     StepType.factcheck: [StepType.writer],
     StepType.readability: [StepType.writer],
