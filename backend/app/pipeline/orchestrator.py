@@ -363,9 +363,12 @@ class PipelineOrchestrator:
             return agent, input_data
 
         selected_retention = self._extract_selected(step_map, StepType.retention, RetentionTechnique)
-        logger.debug(
-            f"[ORCHESTRATOR] Selected retention: {selected_retention.technique_name if selected_retention else 'None'}"
-        )
+        if isinstance(selected_retention, list):
+            logger.debug(f"[ORCHESTRATOR] Selected retention: {len(selected_retention)} techniques")
+        else:
+            logger.debug(
+                f"[ORCHESTRATOR] Selected retention: {selected_retention.technique_name if selected_retention else 'None'}"
+            )
 
         if step_type == StepType.cta:
             logger.info(f"[ORCHESTRATOR] Building CTA agent input")
