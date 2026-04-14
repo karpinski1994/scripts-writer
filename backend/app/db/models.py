@@ -50,6 +50,10 @@ class Project(Base):
             name="ck_projects_target_format",
         ),
         CheckConstraint(
+            "content_goal IS NOT NULL OR content_goal IS NULL",
+            name="ck_projects_content_goal",
+        ),
+        CheckConstraint(
             "status IN ('draft','in_progress','completed')",
             name="ck_projects_status",
         ),
