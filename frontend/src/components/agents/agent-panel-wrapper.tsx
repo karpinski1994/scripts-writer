@@ -16,6 +16,7 @@ import { CTAPanel } from "./cta-panel";
 import { WriterPanel } from "./writer-panel";
 import { AnalysisPanel } from "./analysis-panel";
 import { SubjectPanel } from "./subject-panel";
+import { StepDocumentDropzone } from "@/components/piragi/step-document-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -178,86 +179,44 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
     );
   }
 
-  if (step?.status === "pending" || !step) {
-    if (activeStepType === "icp") {
-      return <ICPPanel
-        projectId={projectId}
-        isPending={true}
-      />;
-    }
+if (step?.status === "pending" || !step) {
+    const showDropzone = activeStepType === "icp" || activeStepType === "hook";
 
     if (activeStepType === "subject") {
       return <SubjectPanel projectId={projectId} />;
     }
 
-    if (activeStepType === "analysis" && ready) {
-      const lastTab = ANALYSIS_STEPS.find((t) => steps.find((s) => s.step_type === t)?.status === "completed") || "factcheck";
-      return (
-        <AnalysisPanelWrapper
-          projectId={projectId}
-          activeTab={lastTab as AgentType}
-          steps={steps}
-        />
-      );
-    }
-
-    if (activeStepType === "writer" && step && ready) {
-      return (
-        <WriterPanel
-          projectId={projectId}
-          step={step}
-          onRun={async () => {
-            try {
-              await api.post(`/api/v1/projects/${projectId}/pipeline/run/writer`, {});
-            } catch {
-              // error handled by query invalidation
-            }
-            queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
-            queryClient.invalidateQueries({ queryKey: ["scripts", projectId] });
-          }}
-          onNavigateToEditor={() => router.push(`/projects/${projectId}/editor`)}
-        />
-      );
-    }
-
-    if (["factcheck", "readability", "copyright", "policy"].includes(activeStepType)) {
-      return (
-        <AnalysisPanelWrapper
-          projectId={projectId}
-          activeTab={activeStepType as AgentType}
-          steps={steps}
-        />
-      );
-    }
-
-    // For auto-run steps, show loading while the agent is being triggered
-    if (AUTO_RUN_STEPS.includes(activeStepType) && ready) {
-      return (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
-            <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Starting {STEP_LABELS[activeStepType]} agent...</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
     return (
       <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">Waiting for previous steps...</p>
+        <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
+          <p className="text-lg font-medium">{STEP_LABELS[activeStepType]}</p>
+          {showDropzone && (
+            <StepDocumentDropzone projectId={projectId} stepType={activeStepType} className="w-full max-w-md mb-4" />
+          )}
+          <p className="text-sm text-muted-foreground">This step hasn't been run yet.</p>
+          <Button
+            onClick={async () => {
+              try {
+                await api.post(`/api/v1/projects/${projectId}/pipeline/run/${activeStepType}`, {});
+              } catch {
+                // error handled by query invalidation
+              }
+              queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+            }}
+          >
+            Run Agent
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
   if (step?.status === "failed") {
-    if (!step) return null;
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
           <p className="text-lg font-medium text-destructive">{STEP_LABELS[activeStepType]} Failed</p>
-          {step.error_message && (
+          {step?.error_message && (
             <p className="text-sm text-muted-foreground">{step.error_message}</p>
           )}
           <Button

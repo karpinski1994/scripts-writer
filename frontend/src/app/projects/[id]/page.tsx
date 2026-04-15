@@ -64,11 +64,6 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (pipeline?.steps) {
       setSteps(pipeline.steps);
-      const icpStep = pipeline.steps.find((s) => s.step_type === "icp");
-      if (icpStep && (icpStep.status === "pending" || icpStep.status === "failed") && !usePipelineStore.getState().activeStepType) {
-        setActiveStepType("icp");
-        return;
-      }
       const firstPending = pipeline.steps.find(
         (s) => s.status === "pending" || s.status === "failed"
       );
