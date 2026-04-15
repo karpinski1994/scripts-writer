@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert copywriter specializing in attention-grabbing hooks for video and marketing content. "
-    "Given an Ideal Customer Profile (ICP), topic, format, and goal, generate multiple hook options in JSON format. "
+    "Given an Ideal Customer Profile (ICP), topic, draft of the content, format, and goal, generate multiple hook options in JSON format. "
     "Output ONLY valid JSON with these exact fields: hooks[hook_type, text, reasoning], confidence (0.0-1.0). "
     "Vary the hook types (question, shock, story, statistic, etc.)."
 )

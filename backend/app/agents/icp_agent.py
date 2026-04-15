@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert marketing analyst specializing in ICP generation. "
-    "Given raw notes about a product/service, generate ICP in JSON format. "
+    "Given raw notes about a product/service, and clients generate ICP in JSON format. "
     "Output ONLY valid JSON with exact fields: icp.demographics(age_range,gender,income_level,"
     "education,location,occupation), icp.psychographics(values:list[str],interests:list[str],"
     "lifestyle:str,media_consumption:list[str],personality_traits:list[str]), "
