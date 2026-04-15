@@ -64,6 +64,11 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (pipeline?.steps) {
       setSteps(pipeline.steps);
+      const icpStep = pipeline.steps.find((s) => s.step_type === "icp");
+      if (icpStep && (icpStep.status === "pending" || icpStep.status === "failed") && !usePipelineStore.getState().activeStepType) {
+        setActiveStepType("icp");
+        return;
+      }
       const firstPending = pipeline.steps.find(
         (s) => s.status === "pending" || s.status === "failed"
       );
@@ -132,11 +137,6 @@ export default function ProjectDetailPage() {
         <StepSidebar steps={pipeline.steps} targetFormat={project.target_format} />
         <div className="flex-1 min-w-0">
           <ErrorBoundary>
-            {pipeline.steps.every((s) => s.status === "pending") && (
-              <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-8">
-                <p className="text-sm text-muted-foreground">Complete the ICP Profile to get started</p>
-              </div>
-            )}
             <AgentPanelWrapper projectId={id} steps={pipeline.steps} targetFormat={project.target_format} />
           </ErrorBoundary>
         </div>

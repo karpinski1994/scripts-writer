@@ -1,5 +1,7 @@
 import logging
+import shutil
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -11,6 +13,8 @@ from app.pipeline.state import STEP_ORDER, StepStatus, StepType, has_retention
 from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest, SubjectUpdateRequest
 
 logger = logging.getLogger(__name__)
+
+DOCUMENTS_BASE_DIR = Path("/Users/karpinski94/projects/scripts-writer/documents")
 
 
 class ProjectService:
@@ -119,6 +123,17 @@ class ProjectService:
 
     async def delete(self, project_id: str) -> None:
         project = await self.get_by_id(project_id)
+
+        project_slug = project.name.lower().replace(" ", "-")
+        project_docs_dir = DOCUMENTS_BASE_DIR / project_slug
+
+        if project_docs_dir.exists():
+            try:
+                shutil.rmtree(project_docs_dir)
+                logger.info(f"[PROJECT-SERVICE] Deleted documents folder: {project_docs_dir}")
+            except Exception as e:
+                logger.error(f"[PROJECT-SERVICE] Failed to delete documents folder: {e}")
+
         await self.db.delete(project)
         await self.db.commit()
 

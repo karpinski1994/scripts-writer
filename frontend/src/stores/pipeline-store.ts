@@ -34,7 +34,7 @@ interface PipelineStore {
 }
 
 export const usePipelineStore = create<PipelineStore>((set) => ({
-  activeStepType: null,
+  activeStepType: 'icp',
   steps: [],
   streamingOutput: {},
   isRunning: {},
@@ -70,7 +70,7 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
     })),
   reset: () =>
     set({
-      activeStepType: null,
+      activeStepType: 'icp',
       steps: [],
       streamingOutput: {},
       isRunning: {},

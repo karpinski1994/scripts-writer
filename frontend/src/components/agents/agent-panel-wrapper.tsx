@@ -79,6 +79,7 @@ function parseOutput<T>(step: PipelineStep): T | null {
 
 export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanelWrapperProps) {
   const { activeStepType, isRunning } = usePipelineStore();
+  console.log('activeStepType: ', activeStepType)
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -95,7 +96,7 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
   });
 
   const step = activeStepType ? steps.find((s) => s.step_type === activeStepType) : undefined;
-
+  console.log('step: ', step)
   const getDependencies = (stepType: string): string[] => {
     const deps = DEPENDENCY_MAP[stepType] ?? [];
     if (!showRetention && (stepType === "cta" || stepType === "writer")) {
@@ -122,6 +123,7 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
       prevActiveStepRef.current = activeStepType;
       autoRunTriggeredRef.current = null;
     }
+
   }, [activeStepType]);
 
   useEffect(() => {
@@ -177,6 +179,13 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
   }
 
   if (step?.status === "pending" || !step) {
+    if (activeStepType === "icp") {
+      return <ICPPanel
+        projectId={projectId}
+        isPending={true}
+      />;
+    }
+
     if (activeStepType === "subject") {
       return <SubjectPanel projectId={projectId} />;
     }
@@ -242,7 +251,8 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
     );
   }
 
-  if (step.status === "failed") {
+  if (step?.status === "failed") {
+    if (!step) return null;
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
@@ -280,6 +290,10 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
         steps={steps}
       />
     );
+  }
+
+  if (!step) {
+    return null;
   }
 
   if (step.status !== "completed" || !step.output_data) {
@@ -328,12 +342,15 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
       usePipelineStore.getState().setActiveStepType(nextStep);
     }
   };
+  console.log('##activeStepType: ', activeStepType);
 
   switch (activeStepType) {
     case "subject": {
+      console.log('step: ', 'subject')
       return <SubjectPanel projectId={projectId} />;
     }
     case "icp": {
+      console.log('step: ', step)
       const data = parseOutput<ICPAgentOutput>(step);
       if (!data) return null;
       return (
