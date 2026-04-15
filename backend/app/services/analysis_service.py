@@ -51,10 +51,13 @@ class AnalysisService:
 
     async def get_result_by_type(self, project_id: str, agent_type: str) -> AnalysisResultResponse | None:
         result = await self.db.execute(
-            select(AnalysisResult).where(
+            select(AnalysisResult)
+            .where(
                 AnalysisResult.project_id == project_id,
                 AnalysisResult.agent_type == agent_type,
             )
+            .order_by(AnalysisResult.created_at.desc())
+            .limit(1)
         )
         row = result.scalar_one_or_none()
         if row is None:

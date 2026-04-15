@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
 import type { AgentType, Finding, AnalysisResult } from "@/types/analysis";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Shield, BookOpen, Copyright, ScrollText, Play } from "lucide-react";
+import { Loader2, Shield, BookOpen, Copyright, ScrollText } from "lucide-react";
 
 const AGENT_LABELS: Record<AgentType, string> = {
   factcheck: "Fact Check",
@@ -86,7 +84,6 @@ export function AnalysisPanel({
   onRunAgent,
 }: AnalysisPanelProps) {
   const [activeTab, setActiveTab] = useState<AgentType>(initialTab);
-  const queryClient = useQueryClient();
   const [dismissedFindings, setDismissedFindings] = useState<Set<string>>(new Set());
 
   const currentResult = results.find((r) => r.agent_type === activeTab);
@@ -95,26 +92,10 @@ export function AnalysisPanel({
     (f) => !dismissedFindings.has(`${activeTab}-${f.text}`)
   ) ?? [];
 
-  const runAll = async () => {
-    try {
-      await api.post(`/api/v1/projects/${projectId}/analysis/all`, {});
-    } catch {
-      // error handled by query invalidation
-    }
-    queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
-    queryClient.invalidateQueries({ queryKey: ["analysis", projectId] });
-  };
-
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Analysis</CardTitle>
-          <Button size="sm" onClick={runAll}>
-            <Play className="size-3.5" />
-            Analyze All
-          </Button>
-        </div>
+        <CardTitle>Analysis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-1.5">
@@ -159,14 +140,14 @@ export function AnalysisPanel({
                   label="Flesch-Kincaid Grade Level"
                   score={
                     (currentResult.findings as unknown as Record<string, number>)?.flesch_kincaid_score
-                      ?? currentResult.overall_score
+                    ?? currentResult.overall_score
                   }
                 />
                 <ScoreGauge
                   label="Gunning Fog Index"
                   score={
                     (currentResult.findings as unknown as Record<string, number>)?.gunning_fog_score
-                      ?? currentResult.overall_score
+                    ?? currentResult.overall_score
                   }
                 />
               </div>

@@ -50,7 +50,6 @@ async def run_analysis(
     agent_type: str,
     db: AsyncSession = Depends(get_db),
 ):
-    logger.error(f"DEBUG: run_analysis called with agent_type='{agent_type}'")
     if agent_type not in VALID_AGENT_TYPES:
         raise HTTPException(status_code=400, detail=f"Invalid agent type: {agent_type}")
     await _verify_writer_completed(project_id, db)
@@ -86,25 +85,6 @@ async def run_analysis(
         findings=findings,
         overall_score=overall_score,
     )
-
-
-@router.post("/all", response_model=list[AnalysisResultResponse])
-async def run_all_analysis(
-    project_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    await _verify_writer_completed(project_id, db)
-
-    orchestrator = PipelineOrchestrator(db, ws_manager=connection_manager)
-    await orchestrator.run_analysis_parallel(project_id)
-
-    service = AnalysisService(db)
-    results = []
-    for agent_type in VALID_AGENT_TYPES:
-        result = await service.get_result_by_type(project_id, agent_type)
-        if result:
-            results.append(result)
-    return results
 
 
 @router.get("", response_model=list[AnalysisResultResponse])
