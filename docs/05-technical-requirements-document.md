@@ -128,6 +128,21 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 
 **Rationale:** SQLite is chosen for structured project data because it requires zero configuration, runs as a file on disk, and handles single-user workloads efficiently. Large text content (notes, scripts) is stored inline in SQLite. File exports are written to the filesystem in a configurable output directory.
 
+### Data Lifecycle & Deletion
+
+| Lifecycle Phase | Storage Location | Description |
+|-----------------|------------------|-------------|
+| **Creation** | Database (`projects` table) | Project record created with name |
+| **Pipeline Execution** | Database (`pipeline_steps`, `icp_profiles`, `script_versions`, `analysis_results`) | All pipeline data stored in SQLite |
+| **Content Generation** | Filesystem (`documents/{project_slug}/`) | Each pipeline step may create document subdirectories (e.g., `subject/`, `hooks/`, `icp/`, etc.) |
+| **Export** | Filesystem (`data/exports/`) | Final script exports as .txt or .md files |
+| **Deletion** | Database + Filesystem | When a project is deleted: (1) Database cascade removes all related records (pipeline_steps, icp_profiles, script_versions, analysis_results), (2) Filesystem removes `documents/{project_slug}/` folder |
+
+**Deletion Behavior:**
+- Deleting a project via `DELETE /api/v1/projects/{project_id}` removes both database records and filesystem artifacts
+- Database cascade is handled by SQLAlchemy `ondelete="CASCADE"` relationships
+- Filesystem cleanup is performed by `ProjectService.delete()` which removes the `documents/{project_slug}/` folder where `project_slug = project.name.lower().replace(" ", "-")`
+
 ### Entity-Relationship Overview
 
 ```
@@ -268,7 +283,7 @@ Project 1──* AnalysisResult
 | POST | `/api/v1/projects` | Create a new project (name only) |
 | GET | `/api/v1/projects/{project_id}` | Get project details |
 | PATCH | `/api/v1/projects/{project_id}` | Update project metadata |
-| DELETE | `/api/v1/projects/{project_id}` | Delete a project |
+| DELETE | `/api/v1/projects/{project_id}` | Delete a project (cascades DB records + removes documents/{project_slug} folder) |
 | POST | `/api/v1/projects/{project_id}/subject` | Update subject (topic, format, goal, notes) |
 | POST | `/api/v1/projects/{project_id}/branch` | Branch project from a step |
 

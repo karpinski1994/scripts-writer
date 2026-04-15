@@ -42,6 +42,7 @@ Notes & Context → ICP Analysis → Hook Selection → Narrative Pattern → Re
 | US-16 | As a Creator, I want to attach Piragi RAG documents to my project so that agents can use my existing research and notes |
 | US-17 | As a Creator, I want to query Piragi documents for specific insights before running an agent so that the agent output is grounded in my research |
 | US-18 | As a Creator, I want to attach Piragi context to any creative step (ICP, Hook, Narrative, Retention, CTA, Writer) so that each agent can benefit from relevant research |
+| US-19 | As a Creator, I want to delete a project from the dashboard so that I can remove unwanted projects |
 
 ## Functional Requirements
 
@@ -165,6 +166,9 @@ Notes & Context → ICP Analysis → Hook Selection → Narrative Pattern → Re
 | ID | Requirement | Priority |
 |----|------------|----------|
 | FR-13.1 | The system shall allow the user to create, save, and load projects (each project = one script pipeline) | Must |
+| FR-13.1.1 | The system shall allow the user to delete a project from the dashboard | Must |
+| FR-13.1.2 | Deleting a project shall remove all database records (via cascade) and the project's documents folder (documents/{project_slug}/) | Must |
+| FR-13.1.3 | The system shall display a confirmation dialog before deleting a project to prevent accidental deletion | Must |
 | FR-13.2 | The system shall export final scripts as plain text | Must |
 | FR-13.3 | The system shall export final scripts as Markdown | Must |
 | FR-13.4 | The system shall copy final scripts to the system clipboard | Should |

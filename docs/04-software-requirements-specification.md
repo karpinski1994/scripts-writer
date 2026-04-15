@@ -219,6 +219,8 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | ID | Requirement | Priority |
 |----|------------|----------|
 | SRS-F13.1 | The system shall allow the user to create, save, and load projects (each project = one script pipeline) | Must |
+| SRS-F13.1.1 | The system shall allow the user to delete a project, removing all database records and the project's documents folder | Must |
+| SRS-F13.1.2 | The system shall display a confirmation dialog before deleting a project to prevent accidental deletion | Must |
 | SRS-F13.2 | The system shall export final scripts as plain text | Must |
 | SRS-F13.3 | The system shall export final scripts as Markdown | Must |
 | SRS-F13.4 | The system shall copy final scripts to the system clipboard | Should |

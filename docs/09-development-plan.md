@@ -843,6 +843,36 @@ scripts-writer/
 
 ---
 
+## Phase 10b: Project Delete
+
+**Goal:** Add ability to delete project from Dashboard, including all DB records and documents folder.
+
+**Test criteria for the whole phase:** Click X on project card → confirm dialog → project and all artifacts deleted → dashboard refreshes.
+
+### Steps
+
+- [ ] **10b.1** Extend `ProjectService.delete()` to clean up `documents/{project_slug}/` folder after DB delete
+  - **Verify:** Delete project → DB records removed via cascade, documents folder deleted
+  - **Date completed:** ___
+
+- [ ] **10b.2** Add delete button (X) to project cards on Dashboard
+  - **Verify:** X button visible in top-right of each project card
+  - **Date completed:** ___
+
+- [ ] **10b.3** Add delete confirmation dialog (AlertDialog) on Dashboard
+  - **Verify:** Click X → confirm dialog appears with "Delete" and "Cancel" buttons
+  - **Date completed:** ___
+
+- [ ] **10b.4** Connect delete dialog to API — `DELETE /api/v1/projects/{id}` → invalidate projects query → close dialog
+  - **Verify:** Confirm delete → API called → project disappears from dashboard
+  - **Date completed:** ___
+
+- [ ] **10b.5** Ensure delete button uses `e.stopPropagation()` to prevent card click navigation
+  - **Verify:** Click X → delete dialog opens, card click does NOT navigate
+  - **Date completed:** ___
+
+---
+
 ## Phase 11: Docker & Deployment
 
 **Goal:** One-command deployment.

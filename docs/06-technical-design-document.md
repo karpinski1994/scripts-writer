@@ -651,6 +651,24 @@ CREATE INDEX idx_analysis_results_project ON analysis_results(project_id);
 
 ---
 
+#### DELETE /api/v1/projects/{project_id}
+
+**Request:** Empty body (deletion by project ID in path)
+
+**Response (204):**
+```
+No content (successful deletion)
+```
+
+**Side Effects:**
+- Cascades database deletions via SQLAlchemy relationships (pipeline_steps, icp_profiles, script_versions, analysis_results)
+- **Filesystem cleanup:** Removes the `documents/{project_slug}/` folder where `project_slug = project.name.lower().replace(" ", "-")`
+- ProjectService.delete() is enhanced to perform both DB cascade and filesystem cleanup
+
+**Errors:** 404 (project not found)
+
+---
+
 #### POST /api/v1/projects/{project_id}/notebooklm/connect
 
 **Request:**

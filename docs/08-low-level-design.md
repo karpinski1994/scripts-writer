@@ -11,17 +11,21 @@ State:
   projects: Project[]           (fetched via TanStack Query)
   isLoading: boolean
   error: string | null
+  deleteTarget: Project | null   (project pending deletion)
 
 Lifecycle:
   1. On mount, fetch GET /api/v1/projects
   2. Render project cards sorted by updated_at DESC
-  3. Each card shows: name, target_format badge, status badge, updated_at
+  3. Each card shows: name, target_format badge, status badge, updated_at, delete button (X)
   4. "New Project" button → navigate to /projects/new
+  5. Delete button (X) → set deleteTarget → open AlertDialog confirmation
 
 Actions:
   - onClick(project) → navigate to /projects/{id}
   - onClick(new) → open create dialog
-  - onDelete(project) → confirm → DELETE /api/v1/projects/{id} → invalidate query
+  - onDeleteClick(e, project) → e.stopPropagation(), set deleteTarget
+  - onDeleteConfirm → DELETE /api/v1/projects/{id} → invalidate query → set deleteTarget(null)
+  - onDeleteCancel → set deleteTarget(null)
 ```
 
 **File:** `frontend/src/components/dashboard/create-project-dialog.tsx`

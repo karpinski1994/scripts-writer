@@ -77,7 +77,8 @@ Scripts Writer
 ├── Frontend (Next.js)
 │   ├── Dashboard Module
 │   │   ├── Project list with status badges
-│   │   └── Create new project flow
+│   │   ├── Create new project flow
+│   │   └── Delete project (X button with confirmation dialog)
 │   ├── Pipeline Module
 │   │   ├── Pipeline view (step-by-step progress)
 │   │   ├── Step sidebar (non-linear navigation)
