@@ -21,6 +21,7 @@ import { toast } from "sonner"
 import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileTextIcon, MessageCircle, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { usePipelineStore } from "@/stores/pipeline-store"
+import type { ProjectDetail } from "@/types/project"
 
 const CONTENT_FORMATS = [
   { id: "short_video", label: "Short-form Video", sublabel: "TikTok/Reels", icon: Video, hasRetention: true },
@@ -65,7 +66,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const [hasFile, setHasFile] = useState(false)
   const [hasInitialized, setHasInitialized] = useState(false)
 
-  const { data: project, isLoading: projectLoading } = useQuery({
+  const { data: project, isLoading: projectLoading } = useQuery<ProjectDetail>({
     queryKey: ["project", projectId],
     queryFn: () => api.get(`/api/v1/projects/${projectId}`),
     enabled: !!projectId,

@@ -29,7 +29,7 @@ export function WriterPanel({
   onRun,
   onNavigateToEditor,
 }: WriterPanelProps) {
-  const { streamingOutput, isRunning } = usePipelineStore();
+  const { streamingOutput, isRunning, setActiveStepType } = usePipelineStore();
   const running = isRunning["writer"] ?? step.status === "running";
   const streaming = streamingOutput["writer"];
   const data = parseOutput(step);
@@ -104,6 +104,7 @@ export function WriterPanel({
           {data.script.word_count} words
         </p>
         <div className="flex gap-2">
+          <Button onClick={() => setActiveStepType("analysis")}>Continue to Analysis</Button>
           <Button onClick={onNavigateToEditor}>Open in Editor</Button>
           <Button variant="outline" onClick={onRun}>
             <RotateCw className="size-4" />

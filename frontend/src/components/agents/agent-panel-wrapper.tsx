@@ -181,6 +181,17 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
       return <SubjectPanel projectId={projectId} />;
     }
 
+    if (activeStepType === "analysis" && ready) {
+      const lastTab = ANALYSIS_STEPS.find((t) => steps.find((s) => s.step_type === t)?.status === "completed") || "factcheck";
+      return (
+        <AnalysisPanelWrapper
+          projectId={projectId}
+          activeTab={lastTab as AgentType}
+          steps={steps}
+        />
+      );
+    }
+
     if (activeStepType === "writer" && step && ready) {
       return (
         <WriterPanel
@@ -258,6 +269,17 @@ export function AgentPanelWrapper({ projectId, steps, targetFormat }: AgentPanel
 
   if (activeStepType === "subject") {
     return <SubjectPanel projectId={projectId} />;
+  }
+
+  if (activeStepType === "analysis") {
+    const lastTab = ANALYSIS_STEPS.find((t) => steps.find((s) => s.step_type === t)?.status === "completed") || "factcheck";
+    return (
+      <AnalysisPanelWrapper
+        projectId={projectId}
+        activeTab={lastTab as AgentType}
+        steps={steps}
+      />
+    );
   }
 
   if (step.status !== "completed" || !step.output_data) {
