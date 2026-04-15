@@ -4,7 +4,7 @@
 
 ### Pattern: Modular Monolith with Agent-Based Pipeline
 
-Scripts Writer uses a **modular monolith** architecture. The backend is a single FastAPI application with clearly separated agent modules, each following Pydantic AI patterns. A monolith is chosen over microservices for the following reasons:
+Scripts Writer uses a **modular monolith** architecture. The backend is a single FastAPI application with clearly separated agent modules, each handling LLM API calls with manual JSON parsing. A monolith is chosen over microservices for the following reasons:
 
 | Factor | Rationale |
 |--------|-----------|
@@ -78,12 +78,12 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 
 | Layer | Technology | Version | Purpose |
 |-------|-----------|---------|---------|
-| **Runtime** | Python | 3.11+ | Primary language |
+| **Runtime** | Python | 3.13+ | Primary language |
 | **Framework** | FastAPI | 0.110+ | Async API server with auto OpenAPI docs |
 | **Validation** | Pydantic | 2.x | Data models, validation, serialization |
-| **Agent Framework** | Pydantic AI | 0.x | Agent definition, structured I/O, tool use |
+| **Agent Framework** | Raw LLM calls with JSON parsing | Agent definition, structured I/O via Pydantic models (not Pydantic AI framework) |
 | **LLM Client** | `openai` (OpenAI-compatible) | 1.x | Unified client for Modal, Groq, Gemini, Ollama |
-| **LLM Client** | `google-generativeai` | 0.x | Google Gemini-specific client |
+| **LLM Client** | `google-genai` | latest | Google Gemini client using `google.genai.Client` |
 | **LLM Client** | `ollama` | 0.x | Ollama local client |
 | **Database** | SQLite (via `aiosqlite`) | 3.x | Project and pipeline state persistence |
 | **ORM** | SQLAlchemy | 2.x | Async database models and queries |
@@ -145,20 +145,18 @@ Project 1──* AnalysisResult
 |--------|------|------------|-------------|
 | id | UUID | PK | Unique project identifier |
 | name | VARCHAR(100) | NOT NULL | Project name |
-| topic | VARCHAR(200) | NOT NULL | Content topic/subject |
-| target_format | VARCHAR(20) | NOT NULL | VSL, YouTube, Tutorial, Facebook, LinkedIn, Blog |
+| topic | VARCHAR(200) | NULL | Content topic/subject |
+| target_format | VARCHAR(20) | NULL | Short-form Video, Long-form Video, VSL, Blog Post, LinkedIn Post, Facebook Post |
 | content_goal | VARCHAR(20) | NULL | Sell, Educate, Entertain, Build Authority |
-| raw_notes | TEXT | NOT NULL | User's original notes |
+| cta_purpose | VARCHAR(100) | NULL | Call-to-action purpose |
+| raw_notes | TEXT | NOT NULL DEFAULT '' | User's original notes |
+| draft | TEXT | NOT NULL DEFAULT '' | Draft content |
 | status | VARCHAR(20) | NOT NULL DEFAULT 'draft' | draft, in_progress, completed |
 | current_step | INTEGER | NOT NULL DEFAULT 0 | Current pipeline step index |
+| notebooklm_notebook_id | VARCHAR(100) | NULL | Connected NotebookLM notebook ID |
+| piragi_document_paths | VARCHAR(500) | NULL | Connected Piragi document paths |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last modification timestamp |
-
-#### `projects` (Piragi extension)
-
-| Column | Type | Constraints | Description |
-|--------|------|------------|-------------|
-| piragi_document_paths | VARCHAR(500) | NULL | Connected Piragi document paths (comma-separated) |
 
 #### `icp_profiles`
 
@@ -166,13 +164,13 @@ Project 1──* AnalysisResult
 |--------|------|------------|-------------|
 | id | UUID | PK | Unique ICP identifier |
 | project_id | UUID | FK → projects.id, UNIQUE | One ICP per project |
-| demographics | JSON | NOT NULL | Age, gender, location, occupation, income |
-| psychographics | JSON | NOT NULL | Values, interests, attitudes, lifestyle |
+| demographics | JSON | NOT NULL | Age range, gender, income level, education, location, occupation |
+| psychographics | JSON | NOT NULL | Values, interests, lifestyle, media consumption, personality traits |
 | pain_points | JSON | NOT NULL | Array of pain point strings |
 | desires | JSON | NOT NULL | Array of desire strings |
 | objections | JSON | NOT NULL | Array of objection strings |
 | language_style | VARCHAR(50) | NOT NULL | casual, professional, technical |
-| source | VARCHAR(20) | NOT NULL | generated, uploaded, notebooklm |
+| source | VARCHAR(20) | NOT NULL | generated, uploaded, piragi |
 | approved | BOOLEAN | NOT NULL DEFAULT FALSE | User has approved the ICP |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last modification timestamp |
@@ -183,7 +181,7 @@ Project 1──* AnalysisResult
 |--------|------|------------|-------------|
 | id | UUID | PK | Step identifier |
 | project_id | UUID | FK → projects.id | Parent project |
-| step_type | VARCHAR(30) | NOT NULL | icp, hook, narrative, retention, cta, writer, factcheck, readability, copyright, policy |
+| step_type | VARCHAR(30) | NOT NULL | icp, subject, hook, narrative, retention, cta, writer, analysis, factcheck, readability, copyright, policy |
 | step_order | INTEGER | NOT NULL | Execution order within pipeline |
 | status | VARCHAR(20) | NOT NULL DEFAULT 'pending' | pending, running, completed, failed |
 | input_data | JSON | NOT NULL | Agent input payload |
@@ -230,9 +228,10 @@ Project 1──* AnalysisResult
 {
   "age_range": "25-45",
   "gender": "any",
+  "income_level": "mid-to-high",
+  "education": "bachelors",
   "location": "global",
-  "occupation": ["software engineer", "developer"],
-  "income": "mid-to-high"
+  "occupation": "software engineer"
 }
 ```
 
@@ -266,10 +265,12 @@ Project 1──* AnalysisResult
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/v1/projects` | List all projects |
-| POST | `/api/v1/projects` | Create a new project |
+| POST | `/api/v1/projects` | Create a new project (name only) |
 | GET | `/api/v1/projects/{project_id}` | Get project details |
 | PATCH | `/api/v1/projects/{project_id}` | Update project metadata |
 | DELETE | `/api/v1/projects/{project_id}` | Delete a project |
+| POST | `/api/v1/projects/{project_id}/subject` | Update subject (topic, format, goal, notes) |
+| POST | `/api/v1/projects/{project_id}/branch` | Branch project from a step |
 
 #### Pipeline
 
@@ -277,7 +278,8 @@ Project 1──* AnalysisResult
 |--------|------|-------------|
 | GET | `/api/v1/projects/{project_id}/pipeline` | Get full pipeline state (all steps) |
 | POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | Run a specific agent |
-| POST | `/api/v1/projects/{project_id}/pipeline/run-all` | Run all pending agents sequentially |
+| POST | `/api/v1/projects/{project_id}/pipeline/cancel` | Cancel running pipeline steps |
+| POST | `/api/v1/projects/{project_id}/pipeline/reset-errors` | Reset failed pipeline steps |
 | PATCH | `/api/v1/projects/{project_id}/pipeline/{step_id}` | Update step (user selection, approval) |
 
 #### ICP
@@ -302,8 +304,7 @@ Project 1──* AnalysisResult
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/v1/projects/{project_id}/analyze/{agent_type}` | Run a specific analysis agent |
-| POST | `/api/v1/projects/{project_id}/analyze/all` | Run all analysis agents in parallel |
+| POST | `/api/v1/projects/{project_id}/analysis/{agent_type}` | Run a specific analysis agent (factcheck, readability, copyright, policy) |
 | GET | `/api/v1/projects/{project_id}/analysis` | Get analysis results |
 
 #### Export
@@ -312,16 +313,17 @@ Project 1──* AnalysisResult
 |--------|------|-------------|
 | GET | `/api/v1/projects/{project_id}/export?format=txt` | Export as plain text |
 | GET | `/api/v1/projects/{project_id}/export?format=md` | Export as Markdown |
-| POST | `/api/v1/projects/{project_id}/export/clipboard` | Copy to clipboard |
 
-#### Piragi
+#### RAG (Piragi)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/v1/projects/{project_id}/piragi/documents` | List available Piragi documents |
-| POST | `/api/v1/projects/{project_id}/piragi/connect` | Connect documents to the project |
-| DELETE | `/api/v1/projects/{project_id}/piragi/connect` | Disconnect documents from project |
-| POST | `/api/v1/projects/{project_id}/piragi/query` | Query connected documents for insights |
+| GET | `/api/v1/projects/{project_id}/rag/documents` | List available RAG documents |
+| POST | `/api/v1/projects/{project_id}/rag/connect` | Connect documents to the project |
+| DELETE | `/api/v1/projects/{project_id}/rag/connect` | Disconnect documents from project |
+| POST | `/api/v1/projects/{project_id}/rag/query` | Query connected documents for insights |
+| POST | `/api/v1/projects/{project_id}/rag/upload` | Upload a document to RAG |
+| POST | `/api/v1/projects/{project_id}/hooks/upload` | Upload hook reference document |
 | POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | (Modified) Accepts optional `piragi_context` field |
 
 #### Settings
@@ -332,20 +334,27 @@ Project 1──* AnalysisResult
 | PATCH | `/api/v1/settings/llm` | Update LLM provider configuration |
 | GET | `/api/v1/settings/llm/status` | Check connectivity to configured providers |
 
+#### NotebookLM
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/projects/{project_id}/notebooklm/notebooks` | List available notebooks |
+| POST | `/api/v1/projects/{project_id}/notebooklm/connect` | Connect a notebook to the project |
+| DELETE | `/api/v1/projects/{project_id}/notebooklm/connect` | Disconnect notebook from project |
+| POST | `/api/v1/projects/{project_id}/notebooklm/query` | Query connected notebook |
+
 ### WebSocket Endpoint
 
 | Path | Description |
 |------|-------------|
-| `ws://localhost:8000/ws/pipeline/{project_id}` | Real-time pipeline events: agent start, progress, completion, streaming tokens |
+| `ws://localhost:8000/ws/pipeline/{project_id}` | Real-time pipeline events: agent_start, agent_complete, agent_failed (no streaming tokens) |
 
 **WebSocket Message Format:**
 ```json
 {
-  "event": "agent_progress",
+  "event": "agent_start",
   "step_type": "hook",
-  "status": "running",
-  "progress": 0.5,
-  "streaming_token": "compelling"
+  "status": "running"
 }
 ```
 
@@ -358,16 +367,25 @@ Project 1──* AnalysisResult
 }
 ```
 
+```json
+{
+  "event": "agent_failed",
+  "step_type": "hook",
+  "status": "failed",
+  "error": "..."
+}
+```
+
 ### External API Integrations
 
-#### Modal LLM API (Primary)
+#### Modal LLM API
 
 | Property | Value |
 |----------|-------|
 | Base URL | `https://api.us-west-2.modal.direct/v1` |
 | Protocol | HTTPS, OpenAI-compatible REST |
 | Auth | API key via `Authorization: Bearer` header |
-| Models | GLM-5.1 |
+| Models | zai-org/GLM-5.1-FP8 |
 | Rate Limits | Per free-tier policy |
 | SDK | `openai` Python package (OpenAI-compatible mode) |
 
@@ -378,7 +396,7 @@ Project 1──* AnalysisResult
 | Base URL | `https://api.groq.com/openai/v1` |
 | Protocol | HTTPS, OpenAI-compatible REST |
 | Auth | API key via `Authorization: Bearer` header |
-| Models | Per Groq free-tier availability |
+| Models | Per Groq free-tier availability (llama-3.3-70b-versatile) |
 | SDK | `openai` Python package |
 
 #### Google Gemini API
@@ -388,7 +406,8 @@ Project 1──* AnalysisResult
 | Base URL | Gemini REST API |
 | Protocol | HTTPS |
 | Auth | API key |
-| SDK | `google-generativeai` Python package |
+| SDK | `google-genai` Python package (google.genai.Client) |
+| Default Model | gemini-2.0-flash |
 
 #### Ollama (Local)
 
@@ -512,6 +531,8 @@ class AppSettings(BaseSettings):
     google_cloud_project: str
     google_cloud_location: str = "us"
     google_application_credentials: str = ""
+    gemini_model: str = "gemini-2.0-flash"
+    notebooklm_storage_path: str = ""
 ```
 
 ### Data Protection
@@ -528,7 +549,7 @@ class AppSettings(BaseSettings):
 | Layer | Mechanism |
 |-------|-----------|
 | API | Pydantic models validate all request bodies, query params, path params |
-| Agent | Pydantic AI validates agent inputs/outputs with structured schemas |
+| Agent | Pydantic models validate agent inputs/outputs with structured schemas |
 | Frontend | Zod schemas for form validation; server-side validation as ground truth |
 
 ---
@@ -565,11 +586,11 @@ class AppSettings(BaseSettings):
 ### LLM Provider Failover
 
 ```
-Request → Provider 1 (Modal)
+Request → Provider 1 (Gemini)
          ↓ rate limit / error
          → Provider 2 (Groq) — retry with backoff
          ↓ rate limit / error
-         → Provider 3 (Gemini) — retry with backoff
+         → Provider 3 (Modal) — retry with backoff
          ↓ rate limit / error
          → Provider 4 (Ollama) — local fallback
          ↓ all failed
@@ -601,8 +622,8 @@ Provider order is user-configurable. The system attempts each configured provide
 | Component | Framework | Level | Output |
 |-----------|-----------|-------|--------|
 | FastAPI | `structlog` | INFO (prod), DEBUG (dev) | Stdout + `./logs/app.log` |
-| Agents | `structlog` | INFO | Stdout + `./logs/agents.log` |
-| LLM calls | `structlog` | DEBUG | Stdout + `./logs/llm.log` |
+| Agents | `structlog` | INFO | Same as above |
+| LLM calls | `structlog` | DEBUG | Same as above |
 
 ### Log Format (Structured JSON)
 

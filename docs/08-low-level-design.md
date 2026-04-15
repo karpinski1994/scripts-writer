@@ -29,19 +29,15 @@ Actions:
 ```
 Props: open, onClose
 State:
-  form: { name, topic, target_format, content_goal, raw_notes }
+  form: { name }  (only name field - other fields set via Subject step)
   isSubmitting: boolean
   errors: Record<string, string>
 
 Validation (Zod):
   name: string().min(1).max(100)
-  topic: string().min(1).max(200)
-  target_format: enum(["VSL","YouTube","Tutorial","Facebook","LinkedIn","Blog"])
-  content_goal: enum(["Sell","Educate","Entertain","Build Authority"]).optional()
-  raw_notes: string().min(1).max(10000)
 
 Actions:
-  - onSubmit → POST /api/v1/projects → on success, navigate to /projects/{id}
+  - onSubmit → POST /api/v1/projects { name } → on success, navigate to /projects/{id}
   - onCancel → close dialog
 ```
 

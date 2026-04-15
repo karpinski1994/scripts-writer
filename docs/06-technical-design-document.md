@@ -14,14 +14,15 @@ backend/
 │   │   ├── models.py             # SQLAlchemy ORM models
 │   │   └── migrations/           # Alembic migrations
 │   ├── api/
-│   │   ├── router.py             # Root router aggregation
 │   │   ├── projects.py           # /api/v1/projects endpoints
 │   │   ├── pipeline.py           # /api/v1/projects/{id}/pipeline endpoints
 │   │   ├── icp.py                # /api/v1/projects/{id}/icp endpoints
 │   │   ├── scripts.py            # /api/v1/projects/{id}/scripts endpoints
-│   │   ├── analysis.py           # /api/v1/projects/{id}/analyze endpoints
+│   │   ├── analysis.py           # /api/v1/projects/{id}/analysis endpoints
 │   │   ├── export.py            # /api/v1/projects/{id}/export endpoints
 │   │   ├── notebooklm.py       # /api/v1/projects/{id}/notebooklm endpoints
+│   │   ├── rag.py              # /api/v1/projects/{id}/rag endpoints
+│   │   ├── hooks.py            # /api/v1/projects/{id}/hooks endpoints
 │   │   └── settings.py          # /api/v1/settings endpoints
 │   ├── schemas/
 │   │   ├── project.py           # Pydantic request/response schemas
@@ -29,7 +30,9 @@ backend/
 │   │   ├── icp.py               # ICP schemas
 │   │   ├── script.py            # Script schemas
 │   │   ├── analysis.py          # Analysis result schemas
-│   │   └── settings.py          # Settings schemas
+│   │   ├── settings.py          # Settings schemas
+│   │   ├── piragi.py            # RAG schemas
+│   │   └── notebooklm.py       # NotebookLM schemas
 │   ├── agents/
 │   │   ├── base.py              # BaseAgent abstract class
 │   │   ├── icp_agent.py         # ICP Analysis Agent
@@ -44,16 +47,27 @@ backend/
 │   │   └── policy_agent.py     # Platform Policy Agent
 │   ├── llm/
 │   │   ├── base.py              # LLMProvider abstract class
-│   │   ├── modal_provider.py    # Modal (GLM-5.1) provider
+│   │   ├── modal_provider.py    # Modal (GLM-5.1-FP8) provider
 │   │   ├── groq_provider.py     # Groq provider
 │   │   ├── gemini_provider.py   # Google Gemini provider
 │   │   ├── ollama_provider.py   # Ollama local provider
 │   │   ├── provider_factory.py  # Provider factory + failover chain
 │   │   └── cache.py            # LLM response LRU cache
+│   ├── pipeline/
+│   │   ├── orchestrator.py      # PipelineOrchestrator (run_step, invalidation)
+│   │   └── state.py            # StepType, StepStatus, DEPENDENCY_MAP
+│   ├── services/
+│   │   ├── analysis_service.py  # Analysis results persistence
+│   │   ├── export_service.py    # Script export (txt/md)
+│   │   ├── notebooklm_service.py # NotebookLM integration
+│   │   └── project_service.py   # Project CRUD
 │   ├── integrations/
-│   │   └── piragi.py        # Piragi RAG client
-│   │   └── rag/
-│   │       └── config.py           # Piragi configuration per step type
+│   │   └── notebooklm.py       # NotebookLM CLI wrapper
+│   ├── rag/
+│   │   └── config.py           # Piragi RAG configuration per step type
+│   └── ws/
+│       ├── connection.py       # WebSocket connection manager
+│       └── handler.py          # WebSocket event handler
 ```
 
 And in services:
@@ -71,7 +85,6 @@ frontend/
 │   │   ├── layout.tsx
 │   │   ├── page.tsx              # Dashboard
 │   │   ├── projects/
-│   │   │   ├── page.tsx          # Project list
 │   │   │   └── [id]/
 │   │   │       ├── page.tsx      # Project pipeline view
 │   │   │       └── editor/
@@ -80,43 +93,57 @@ frontend/
 │   │       └── page.tsx          # LLM settings
 │   ├── components/
 │   │   ├── ui/                   # Shadcn/UI primitives
+│   │   ├── app-shell.tsx        # App layout with sidebar
 │   │   ├── dashboard/
 │   │   ├── pipeline/
 │   │   │   ├── pipeline-view.tsx
-│   │   │   ├── step-card.tsx
 │   │   │   └── step-sidebar.tsx
 │   │   ├── agents/
-│   │   │   ├── agent-output-panel.tsx
+│   │   │   ├── agent-panel-wrapper.tsx  # Central routing for step panels
+│   │   │   ├── subject-panel.tsx        # Subject definition form
 │   │   │   ├── icp-panel.tsx
 │   │   │   ├── hook-panel.tsx
 │   │   │   ├── narrative-panel.tsx
 │   │   │   ├── retention-panel.tsx
 │   │   │   ├── cta-panel.tsx
-│   │   │   └── analysis-panel.tsx
+│   │   │   ├── writer-panel.tsx         # Script generation UI
+│   │   │   └── analysis-panel.tsx      # Tabbed analysis (no Analyze All)
 │   │   ├── editor/
-│   │   │   └── script-editor.tsx
+│   │   │   ├── script-editor.tsx
+│   │   │   ├── toolbar.tsx
+│   │   │   └── version-dropdown.tsx
+│   │   ├── piragi/
+│   │   │   ├── piragi-connect-panel.tsx
+│   │   │   ├── piragi-context-preview.tsx
+│   │   │   └── step-document-dropzone.tsx
 │   │   └── shared/
-│   │       ├── loading-spinner.tsx
-│   │       ├── error-boundary.tsx
-│   │       └── streaming-text.tsx
+│   │       ├── branch-dialog.tsx
+│   │       ├── export-panel.tsx
+│   │       ├── notebooklm-context.tsx
+│   │       ├── streaming-text.tsx
+│   │       └── error-boundary.tsx
 │   ├── lib/
 │   │   ├── api.ts                # API client (fetch wrapper)
-│   │   ├── ws.ts                 # WebSocket client
 │   │   └── utils.ts              # Utility functions
 │   ├── hooks/
-│   │   ├── use-pipeline.ts       # Pipeline state hook
 │   │   ├── use-websocket.ts      # WebSocket connection hook
-│   │   └── use-agent-stream.ts   # Agent streaming hook
+│   │   └── use-agent-stream.ts   # Agent event hook (agent_start/complete/failed only)
 │   ├── stores/
 │   │   ├── project-store.ts      # Zustand project state
 │   │   ├── pipeline-store.ts     # Zustand pipeline state
-│   │   └── settings-store.ts     # Zustand settings state
+│   │   ├── settings-store.ts     # Zustand settings state
+│   │   ├── editor-store.ts       # Zustand editor state (auto-save)
+│   │   ├── piragi-store.ts       # Zustand Piragi state
+│   │   └── notebooklm-store.ts  # Zustand NotebookLM state
 │   └── types/
 │       ├── project.ts
 │       ├── pipeline.ts
 │       ├── icp.ts
 │       ├── script.ts
-│       └── analysis.ts
+│       ├── analysis.ts
+│       ├── settings.ts
+│       ├── piragi.ts
+│       └── notebooklm.ts
 ├── tailwind.config.ts
 ├── next.config.ts
 ├── package.json
@@ -156,18 +183,13 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
     def __init__(self, llm_provider: LLMProvider, cache: LLMCache | None = None):
         self.llm_provider = llm_provider
         self.cache = cache
-        self._agent = self._build_agent()
-
-    @abstractmethod
-    def _build_agent(self) -> pydantic_ai.Agent:
-        """Define the Pydantic AI agent with system prompt and deps."""
 
     @abstractmethod
     def build_prompt(self, inputs: InputT) -> str:
         """Construct the user prompt from structured inputs."""
 
     async def execute(self, inputs: InputT, ws_handler: WSHandler | None = None) -> OutputT:
-        """Run the agent with failover, caching, and streaming."""
+        """Run the agent with failover, caching, and output parsing."""
         cache_key = self._compute_cache_key(inputs)
         if self.cache and (cached := await self.cache.get(cache_key)):
             return cached
@@ -180,11 +202,13 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
             raise AgentExecutionError(self.name, str(e))
 
     async def _run_with_failover(self, inputs: InputT, ws_handler: WSHandler | None) -> OutputT:
-        """Try primary provider, failover to alternates."""
+        """Call factory.execute_with_failover(), then parse JSON response manually."""
 
     def _compute_cache_key(self, inputs: InputT) -> str:
         """Hash inputs + model + provider for cache key."""
 ```
+
+**Note:** Agents use raw LLM API calls with manual JSON parsing, not Pydantic AI framework. The `_build_agent()` method exists but is unused.
 
 #### ICPAgent
 
@@ -192,13 +216,6 @@ class BaseAgent(ABC, Generic[InputT, OutputT]):
 class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
     name = "icp"
     step_type = StepType.ICP
-
-    def _build_agent(self) -> pydantic_ai.Agent:
-        return pydantic_ai.Agent(
-            model=self.llm_provider.model_name,
-            result_type=ICPAgentOutput,
-            system_prompt=ICP_SYSTEM_PROMPT,
-        )
 
     def build_prompt(self, inputs: ICPAgentInput) -> str:
         return f"""Analyze the following notes and create an Ideal Customer Profile.
@@ -210,8 +227,10 @@ Content Goal: {inputs.content_goal or 'not specified'}
 Raw Notes:
 {inputs.raw_notes}
 
-Generate a detailed ICP including demographics, psychographics, pain points, desires, objections, and recommended language style."""
+Generate a detailed ICP including demographics, psychographics, pain points, desires, objections, and recommended language style. Return as JSON."""
 ```
+
+**Output:** ICPAgentOutput (icp: ICPProfile, confidence: float) — no suggestions[] field.
 
 #### HookAgent
 
@@ -342,44 +361,11 @@ class LLMProvider(ABC):
 ```python
 class ModalProvider(LLMProvider):
     provider_name = "modal"
-    model_name = "glm-5.1"
+    model_name = "zai-org/GLM-5.1-FP8"
+    priority = 3  # Third in failover chain
 
     def __init__(self, api_key: str, base_url: str = "https://api.us-west-2.modal.direct/v1"):
         self.client = OpenAI(api_key=api_key, base_url=base_url)
-
-    async def generate(self, prompt: str, system_prompt: str, response_model: type[BaseModel] | None = None) -> str:
-        kwargs = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-        }
-        if response_model:
-            kwargs["response_format"] = {"type": "json_object"}
-        response = await asyncio.to_thread(self.client.chat.completions.create, **kwargs)
-        return response.choices[0].message.content
-
-    async def stream(self, prompt: str, system_prompt: str) -> AsyncIterator[str]:
-        stream = await asyncio.to_thread(
-            self.client.chat.completions.create,
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-            stream=True,
-        )
-        for chunk in stream:
-            if chunk.choices[0].delta.content:
-                yield chunk.choices[0].delta.content
-
-    async def health_check(self) -> bool:
-        try:
-            await asyncio.to_thread(self.client.models.list)
-            return True
-        except Exception:
-            return False
 ```
 
 #### ProviderFactory
@@ -391,28 +377,22 @@ class ProviderFactory:
         self._build_providers(config)
 
     def _build_providers(self, config: LLMConfig):
-        if config.modal_api_key:
-            self._providers.append(ModalProvider(config.modal_api_key, priority=0))
-        if config.groq_api_key:
-            self._providers.append(GroqProvider(config.groq_api_key, priority=1))
         if config.gemini_api_key:
-            self._providers.append(GeminiProvider(config.gemini_api_key, priority=2))
+            self._providers.append(GeminiProvider(config.gemini_api_key, priority=1))
+        if config.groq_api_key:
+            self._providers.append(GroqProvider(config.groq_api_key, priority=2))
+        if config.modal_api_key:
+            self._providers.append(ModalProvider(config.modal_api_key, priority=3))
         if config.ollama_enabled:
-            self._providers.append(OllamaProvider(priority=3))
+            self._providers.append(OllamaProvider(priority=4))
         self._providers.sort(key=lambda p: p.priority)
-
-    async def get_provider(self) -> LLMProvider:
-        for provider in self._providers:
-            if await provider.health_check():
-                return provider
-        raise AllProvidersFailedError("No LLM provider available")
 
     async def execute_with_failover(self, prompt: str, system_prompt: str, response_model: type[BaseModel] | None = None) -> str:
         last_error: Exception | None = None
         for provider in self._providers:
             for attempt in range(3):
                 try:
-                    return await provider.generate(prompt, system_prompt, response_model)
+                    return await provider.generate(prompt, system_prompt)
                 except RateLimitError:
                     await asyncio.sleep(2 ** attempt)
                     continue
@@ -422,6 +402,8 @@ class ProviderFactory:
         raise AllProvidersFailedError(str(last_error))
 ```
 
+**Provider Priority Order:** Gemini (1) → Groq (2) → Modal (3) → Ollama (4)
+
 ---
 
 #### PipelineOrchestrator
@@ -429,8 +411,9 @@ class ProviderFactory:
 ```python
 class PipelineOrchestrator:
     STEP_ORDER: list[StepType] = [
-        StepType.ICP, StepType.HOOK, StepType.NARRATIVE,
+        StepType.ICP, StepType.SUBJECT, StepType.HOOK, StepType.NARRATIVE,
         StepType.RETENTION, StepType.CTA, StepType.WRITER,
+        StepType.ANALYSIS,
         StepType.FACTCHECK, StepType.READABILITY,
         StepType.COPYRIGHT, StepType.POLICY,
     ]
@@ -546,7 +529,7 @@ class PipelineState:
 | **Factory** | `ProviderFactory` | Centralizes provider instantiation and configuration; manages failover chain ordering |
 | **Template Method** | `BaseAgent.execute()` | Defines the skeleton (cache check → failover run → cache write); subclasses override `build_prompt()` and `_build_agent()` |
 | **Chain of Responsibility** | Provider failover chain | Each provider attempts the request; on failure, passes to next provider in chain |
-| **Observer** | WebSocket event broadcasting | Pipeline orchestrator emits events (agent_start, agent_progress, agent_complete); WebSocket handler subscribes and pushes to clients |
+| **Observer** | WebSocket event broadcasting | Pipeline orchestrator emits events (agent_start, agent_complete, agent_failed); WebSocket handler subscribes and pushes to clients. No streaming tokens. |
 | **Adapter** | Modal/Groq/Gemini/Ollama providers | Each wraps a different SDK behind the common `LLMProvider` interface |
 | **Repository** | Service layer (`ProjectService`, `PipelineService`) | Encapsulates database access logic; keeps API handlers thin |
 | **State Machine** | `PipelineState` | Enforces valid step transitions and dependency checks |
@@ -648,11 +631,7 @@ CREATE INDEX idx_analysis_results_project ON analysis_results(project_id);
 **Request:**
 ```json
 {
-  "name": "My VSL Script",
-  "topic": "Python course launch",
-  "target_format": "VSL",
-  "content_goal": "Sell",
-  "raw_notes": "I want to sell my Python course..."
+  "name": "My VSL Script"
 }
 ```
 
@@ -661,9 +640,6 @@ CREATE INDEX idx_analysis_results_project ON analysis_results(project_id);
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "name": "My VSL Script",
-  "topic": "Python course launch",
-  "target_format": "VSL",
-  "content_goal": "Sell",
   "status": "draft",
   "current_step": 0,
   "created_at": "2026-04-11T10:00:00Z",
@@ -982,22 +958,18 @@ OUTPUT: ready (bool), missing_dependencies (list[StepType])
 
 DEPENDENCY_MAP = {
     ICP: [],
-    HOOK: [ICP],
-    NARRATIVE: [ICP, HOOK],
-    RETENTION: [ICP, NARRATIVE],
-    CTA: [ICP, HOOK, NARRATIVE],
-    WRITER: [ICP, HOOK, NARRATIVE, RETENTION, CTA],
+    SUBJECT: [ICP],
+    HOOK: [ICP, SUBJECT],
+    NARRATIVE: [ICP, SUBJECT, HOOK],
+    RETENTION: [ICP, SUBJECT, NARRATIVE],  # Video formats only; skipped for non-video
+    CTA: [ICP, SUBJECT, NARRATIVE],        # Reduced deps for non-video formats
+    WRITER: [ICP, SUBJECT, NARRATIVE, RETENTION, CTA],  # Reduced deps for non-video
+    ANALYSIS: [WRITER],
     FACTCHECK: [WRITER],
     READABILITY: [WRITER],
     COPYRIGHT: [WRITER],
     POLICY: [WRITER],
 }
-
-1. Look up DEPENDENCY_MAP[step_type]
-2. For each dependency, check if pipeline_step exists with status=COMPLETED
-3. Collect any unmet dependencies
-4. If missing_dependencies is empty, return ready=True
-5. Otherwise return ready=False with the list
 ```
 
 ---

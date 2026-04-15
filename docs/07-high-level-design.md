@@ -28,8 +28,8 @@ Scripts Writer follows a **layered architecture** with a central **pipeline orch
 ┌──────────────────────────▼──────────────────────────────────────┐
 │                        API LAYER                                 │
 │                     FastAPI Routers                               │
-│  /projects · /pipeline · /icp · /scripts · /analyze             │
-│  /export · /settings · /ws/pipeline/{id}                        │
+│  /projects · /pipeline · /icp · /scripts · /analysis            │
+│  /export · /settings · /rag · /notebooklm · /ws/pipeline/{id}   │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────────┐
@@ -44,7 +44,7 @@ Scripts Writer follows a **layered architecture** with a central **pipeline orch
 │                    Agent Modules                                 │
 │  ICP · Hook · Narrative · Retention · CTA · Writer              │
 │  FactCheck · Readability · Copyright · Policy                   │
-│  Each agent: Pydantic AI definition + structured I/O             │
+│  Each agent: Raw LLM calls with manual JSON parsing             │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────────┐
@@ -112,7 +112,7 @@ Scripts Writer
 │   │   ├── Pipeline router (run, select, branch)
 │   │   ├── ICP router (generate, upload, approve)
 │   │   ├── Script router (generate, edit, version)
-│   │   ├── Analysis router (run individual, run all)
+│   │   ├── Analysis router (run individual agents - no run all)
 │   │   ├── Export router (txt, md, clipboard)
 │   │   └── Settings router (LLM config, health)
 │   ├── Pipeline Module
@@ -194,7 +194,7 @@ NotebookLM Panel ──► NotebookLM Router ──► NotebookLM Service ──
    Frontend ◄──201 {project}── API ◄── ProjectService ◄── SQLite
 
 1a. USER ATTACHES PIRAGI DOCUMENTS (OPTIONAL)
-   Frontend ──POST /piragi/connect──► API ──► Piragi Service ──► Local filesystem
+   Frontend ──POST /rag/connect──► API ──► Piragi Service ──► Local filesystem
    Store document_paths on project
 
 2. USER TRIGGERS ICP AGENT (If Piragi documents connected, query for ICP-related insights; include in agent prompt)
@@ -220,12 +220,14 @@ NotebookLM Panel ──► NotebookLM Router ──► NotebookLM Service ──
    Streaming output via WebSocket to frontend
    New ScriptVersion saved to SQLite
 
-6. ANALYSIS AGENTS RUN IN PARALLEL
-   Frontend ──POST /analyze/all──► API ──► Orchestrator
-   Orchestrator ──asyncio.gather──► [FactCheck, Readability, Copyright, Policy]
-   Each agent ──► LLMProvider ──► External
-   Results collected, saved to SQLite
-   Frontend ◄──200 {analysis results}── API
+6. ANALYSIS AGENTS RUN INDIVIDUALLY (user clicks each tab to run)
+   Frontend ──POST /analysis/{agentType}──► API ──► Orchestrator
+   Orchestrator ──► Agent (FactCheck OR Readability OR Copyright OR Policy)
+   Agent ──► LLMProvider ──► External
+   Result saved to SQLite
+   Frontend ◄──200 {analysis result}── API
+
+   Note: run_analysis_parallel() exists but is not exposed via API (no /analysis/all endpoint)
 
 7. USER EXPORTS SCRIPT
    Frontend ──GET /export?format=md──► API ──► ExportService
@@ -237,32 +239,24 @@ NotebookLM Panel ──► NotebookLM Router ──► NotebookLM Service ──
 
 ```
 Frontend                              Backend
-   │                                     │
-   │  WS connect /ws/pipeline/{id}       │
-   │─────────────────────────────────────►│
-   │  101 Switching Protocols            │
+   │
+   │  WS connect /ws/pipeline/{id}
+   │─────────────────────────────────────►
+   │  101 Switching Protocols
    │◄─────────────────────────────────────│
-   │                                     │
-   │  (user triggers agent)              │
-   │                                     │
-   │  WS: {event: "agent_start",         │
-   │       step_type: "hook"}            │
+   │
+   │  (user triggers agent)
+   │
+   │  WS: {event: "agent_start",
+   │       step_type: "hook"}
    │◄─────────────────────────────────────│
-   │                                     │
-   │  WS: {event: "agent_progress",      │
-   │       step_type: "hook",            │
-   │       streaming_token: "What"}      │
-   │◄─────────────────────────────────────│
-   │                                     │
-   │  WS: {event: "agent_progress",      │
-   │       streaming_token: " if"}       │
-   │◄─────────────────────────────────────│
-   │  ...                                │
-   │                                     │
-   │  WS: {event: "agent_complete",      │
-   │       step_type: "hook",            │
-   │       status: "completed",          │
-   │       output: {...}}                │
+   │
+   │  (no streaming tokens - real-time status only)
+   │
+   │  WS: {event: "agent_complete",
+   │       step_type: "hook",
+   │       status: "completed",
+   │       output: {...}}
    │◄─────────────────────────────────────│
 ```
 
@@ -306,9 +300,9 @@ Frontend                              Backend
 
 | Integration | Direction | Protocol | Auth | Data Exchanged | Failure Mode |
 |------------|-----------|----------|------|----------------|-------------|
-| Modal | Outbound | HTTPS REST (OpenAI-compatible) | API key (Bearer) | User notes + ICP + selections → generated text | Failover to next provider |
-| Groq | Outbound | HTTPS REST (OpenAI-compatible) | API key (Bearer) | Same as Modal | Failover to next provider |
 | Gemini | Outbound | HTTPS REST (Google SDK) | API key | Same as Modal | Failover to next provider |
+| Groq | Outbound | HTTPS REST (OpenAI-compatible) | API key (Bearer) | Same as Modal | Failover to next provider |
+| Modal | Outbound | HTTPS REST (OpenAI-compatible) | API key (Bearer) | User notes + ICP + selections → generated text | Failover to next provider |
 | Ollama | Outbound | HTTP REST | None | Same as Modal | Prompt user to start Ollama or switch provider |
 | YouTube Data | Outbound | HTTPS REST | API key | Video metadata queries | Graceful degradation; analysis proceeds without |
 | Piragi RAG | Outbound | Local I/O | Document paths | Step-relevant query → contextual insights | Graceful degradation; agents use raw notes only |
@@ -316,18 +310,18 @@ Frontend                              Backend
 ### Integration Resilience
 
 ```
-Request ──► Modal
+Request ──► Gemini
              ├── Success ──► Return result
              └── Failure (429/5xx/timeout)
                   └── Retry (max 3, exponential backoff)
                        └── Still failing ──► Groq
                                              ├── Success ──► Return result
-                                             └── Failure ──► Gemini
-                                                              ├── Success ──► Return result
-                                                              └── Failure ──► Ollama
-                                                                               ├── Success ──► Return result
-                                                                               └── Failure ──► Return error to user
-                                                                                               with provider status summary
+                                             └── Failure ──► Modal
+                                                           ├── Success ──► Return result
+                                                           └── Failure ──► Ollama
+                                                                        ├── Success ──► Return result
+                                                                        └── Failure ──► Return error to user
+                                                                                        with provider status summary
 ```
 
 ---
@@ -567,36 +561,29 @@ Browser          Next.js            FastAPI           Orchestrator       ICPAgen
 ```
 Browser          Next.js           FastAPI          Orchestrator     FactCheck     Readability   Copyright    Policy
   │                 │                  │                  │               │             │            │           │
-  │ Click "Analyze"│                  │                  │               │             │            │           │
+  │ Click "Run      │                  │                  │               │             │            │           │
+  │ Fact Check"     │                  │                  │               │             │            │           │
   │────────────────>│                  │                  │               │             │            │           │
-  │                 │ POST /analyze/all│                  │               │             │            │           │
+  │                 │ POST /analysis/factcheck            │               │             │            │           │
   │                 │─────────────────>│                  │               │             │            │           │
-  │                 │                  │ run_analysis_    │               │             │            │           │
-  │                 │                  │ parallel()      │               │             │            │           │
+  │                 │                  │ run_step(FACTCHECK)            │             │            │           │
   │                 │                  │─────────────────>│               │             │            │           │
-  │                 │                  │                  │ asyncio.       │             │            │           │
-  │                 │                  │                  │ gather()       │             │            │           │
+  │                 │                  │                  │ execute()     │             │            │           │
   │                 │                  │                  │──────────────>│             │            │           │
-  │                 │                  │                  │────────────────────────────>│            │           │
-  │                 │                  │                  │────────────────────────────────────────>│           │
-  │                 │                  │                  │───────────────────────────────────────────────────>│
+  │                 │                  │                  │               │ generate() │            │           │
+  │                 │                  │                  │               │───────────>│            │           │
+  │                 │                  │                  │               │  <result>  │            │           │
+  │                 │                  │                  │               │<───────────│            │           │
+  │                 │                  │                  │<──────────────│             │            │           │
   │                 │                  │                  │               │             │            │           │
-  │ WS: factcheck   │                  │                  │  <results>    │             │            │           │
+  │ WS: factcheck   │                  │                  │  <results>   │             │            │           │
   │  result         │<─────────────────│<──WS broadcast───│<──────────────│             │            │           │
   │<────────────────│                  │                  │               │             │            │           │
-  │ WS: readability  │                  │                  │               │  <results>  │            │           │
-  │  result         │<─────────────────│<──WS broadcast───│<──────────────────────────│            │           │
-  │<────────────────│                  │                  │               │             │            │           │
-  │ WS: copyright   │                  │                  │               │             │  <results> │           │
-  │  result         │<─────────────────│<──WS broadcast───│<──────────────────────────────────────│           │
-  │<────────────────│                  │                  │               │             │            │           │
-  │ WS: policy     │                  │                  │               │             │            │  <results>│
-  │  result        │<─────────────────│<──WS broadcast───│<──────────────────────────────────────────────────│
+  │                 │                  │ 200 {result}     │               │             │            │           │
+  │                 │<─────────────────│<─────────────────│               │             │            │           │
   │<────────────────│                  │                  │               │             │            │           │
   │                 │                  │                  │               │             │            │           │
-  │ 200 {all       │                  │ 200 {results[]}  │               │             │            │           │
-  │  analysis}     │<─────────────────│<─────────────────│               │             │            │           │
-  │<────────────────│                  │                  │               │             │            │           │
+  │ (user repeats for readability, copyright, policy tabs as needed)              │             │            │           │
 ```
 
 ### Path of a Request: LLM Provider Failover

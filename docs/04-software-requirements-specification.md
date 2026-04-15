@@ -37,7 +37,6 @@ Scripts Writer transforms raw notes and audience insights into polished, analyze
 | **PAS** | Problem-Agitate-Solution — copywriting framework |
 | **AIDA** | Attention-Interest-Desire-Action — copywriting framework |
 | **LLM** | Large Language Model |
-| **Pydantic AI** | Python framework for building AI agents with structured input/output using Pydantic models |
 | **FastAPI** | Python web framework for building APIs with automatic validation |
 | **Next.js** | React framework for full-stack web applications |
 | **Shadcn/UI** | Re-usable UI component library for React with Tailwind CSS |
@@ -45,6 +44,7 @@ Scripts Writer transforms raw notes and audience insights into polished, analyze
 | **Modal** | Cloud compute platform hosting LLM inference endpoints |
 | **Ollama** | Local LLM runtime for running models on-device |
 | **Piragi** | Google's AI-powered RAG tool that synthesizes insights from uploaded sources and enables Q&A; accessible via local filesystem or remote storage |
+| **Raw LLM Calls** | Agents use direct LLM API calls with manual JSON parsing rather than a framework |
 
 ---
 
@@ -60,8 +60,8 @@ The system is not part of a larger product suite. It is a self-contained tool de
 ┌──────────────┐     HTTP/WS     ┌──────────────┐     API      ┌─────────────────┐
 │  Next.js     │ ◄────────────► │  FastAPI      │ ◄──────────► │  LLM Providers  │
 │  Frontend    │                │  Backend      │              │  (Modal, Groq,  │
-│  (Shadcn/UI, │                │  (Pydantic AI)│              │   Gemini,       │
-│   Tailwind)  │                │               │              │   Ollama)       │
+│  (Shadcn/UI, │                │  (FastAPI,    │              │   Gemini,       │
+│   Tailwind)  │                │   Pydantic)   │              │   Ollama)       │
 └──────────────┘                └──────────────┘              └─────────────────┘
                                        │
                                        │ API
@@ -69,8 +69,8 @@ The system is not part of a larger product suite. It is a self-contained tool de
                                 ┌─────────────────┐
                                 │  External APIs   │
                                 │  (YouTube Data,  │
-                                │   Google LM Notes│
-                                │   )              │
+                                │   Google LM      │
+                                │   Notes, Piragi) │
                                 └─────────────────┘
 ```
 
@@ -88,7 +88,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 |-----------|-------------|
 | **Server OS** | macOS (must), Windows/Linux (should) |
 | **Client Browser** | Chrome, Firefox, Safari, Edge (latest 2 major versions) |
-| **Runtime** | Python 3.11+, Node.js 20+ |
+| **Runtime** | Python 3.13+, Node.js 20+ |
 | **Local LLM** | Ollama installed and running (optional, for local inference) |
 | **Minimum Hardware** | 8 GB RAM, 2 CPU cores (for app server); 16 GB RAM recommended for local LLM inference |
 | **Network** | Internet connection required for cloud LLM providers; not required for Ollama-only mode |
@@ -104,7 +104,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F01.1 | The system shall provide an input interface for raw notes (freeform text, max 10,000 characters) | Must |
 | SRS-F01.2 | The system shall provide an upload interface for text files (ICP profiles, notes, etc.) | Must |
 | SRS-F01.3 | The system shall allow the user to specify the topic/subject (max 200 characters) | Must |
-| SRS-F01.4 | The system shall allow the user to select the target format from: VSL, YouTube, Tutorial, Facebook, LinkedIn, Blog | Must |
+| SRS-F01.4 | The system shall allow the user to select the target format from: Short-form Video, Long-form Video, VSL, Blog Post, LinkedIn Post, Facebook Post | Must |
 | SRS-F01.5 | The system shall allow the user to specify the content goal: Sell, Educate, Entertain, Build Authority | Should |
 | SRS-F01.6 | The system shall persist all inputs per project for later resumption | Must |
 
@@ -264,7 +264,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 
 | Interface | Protocol | Description |
 |-----------|----------|-------------|
-| Modal LLM API | HTTPS (OpenAI-compatible REST) | GLM-5.1 model inference via `https://api.us-west-2.modal.direct/v1` |
+| Modal LLM API | HTTPS (OpenAI-compatible REST) | GLM-5.1-FP8 model inference via `https://api.us-west-2.modal.direct/v1` |
 | Groq API | HTTPS (REST) | LLM inference via Groq free tier |
 | Google Gemini API | HTTPS (REST) | LLM inference via Google Gemini free tier |
 | Ollama API | HTTP (REST) | Local LLM inference on `localhost:11434` |
@@ -291,7 +291,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | NFR-P1 | Individual agent response time shall not exceed 60 seconds under normal conditions | ≤ 60s per agent |
 | NFR-P2 | Full pipeline execution (all agents sequentially with user decisions) shall complete within 3 minutes of compute time | ≤ 3 min total compute |
 | NFR-P3 | Page load time for the frontend shall not exceed 2 seconds | ≤ 2s initial load |
-| NFR-P4 | The system shall stream LLM responses to the frontend as they are generated to reduce perceived latency | Streaming via WebSocket |
+| NFR-P4 | The system shall provide real-time status updates via WebSocket as agents complete their execution | WebSocket status updates |
 | NFR-P5 | The system shall support concurrent agent execution where dependencies allow (e.g., analysis agents in parallel) | Parallel execution |
 
 ### Security
@@ -325,8 +325,8 @@ The system is not part of a larger product suite. It is a self-contained tool de
 
 | ID | Requirement | Metric |
 |----|------------|--------|
-| NFR-M1 | Each agent shall be implemented as an independent, interchangeable module following Pydantic AI patterns | Independent agent modules |
-| NFR-M2 | The system shall use structured Pydantic models for all agent inputs and outputs to ensure type safety and validation | Pydantic validation on all I/O |
+| NFR-M1 | Each agent shall be implemented as an independent, interchangeable module | Independent agent modules |
+| NFR-M2 | The system shall use Pydantic models for all agent inputs and outputs to ensure type safety and validation | Pydantic validation on all I/O |
 | NFR-M3 | API endpoints shall follow REST conventions with OpenAPI documentation auto-generated by FastAPI | Auto-generated API docs |
 | NFR-M4 | The frontend shall use Shadcn/UI component composition for consistent, maintainable UI patterns | Component-based architecture |
 | NFR-M5 | The system shall include a logging framework for debugging agent execution and LLM interactions | Structured logging |
@@ -337,7 +337,7 @@ The system is not part of a larger product suite. It is a self-contained tool de
 
 | ID | Constraint | Detail |
 |----|-----------|--------|
-| C-1 | **Technology Stack** | Backend: Python 3.11+, FastAPI, Pydantic, Pydantic AI; Frontend: Next.js, Shadcn/UI, Tailwind CSS |
+| C-1 | **Technology Stack** | Backend: Python 3.13+, FastAPI, Pydantic, Raw LLM calls with JSON parsing; Frontend: Next.js, Shadcn/UI, Tailwind CSS |
 | C-2 | **LLM Providers** | Modal (GLM-5.1, OpenAI-compatible), Groq, Google Gemini, Ollama (local) — free tiers only |
 | C-3 | **Budget** | $0 — no paid services, APIs, or hosting |
 | C-4 | **Platform** | macOS (must), Windows/Linux (should) |
@@ -345,4 +345,4 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | C-6 | **Copyright Disclaimer** | Copyright and policy analysis findings are advisory only — the system does not provide legal determinations |
 | C-7 | **Single User** | v1 is designed for single-user local operation; no authentication or multi-tenancy |
 | C-8 | **Node.js** | Node.js 20+ required for Next.js frontend |
-| C-9 | **Python** | Python 3.11+ required for FastAPI backend |
+| C-9 | **Python** | Python 3.13+ required for FastAPI backend |

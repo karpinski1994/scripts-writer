@@ -39,14 +39,14 @@
 
 | Layer | Technology |
 |-------|-----------|
-| Backend runtime | Python 3.11+ |
+| Backend runtime | Python 3.13+ |
 | Backend framework | FastAPI 0.110+ |
-| Agent framework | Pydantic AI |
+| Agent framework | Raw LLM calls with JSON parsing |
 | Validation | Pydantic 2.x |
 | ORM | SQLAlchemy 2.x (async) |
 | Database | SQLite via aiosqlite |
 | Migrations | Alembic |
-| LLM clients | `openai` (Modal/Groq), `google-generativeai` (Gemini), `ollama` |
+| LLM clients | `openai` (Modal/Groq), `google-genai` (Gemini), `ollama` |
 | Frontend framework | Next.js 14+ (App Router) |
 | UI components | Shadcn/UI |
 | Styling | Tailwind CSS 3.x |
@@ -64,14 +64,14 @@
 
 ## LLM Provider Configuration
 
-| Provider | Base URL | SDK | Auth |
-|----------|----------|-----|------|
-| Modal (GLM-5.1) | `https://api.us-west-2.modal.direct/v1` | `openai` (OpenAI-compatible) | API key |
-| Groq | `https://api.groq.com/openai/v1` | `openai` (OpenAI-compatible) | API key |
-| Google Gemini | Gemini REST API | `google-generativeai` | API key |
-| Ollama (local) | `http://localhost:11434` | `ollama` | None |
+| Provider | Base URL | SDK | Model | Auth |
+|----------|----------|-----|------|------|
+| Modal (GLM-5.1-FP8) | `https://api.us-west-2.modal.direct/v1` | `openai` (OpenAI-compatible) | zai-org/GLM-5.1-FP8 | API key |
+| Groq | `https://api.groq.com/openai/v1` | `openai` (OpenAI-compatible) | llama-3.3-70b-versatile | API key |
+| Google Gemini | Gemini REST API | `google-genai` | gemini-2.0-flash | API key |
+| Ollama (local) | `http://localhost:11434` | `ollama` | llama3.2 | None |
 
-Provider priority (failover order): Modal → Groq → Gemini → Ollama
+Provider priority (failover order): Gemini → Groq → Modal → Ollama
 
 ---
 
