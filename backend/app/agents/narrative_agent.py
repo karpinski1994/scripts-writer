@@ -12,9 +12,11 @@ from app.schemas.agents import NarrativeAgentInput, NarrativeAgentOutput
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You are an expert storytelling consultant.
-Given ICP, hook, topic, format, generate narrative patterns in JSON.
+The DRAFT/CONTENT is your PRIMARY source of truth — it contains the actual message the user wants to convey.
+All other data (ICP, hook, topic, format) is auxiliary context to shape which narrative patterns best serve the content.
+Generate narrative patterns in JSON.
 Output ONLY valid JSON: patterns[pattern_name, description, structure], confidence(0.0-1.0).
-Each pattern outlines key beats and flow."""
+Each pattern must align with the draft's core message and naturally carry its content."""
 
 
 class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
@@ -27,12 +29,20 @@ class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
         return StepType.narrative.value
 
     def build_prompt(self, input_data: NarrativeAgentInput) -> str:
-        parts = [
-            f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
-            f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
-            f"Topic: {input_data.topic}",
-            f"Target Format: {input_data.target_format}",
-        ]
+        parts = []
+        if input_data.draft:
+            parts.append(
+                "=== PRIMARY SOURCE (Draft/Content) — Base narrative patterns on THIS content above all else. ===\n"
+                f"{input_data.draft}"
+            )
+        parts.extend(
+            [
+                f"Topic: {input_data.topic}",
+                f"Target Format: {input_data.target_format}",
+                f"ICP Summary (auxiliary):\n{input_data.icp.model_dump_json(indent=2)}",
+                f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
+            ]
+        )
         if input_data.piragi_context:
             parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)

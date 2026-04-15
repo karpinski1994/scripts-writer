@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert in calls-to-action (CTAs) for video and marketing content. "
-    "Given an ICP, a selected hook, a selected narrative pattern, a CTA purpose, and an optional content goal, "
-    "generate CTA options that will drive the desired action from the audience. "
+    "The DRAFT/CONTENT is your PRIMARY source of truth — it contains the actual message the user wants to convey. "
+    "All other data (ICP, hook, narrative, CTA purpose) is auxiliary context to shape the CTA. "
     "The CTA purpose is the highest-priority instruction and defines the exact action the audience should take. "
     "Every CTA must clearly drive that action and must not substitute a different conversion goal. "
+    "The CTA should feel like a natural next step after the draft's content, not an interruption. "
     "Consider the ICP's objections and motivations. Vary CTA types (direct, soft, urgency, value-driven)."
 )
 
@@ -43,11 +44,16 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
                 "Primary CTA Goal (most important instruction):\n"
                 "[Not specified - ask user to define the exact action they want the audience to take]"
             )
+        if input_data.draft:
+            parts.append(
+                "=== PRIMARY SOURCE (Draft/Content) — The CTA must feel like a natural next step from THIS content. ===\n"
+                f"{input_data.draft}"
+            )
         parts.extend(
             [
-                f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
-                f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
-                f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
+                f"ICP Summary (auxiliary):\n{input_data.icp.model_dump_json(indent=2)}",
+                f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
+                f"Selected Narrative (auxiliary):\n{input_data.selected_narrative.model_dump_json(indent=2)}",
             ]
         )
         if input_data.content_goal:

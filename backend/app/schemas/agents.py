@@ -14,6 +14,7 @@ class HookAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    draft: str | None = None
     piragi_context: str | None = None
 
 
@@ -33,6 +34,7 @@ class NarrativeAgentInput(BaseModel):
     selected_hook: HookSuggestion
     topic: str
     target_format: str
+    draft: str | None = None
     piragi_context: str | None = None
 
 
@@ -52,6 +54,7 @@ class RetentionAgentInput(BaseModel):
     selected_hook: HookSuggestion
     selected_narrative: NarrativePattern
     target_format: str
+    draft: str | None = None
     piragi_context: str | None = None
 
 
@@ -72,6 +75,7 @@ class CTAAgentInput(BaseModel):
     selected_narrative: NarrativePattern
     content_goal: str | None = None
     cta_purpose: str | None = None
+    draft: str | None = None
     piragi_context: str | None = None
 
 
@@ -96,6 +100,7 @@ class WriterAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    draft: str | None = None
     raw_notes: str = ""
     piragi_context: str | None = None
 

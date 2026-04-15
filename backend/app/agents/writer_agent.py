@@ -12,11 +12,13 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert scriptwriter for video and marketing content. "
-    "Given an ICP, selected hook, narrative pattern, retention techniques, and CTA, "
-    "write a complete script that weaves all these elements together into a compelling piece. "
+    "The DRAFT/CONTENT is your PRIMARY source of truth — it contains the actual message and content the user wants in the script. "
+    "All other data (ICP, hook, narrative, retention, CTA) is auxiliary — it shapes HOW the script is structured and styled, "
+    "but the draft's content MUST be the foundation. "
+    "Write a complete script that weaves all elements together into a compelling piece. "
     "The script should feel natural and persuasive, not formulaic. "
     "Adapt the tone and language style to the ICP profile. "
-    "Include the raw notes as source material to incorporate key details."
+    "The draft's key points and message must be preserved and enhanced, not replaced."
 )
 
 
@@ -38,19 +40,28 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
         else:
             retention_json = retention_data.model_dump_json(indent=2)
 
-        parts = [
-            f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
-            f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
-            f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
-            f"Selected Retention Technique(s):\n{retention_json}",
-            f"Selected CTA:\n{input_data.selected_cta.model_dump_json(indent=2)}",
-            f"Topic: {input_data.topic}",
-            f"Target Format: {input_data.target_format}",
-        ]
+        parts = []
+        if input_data.draft:
+            parts.append(
+                "=== PRIMARY SOURCE (Draft/Content) — This is the MOST IMPORTANT input. "
+                "The script MUST be built on this content. All other data shapes HOW, not WHAT. ===\n"
+                f"{input_data.draft}"
+            )
+        parts.extend(
+            [
+                f"Topic: {input_data.topic}",
+                f"Target Format: {input_data.target_format}",
+                f"ICP Summary (auxiliary — shapes tone and style):\n{input_data.icp.model_dump_json(indent=2)}",
+                f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
+                f"Selected Narrative (auxiliary):\n{input_data.selected_narrative.model_dump_json(indent=2)}",
+                f"Selected Retention Technique(s) (auxiliary):\n{retention_json}",
+                f"Selected CTA (auxiliary):\n{input_data.selected_cta.model_dump_json(indent=2)}",
+            ]
+        )
         if input_data.content_goal:
             parts.append(f"Content Goal: {input_data.content_goal}")
         if input_data.raw_notes:
-            parts.append(f"Raw Notes:\n{input_data.raw_notes}")
+            parts.append(f"Raw Notes (supplementary):\n{input_data.raw_notes}")
         if input_data.piragi_context:
             parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)

@@ -12,10 +12,12 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert in audience retention techniques for video and marketing content. "
-    "Given an ICP, a selected hook, a selected narrative pattern, and the content format, "
-    "generate retention technique options that will keep the audience engaged throughout. "
+    "The DRAFT/CONTENT is your PRIMARY source of truth — it contains the actual content the user wants to deliver. "
+    "All other data (ICP, hook, narrative, format) is auxiliary context to shape WHERE and HOW to apply retention. "
+    "Generate retention technique options that will keep the audience engaged throughout. "
     "Consider open loops, pattern interrupts, curiosity gaps, and other proven retention methods. "
-    "Specify where each technique should be placed in the script."
+    "Specify where each technique should be placed in the script. "
+    "Retention techniques must feel natural within the draft's flow, not forced."
 )
 
 
@@ -29,12 +31,20 @@ class RetentionAgent(BaseAgent[RetentionAgentInput, RetentionAgentOutput]):
         return StepType.retention.value
 
     def build_prompt(self, input_data: RetentionAgentInput) -> str:
-        parts = [
-            f"ICP Summary:\n{input_data.icp.model_dump_json(indent=2)}",
-            f"Selected Hook:\n{input_data.selected_hook.model_dump_json(indent=2)}",
-            f"Selected Narrative:\n{input_data.selected_narrative.model_dump_json(indent=2)}",
-            f"Target Format: {input_data.target_format}",
-        ]
+        parts = []
+        if input_data.draft:
+            parts.append(
+                "=== PRIMARY SOURCE (Draft/Content) — Base retention placement on THIS content's flow. ===\n"
+                f"{input_data.draft}"
+            )
+        parts.extend(
+            [
+                f"Target Format: {input_data.target_format}",
+                f"ICP Summary (auxiliary):\n{input_data.icp.model_dump_json(indent=2)}",
+                f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
+                f"Selected Narrative (auxiliary):\n{input_data.selected_narrative.model_dump_json(indent=2)}",
+            ]
+        )
         if input_data.piragi_context:
             parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
         return "\n\n".join(parts)

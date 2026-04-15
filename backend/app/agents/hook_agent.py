@@ -13,9 +13,11 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an expert copywriter specializing in attention-grabbing hooks for video and marketing content. "
-    "Given an Ideal Customer Profile (ICP), topic, draft of the content, format, and goal, generate multiple hook options in JSON format. "
-    "Output ONLY valid JSON with these exact fields: hooks[hook_type, text, reasoning], confidence (0.0-1.0). "
-    "Vary the hook types (question, shock, story, statistic, etc.)."
+    "The DRAFT/CONTENT is your PRIMARY source of truth — it contains the actual message and content the user wants to convey. "
+    "All other data (ICP, topic, format, goal) is auxiliary context to shape HOW hooks are crafted, not WHAT they're about. "
+    "Generate multiple hook options in JSON format. "
+    "Output ONLY valid JSON: hooks[hook_type, text, reasoning], confidence (0.0-1.0). "
+    "Vary the hook types (question, shock, story, statistic, etc.). Hooks must resonate with the draft's core message."
 )
 
 
@@ -30,11 +32,20 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
 
     def build_prompt(self, input_data: HookAgentInput) -> str:
         icp = input_data.icp
-        parts = [
-            f"ICP Summary:\n{icp.model_dump_json(indent=2)}",
-            f"Topic: {input_data.topic}",
-            f"Target Format: {input_data.target_format}",
-        ]
+        parts = []
+        if input_data.draft:
+            parts.append(
+                "=== PRIMARY SOURCE (Draft/Content) — This is your most important reference. "
+                "Base hooks on THIS content above all else. ===\n"
+                f"{input_data.draft}"
+            )
+        parts.extend(
+            [
+                f"Topic: {input_data.topic}",
+                f"Target Format: {input_data.target_format}",
+                f"ICP Summary (auxiliary — shapes HOW to hook, not WHAT about):\n{icp.model_dump_json(indent=2)}",
+            ]
+        )
         if input_data.content_goal:
             parts.append(f"Content Goal: {input_data.content_goal}")
         if input_data.piragi_context:
@@ -69,7 +80,7 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
             raw = raw.strip()
         try:
             data = json.loads(raw)
-            logger.debug(f"[HOOK-AGENT] Parsed JSON successfully")
+            logger.debug("[HOOK-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
             logger.warning("[HOOK-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\{.*\}", raw, re.DOTALL)

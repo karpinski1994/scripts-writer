@@ -297,19 +297,21 @@ class PipelineOrchestrator:
 
             project_hook_dir = docs_base / "hooks"
             if project_hook_dir.exists():
-                files = list(project_hook_dir.glob("*"))
+                files = sorted(
+                    [f for f in project_hook_dir.glob("*") if f.is_file() and f.suffix in [".txt", ".md", ".json"]]
+                )
                 if files:
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            hook_context = f"Project hook reference:\n{f.read_text()}\n\n"
+                    for f in files:
+                        hook_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
 
             playbook_hook_dir = playbooks_base / "hooks"
             if playbook_hook_dir.exists():
-                files = list(playbook_hook_dir.glob("*"))
+                files = sorted(
+                    [f for f in playbook_hook_dir.glob("*") if f.is_file() and f.suffix in [".txt", ".md", ".json"]]
+                )
                 if files:
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            hook_context = f"Hook playbook reference:\n{f.read_text()}\n\n" + hook_context
+                    for f in files:
+                        hook_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
 
             agent = HookAgent()
             input_data = HookAgentInput(
@@ -317,6 +319,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                draft=project.draft,
                 piragi_context=hook_context or piragi_context,
             )
             logger.info(f"[ORCHESTRATOR] Hook input built - topic: {project.topic}, has_icp: {bool(icp)}")
@@ -337,15 +340,18 @@ class PipelineOrchestrator:
                         if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
                             narrative_context = f"Project narrative reference:\n{f.read_text()}\n\n"
 
-            playbook_narrative_dir = playbooks_base / "narratives"
+            playbook_narrative_dir = playbooks_base / "narrative_patterns"
             if playbook_narrative_dir.exists():
-                files = list(playbook_narrative_dir.glob("*"))
+                files = sorted(
+                    [
+                        f
+                        for f in playbook_narrative_dir.glob("*")
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]
+                    ]
+                )
                 if files:
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            narrative_context = (
-                                f"Narrative playbook reference:\n{f.read_text()}\n\n" + narrative_context
-                            )
+                    for f in files:
+                        narrative_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
 
             agent = NarrativeAgent()
             input_data = NarrativeAgentInput(
@@ -353,6 +359,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 topic=project.topic,
                 target_format=project.target_format,
+                draft=project.draft,
                 piragi_context=narrative_context or piragi_context,
             )
             logger.info(f"[ORCHESTRATOR] Narrative input built - topic: {project.topic}")
@@ -375,15 +382,18 @@ class PipelineOrchestrator:
                         if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
                             retention_context = f"Project retention reference:\n{f.read_text()}\n\n"
 
-            playbook_retention_dir = playbooks_base / "retention"
+            playbook_retention_dir = playbooks_base / "retention_tactics"
             if playbook_retention_dir.exists():
-                files = list(playbook_retention_dir.glob("*"))
+                files = sorted(
+                    [
+                        f
+                        for f in playbook_retention_dir.glob("*")
+                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]
+                    ]
+                )
                 if files:
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            retention_context = (
-                                f"Retention playbook reference:\n{f.read_text()}\n\n" + retention_context
-                            )
+                    for f in files:
+                        retention_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
 
             agent = RetentionAgent()
             input_data = RetentionAgentInput(
@@ -392,6 +402,7 @@ class PipelineOrchestrator:
                 selected_narrative=selected_narrative,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                draft=project.draft,
                 piragi_context=retention_context or piragi_context,
             )
             logger.info("[ORCHESTRATOR] Retention input built")
@@ -404,7 +415,8 @@ class PipelineOrchestrator:
             logger.debug(f"[ORCHESTRATOR] Selected retention: {len(selected_retention)} techniques")
         else:
             logger.debug(
-                f"[ORCHESTRATOR] Selected retention: {selected_retention.technique_name if selected_retention else 'None'}"
+                f"[ORCHESTRATOR] Selected retention: "
+                f"{selected_retention.technique_name if selected_retention else 'None'}"
             )
 
         if step_type == StepType.cta:
@@ -416,6 +428,7 @@ class PipelineOrchestrator:
                 selected_narrative=selected_narrative,
                 content_goal=project.content_goal,
                 cta_purpose=project.cta_purpose,
+                draft=project.draft,
                 piragi_context=piragi_context,
             )
             logger.info("[ORCHESTRATOR] CTA input built")
@@ -438,11 +451,13 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                draft=project.draft,
                 raw_notes=project.raw_notes,
                 piragi_context=piragi_context,
             )
             logger.info(
-                f"[ORCHESTRATOR] Writer input built - topic: {project.topic}, has_retention: {bool(selected_retention)}, has_cta: {bool(selected_cta)}"
+                f"[ORCHESTRATOR] Writer input built - topic: {project.topic}, "
+                f"has_retention: {bool(selected_retention)}, has_cta: {bool(selected_cta)}"
             )
             return agent, input_data
 
