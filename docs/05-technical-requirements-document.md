@@ -60,6 +60,12 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 │  │           Persistence Layer                   │                   │
 │  │  SQLite + File Storage (projects, exports)   │                   │
 │  └─────────────────────────────────────────────┘                   │
+│                                                                     │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │           Project-Specific FAISS RAG            │                   │
+│  │  Ingestion (TF-IDF + FAISS) · Search          │                   │
+│  │  Per-project indexes in data/faiss_indexes/  │                   │
+│  └─────────────────────────────────────────────┘
 └─────────────────────────────────────────────────────────────────────┘
                             │
           ┌─────────────────┼──────────────────┐
@@ -91,6 +97,8 @@ Scripts Writer uses a **modular monolith** architecture. The backend is a single
 | **WebSocket** | FastAPI native | — | Real-time agent progress and streaming |
 | **HTTP Client** | `httpx` | 0.x | Async HTTP for external APIs (YouTube, Piragi) |
 | **Piragi Client** | `piragi` | latest | Local RAG client for document querying and retrieval |
+| **Vector Search** | `faiss-cpu` | latest | FAISS CPU-only build for efficient similarity search |
+| **Vectorization** | `sklearn` | latest | TF-IDF vectorizer for document embedding (imported as `sklearn`) |
 | **Testing** | `pytest` + `pytest-asyncio` | — | Backend unit and integration tests |
 
 ### Frontend
@@ -340,6 +348,22 @@ Project 1──* AnalysisResult
 | POST | `/api/v1/projects/{project_id}/rag/upload` | Upload a document to RAG |
 | POST | `/api/v1/projects/{project_id}/hooks/upload` | Upload hook reference document |
 | POST | `/api/v1/projects/{project_id}/pipeline/run/{step_type}` | (Modified) Accepts optional `piragi_context` field |
+
+#### FAISS RAG (Project-Specific)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/projects/{project_id}/icp/upload` | (Modified) Triggers FAISS ingestion for all uploaded documents |
+| GET | `/api/v1/projects/{project_id}/rag/icp/search?query=...&k=5` | Search indexed ICP documents using semantic similarity (query string, k results default 5) |
+
+#### FAISS RAG Service (`backend/app/rag/faiss_service.py`)
+
+| Function | Description | Parameters |
+|----------|-------------|-------------|
+| `ingest_project_documents(project_id, docs_path)` | Loads docs, chunks (1000 chars, 200 overlap), fits TfidfVectorizer, creates FAISS L2 index | `project_id: str`, `docs_path: str` |
+| `search_project_documents(project_id, query, k=5)` | Loads persisted index, searches with L2 distance, returns top k chunks | `project_id: str`, `query: str`, `k: int = 5` |
+
+Persistence: `data/faiss_indexes/{project_id}/` containing `index.faiss` and `metadata.pkl`
 
 #### Settings
 

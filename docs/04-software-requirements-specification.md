@@ -44,6 +44,8 @@ Scripts Writer transforms raw notes and audience insights into polished, analyze
 | **Modal** | Cloud compute platform hosting LLM inference endpoints |
 | **Ollama** | Local LLM runtime for running models on-device |
 | **Piragi** | Google's AI-powered RAG tool that synthesizes insights from uploaded sources and enables Q&A; accessible via local filesystem or remote storage |
+| **FAISS** | Facebook AI Similarity Search — library for efficient similarity search and clustering of dense vectors |
+| **TF-IDF** | Term Frequency-Inverse Document Frequency — text vectorization method for semantic matching |
 | **Raw LLM Calls** | Agents use direct LLM API calls with manual JSON parsing rather than a framework |
 
 ---
@@ -245,6 +247,22 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F15.4 | The system shall store the Piragi document references per project but not store document content locally | Must |
 | SRS-F15.5 | The system shall proceed with agent execution using raw notes only if Piragi is unavailable or not connected | Must |
 | SRS-F15.6 | The system shall allow the user to disconnect Piragi documents from a project | Should |
+
+### SRS-F16: Project-Specific FAISS RAG for ICP Generation
+
+| ID | Requirement | Priority |
+|----|------------|----------|
+| SRS-F16.1 | The system shall support a custom FAISS-based Retrieval-Augmented Generation (RAG) pipeline for ICP formulation | Must |
+| SRS-F16.2 | The system shall index uploaded ICP documents using TF-IDF vectorization and FAISS L2 index | Must |
+| SRS-F16.2.1 | The system shall use TfidfVectorizer with `max_features=5000`, `stop_words="english"`, `ngram_range=(1, 2)` | Must |
+| SRS-F16.2.2 | The system shall chunk documents with `chunk_size=1000` characters and `chunk_overlap=200` characters | Must |
+| SRS-F16.3 | The system shall partition vector indexes dynamically per project | Must |
+| SRS-F16.4 | The system shall persist FAISS indexes to a designated data directory (e.g., `data/faiss_indexes/{project_id}`) | Must |
+| SRS-F16.5 | The system shall ingest all project documents automatically upon upload via the ICP upload endpoint | Must |
+| SRS-F16.6 | The system shall search indexed documents using FAISS IndexFlatL2 semantic similarity | Must |
+| SRS-F16.6.1 | The system shall return top `k` most similar chunks (default `k=5`) | Must |
+| SRS-F16.7 | The system shall include retrieved document chunks in ICP agent prompts via FAISS retriever (distinct from piragi_context) | Must |
+| SRS-F16.8 | The system shall retrieve contextual chunks based on the exact query: "form an icp (ideal customer profile) from all the documents take most common lead awarness levels, identities, pain points, goals, dreams, desires, internal conficts, doubts, enemies, external barriers, failed attempts, what did not work, the emotional drivers - why now, and what makes them buy and give me detailed report with quotes based on that" | Must |
 
 ---
 

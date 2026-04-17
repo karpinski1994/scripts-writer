@@ -11,7 +11,7 @@ The orchestrator reads playbook references from documents/playbooks/ which doesn
 Currently only the HookAgent reads from the correct global path (after our earlier fix). Narrative and Retention agents still reference playbooks_base / "narratives" and playbooks_base / "retention" which points to a non-existent documents/playbooks/ directory.
 
 so move /Users/karpinski94/projects/scripts-writer/documents/narrative_patterns to /Users/karpinski94/projects/scripts-writer/documents/playbooks/narrative_patterns
- and /Users/karpinski94/projects/scripts-writer/documents/retention_tactics to
+  and /Users/karpinski94/projects/scripts-writer/documents/retention_tactics to
 /Users/karpinski94/projects/scripts-writer/documents/playbooks/retention_tactics
 
 Step-by-Step Changes
@@ -57,7 +57,7 @@ class WriterAgentInput(BaseModel):
 Rationale: WriterAgent keeps both draft and raw_notes because raw_notes is the original user input (shorter, initial), while draft is the refined content from the Subject step. Both are useful but draft is primary.
 ---
 Step 2: backend/app/agents/hook_agent.py — Emphasize draft as primary
-2a. SYSTEM_PROMPT (line 14-19): Rewrite to emphasize draft as primary source
+2a. SYSTEM_PROMPT (line 14-19): Rewrite to emphasize draft as primary
 Change from:
 "You are an expert copywriter specializing in attention-grabbing hooks... "
 "Given an Ideal Customer Profile (ICP), topic, draft of the content, format, and goal..."
@@ -329,3 +329,216 @@ backend/app/agents/cta_agent.py	Rewrite SYSTEM_PROMPT + add draft to build_promp
 backend/app/agents/writer_agent.py	Rewrite SYSTEM_PROMPT + add draft to build_prompt() as primary, demote raw_notes
 backend/app/pipeline/orchestrator.py	Pass draft=project.draft to 4 agents + fix global doc paths for narrative/retention
 backend/tests/unit/test_agents.py	Optionally add draft-specific test
+
+---
+
+# New: Implement Project-Specific FAISS RAG for ICP Generation
+
+## Overview
+
+This plan implements a custom FAISS-based RAG pipeline that integrates with the ICP upload workflow. The pipeline follows the exact logic from `backend/dummyfiles/ingestion_pipeline.py` and `backend/dummyfiles/answer_generation.py`.
+
+## Workflow
+
+```
+1. User uploads ICP files via /icp/upload
+         ↓
+2. Files saved to documents/{project_slug}/icp/
+         ↓
+3. On EVERY upload → trigger FAISS ingestion (per project)
+         ↓
+4. User clicks "Run ICP Agent"
+         ↓
+5. Orchestrator calls FAISS search with ICP query
+         ↓
+6. Retrieved chunks passed to ICP agent via FAISS retriever (not piragi_context)
+         ↓
+7. ICP agent generates profile using retrieved context
+         ↓
+8. ICP displayed in frontend ICP panel
+```
+
+## Dependencies (backend)
+
+- Using `faiss-cpu` and `sklearn` (imported from `sklearn`) as shown in `dummyfiles/`.
+- Install via: `uv add faiss-cpu sklearn`
+
+## Backend Changes
+
+### 1. [NEW] `backend/app/rag/faiss_service.py`
+
+Implementation exactly as in `backend/dummyfiles/ingestion_pipeline.py`:
+
+```python
+# Functions:
+def load_documents(docs_path: str) -> list[dict]:
+    """Load all .txt files from directory."""
+
+def split_text(text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> list[str]:
+    """Split text into overlapping chunks."""
+
+def create_index(documents: list[dict], project_id: str) -> None:
+    """Create FAISS index with TF-IDF for a project.
+    - Saves to data/faiss_indexes/{project_id}/index.faiss
+    - Saves metadata.pkl with texts, metadatas, vectorizer
+    """
+    
+def load_index(project_id: str):
+    """Load FAISS index from disk."""
+
+def search_project_documents(project_id: str, query: str, k: int = 5) -> list[tuple]:
+    """Search indexed documents, return top k chunks with metadata and distance."""
+```
+
+**Configuration (matching dummyfiles):**
+- `TfidfVectorizer(max_features=5000, stop_words="english", ngram_range=(1, 2))`
+- `chunk_size=1000`, `chunk_overlap=200`
+- `faiss.IndexFlatL2(dimension)`
+- Persistence:  `data/faiss_indexes/{project_id}/`
+
+**ICP Query (exact from answer_generation.py):**
+```python
+ICP_QUERY = "form an icp (ideal customer profile) from all the documents take most common lead awarness levels, identities, pain points, goals, dreams, desires, internal conficts, doubts, enemies, external barriers, failed attempts, what did not work, the emotional drivers - why now, and what makes them buy and give me detailed report with quotes based on that"
+```
+
+### 2. [MODIFY] `backend/app/api/icp.py`
+
+In `upload_icp` endpoint (around line 118):
+
+**Change 1:** After saving file with aiofiles, trigger ingestion:
+```python
+# After line 132 (after aiofiles save)
+from app.rag.faiss_service import create_index
+
+project_slug = project.name.lower().replace(" ", "-")
+docs_dir = Path(DOCUMENTS_DIR_BASE) / project_slug / "icp"
+create_index_function = create_index  # or make async
+create_index(str(docs_dir), project_id)  # Ingest all files for this project
+```
+
+**Actually**, we should add a NEW endpoint to explicitly trigger ingestion, because uploading happens per file and we want to ingest ALL files after all uploads complete. Add:
+
+```python
+@router.post("/ingest", response_model=dict)
+async def ingest_icp_documents(project_id: str, db: AsyncSession = Depends(get_db)):
+    """Trigger FAISS ingestion for all uploaded ICP documents."""
+    project_service = ProjectService(db)
+    project = await project_service.get_by_id(project_id)
+    
+    project_slug = project.name.lower().replace(" ", "-")
+    docs_dir = Path(DOCUMENTS_DIR_BASE) / project_slug / "icp"
+    
+    from app.rag.faiss_service import create_index
+    create_index(str(docs_dir), project_id)
+    
+    return {"status": "ingested", "project_id": project_id}
+```
+
+Or better: Trigger ingestion automatically when generating ICP (not on every upload), so we don't rebuild index on each file upload.
+
+**MODIFIED:** In `generate_icp` endpoint, call ingestion before running agent:
+
+```python
+@router.post("/generate", response_model=ICPProfileResponse)
+async def generate_icp(project_id: str, db: AsyncSession = Depends(get_db)):
+    project_service = ProjectService(db)
+    await project_service.get_by_id(project_id)
+    
+    # NEW: Ensure FAISS index exists before running agent
+    project = await project_service.get_by_id(project_id)
+    project_slug = project.name.lower().replace(" ", "-")
+    docs_dir = Path(DOCUMENTS_DIR_BASE) / project_slug / "icp"
+    
+    if docs_dir.exists():
+        from app.rag.faiss_service import create_index
+        create_index(str(docs_dir), project_id)  # Ingest all docs
+    
+    # Continue with existing pipeline
+    pipeline_service = PipelineService(db)
+    await pipeline_service.run_step(project_id, StepType.icp)
+    ...
+```
+
+### 3. [MODIFY] `backend/app/pipeline/orchestrator.py`
+
+In `_build_agent_inputs` for `StepType.icp` (lines 245-289):
+
+**REMOVE** existing "read only first file" logic (lines 250-276):
+```python
+# REMOVE THIS:
+project_icp_dir = docs_base / "icp"
+if project_icp_dir.exists():
+    files = list(project_icp_dir.glob("*"))
+    if files:
+        doc_content = []
+        for f in files[:1]:  # <-- ONLY FIRST FILE!
+            ...
+```
+
+**REPLACE** with FAISS retrieval:
+```python
+# NEW: Use FAISS to retrieve relevant chunks
+from app.rag.faiss_service import search_project_documents, ICP_QUERY
+
+if project_icp_dir.exists():
+    # Use FAISS search instead of reading first file
+    try:
+        results = search_project_documents(project_id, ICP_QUERY, k=5)
+        if results:
+            retrieved_chunks = "\n\n".join([text for text, meta, dist in results])
+            raw_notes = (
+                f"Retrieved context from project documents:\n{retrieved_chunks}\n\n"
+                f"Original notes: {raw_notes}"
+            )
+            logger.debug(f"[ORCHESTRATOR] FAISS retrieved {len(results)} chunks")
+    except Exception as e:
+        logger.warning(f"[ORCHESTRATOR] FAISS search failed: {e}, using raw_notes only")
+```
+
+Also need to add `project_id` parameter to `_build_agent_inputs` - check current signature.
+
+### 4. [NO CHANGE NEEDED] `backend/app/agents/icp_agent.py`
+
+The agent already has `piragi_context` field. We can pass FAISS-retrieved chunks via this field, but conceptually it's different from Piragi RAG. For clarity, we may want to rename to `retrieved_context` in a future step, but for now it's fine to reuse the field - the key difference is HOW the context is retrieved (FAISS search, not Piragi).
+
+Frontend: No changes required - the existing ICP panel displays the generated profile from the API response.
+
+## Database/Storage Changes
+
+No new database tables needed. The FAISS index files are stored in:
+- `backend/data/faiss_indexes/{project_id}/index.faiss` (FAISS index)
+- `backend/data/faiss_indexes/{project_id}/metadata.pkl` (texts + vectorizer)
+
+Ensure the `backend/data/faiss_indexes/` directory exists.
+
+## API Endpoints Summary
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/projects/{project_id}/icp/upload` | (Unchanged) Saves file, no ingestion trigger yet |
+| POST | `/api/v1/projects/{project_id}/icp/generate` | (Modified) Triggers FAISS ingestion before running ICP agent |
+| GET | `/api/v1/projects/{project_id}/icp` | (Unchanged) Returns ICP profile |
+
+Optionally add explicit ingestion endpoint:
+| POST | `/api/v1/projects/{project_id}/icp/ingest` | Manual trigger to rebuild FAISS index |
+
+## Testing Plan
+
+1. **Unit test faiss_service**: Test chunking, indexing, search
+2. **Integration test**: Upload files → generate ICP → verify FAISS index created
+3. **Manual test**: Frontend ICP panel - upload files, generate ICP, verify context used
+
+## Files Summary
+
+| File | Change |
+|------|--------|
+| `backend/app/rag/faiss_service.py` | NEW - FAISS ingestion and search |
+| `backend/app/api/icp.py` | MODIFIED - trigger ingestion on generate |
+| `backend/app/pipeline/orchestrator.py` | MODIFIED - use FAISS search instead of first-file logic |
+| `backend/data/faiss_indexes/` | NEW - created at runtime for each project |
+
+---
+
+Open Questions (from implementation plan):
+1. **Embedding Stack:** Using TF-IDF (dummyfiles). Could upgrade to sentence-transformers later.
+2. **Persistence Location:** Using `backend/data/faiss_indexes/` - confirm in docs? Yes, documented.
