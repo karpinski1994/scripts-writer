@@ -108,11 +108,16 @@ async def rewrite_selection_endpoint(
     result = await db.execute(select(ICPProfile).where(ICPProfile.project_id == project_id))
     icp = result.scalars().first()
     if icp:
+        # Parse JSON fields stored as Text in SQLite
+        demographics = json.loads(icp.demographics) if isinstance(icp.demographics, str) else icp.demographics
+        pain_points = json.loads(icp.pain_points) if isinstance(icp.pain_points, str) else icp.pain_points
+        desires = json.loads(icp.desires) if isinstance(icp.desires, str) else icp.desires
+
         icp_summary = (
-            f"Age range: {icp.demographics.get('age_range', 'N/A')}, "
-            f"Occupation: {', '.join(icp.demographics.get('occupation', []))}, "
-            f"Pain points: {', '.join(icp.pain_points[:3])}, "
-            f"Desires: {', '.join(icp.desires[:3])}, "
+            f"Age range: {demographics.get('age_range', 'N/A')}, "
+            f"Occupation: {', '.join(demographics.get('occupation', []))}, "
+            f"Pain points: {', '.join(pain_points[:3])}, "
+            f"Desires: {', '.join(desires[:3])}, "
             f"Language style: {icp.language_style}"
         )
 

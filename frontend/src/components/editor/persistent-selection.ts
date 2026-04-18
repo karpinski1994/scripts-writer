@@ -1,3 +1,7 @@
+/**
+ * Persistent Selection Extension for Tiptap
+ * Fix: Corrected imports to use @tiptap/pm/state and @tiptap/pm/view
+ */
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
