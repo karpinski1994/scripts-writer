@@ -34,6 +34,7 @@ class NarrativeAgentInput(BaseModel):
     selected_hook: HookSuggestion
     topic: str
     target_format: str
+    content_length: str | None = None
     draft: str | None = None
     piragi_context: str | None = None
 
@@ -100,6 +101,7 @@ class WriterAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    content_length: str | None = None
     draft: str | None = None
     raw_notes: str = ""
     piragi_context: str | None = None

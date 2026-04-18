@@ -53,6 +53,7 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
             [
                 f"Topic: {input_data.topic}",
                 f"Target Format: {input_data.target_format}",
+                f"Content Length: {input_data.content_length or 'Not specified'}",
                 f"ICP Summary (auxiliary — shapes tone and style):\n{input_data.icp.model_dump_json(indent=2)}",
                 f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
                 f"Selected Narrative (auxiliary):\n{input_data.selected_narrative.model_dump_json(indent=2)}",

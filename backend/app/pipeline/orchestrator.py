@@ -398,6 +398,7 @@ class PipelineOrchestrator:
                 selected_hook=selected_hook,
                 topic=project.topic,
                 target_format=project.target_format,
+                content_length=project.content_length,
                 draft=project.draft,
                 piragi_context=narrative_context or piragi_context,
             )
@@ -490,6 +491,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
+                content_length=project.content_length,
                 draft=project.draft,
                 raw_notes=project.raw_notes,
                 piragi_context=piragi_context,

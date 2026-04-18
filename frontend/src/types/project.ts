@@ -26,6 +26,7 @@ export interface ProjectDetail {
   topic: string;
   target_format: TargetFormat;
   content_goal: ContentGoal | null;
+  content_length?: string | null;
   cta_purpose?: string | null;
   raw_notes: string;
   draft: string;

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileTextIcon, MessageCircle, Globe } from "lucide-react"
+import { Loader2, Upload, FileText, X, CheckCircle2, Video, FileText as FileTextIcon, MessageCircle, Globe, Clock, File } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { usePipelineStore } from "@/stores/pipeline-store"
 import type { ProjectDetail } from "@/types/project"
@@ -48,7 +48,14 @@ const schema = z.object({
   topic: z.string().max(500),
   draft: z.string().max(10000),
   main_goal: z.string().max(200),
+  content_length: z.string().max(50).optional(),
 })
+
+const WRITTEN_LENGTHS = [
+  { id: "brief", label: "Brief", description: "Quick punchy content", wordRange: "~50-150 words" },
+  { id: "standard", label: "Standard", description: "Balanced coverage", wordRange: "~300-500 words" },
+  { id: "extended", label: "Extended", description: "Comprehensive deep dive", wordRange: "~800-1500 words" },
+] as const
 
 type FormValues = z.infer<typeof schema>
 
@@ -85,11 +92,19 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
       topic: "",
       draft: "",
       main_goal: "",
+      content_length: undefined,
     },
   })
 
   const watchedContentFormat = watch("content_format")
   const watchedTopic = watch("topic")
+  const watchedContentLength = watch("content_length")
+
+  const selectedFormat = CONTENT_FORMATS.find(f => f.id === watchedContentFormat)
+  const isVideoFormat = selectedFormat?.hasRetention ?? false
+
+  const [videoMinutes, setVideoMinutes] = useState("")
+  const [videoSeconds, setVideoSeconds] = useState("")
 
   useEffect(() => {
     if (project && !hasInitialized) {
@@ -105,6 +120,16 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
         }
         if (project.content_goal) {
           setValue("main_goal", project.content_goal, { shouldValidate: false })
+        }
+        if (project.content_length) {
+          setValue("content_length", project.content_length, { shouldValidate: false })
+          if (project.content_length.includes("m") || project.content_length.includes(":")) {
+            const match = project.content_length.match(/(\d+)\s*m[ins]*\s*(\d+)?\s*s?/)
+            if (match) {
+              setVideoMinutes(match[1])
+              setVideoSeconds(match[2] || "0")
+            }
+          }
         }
       }
     }
@@ -195,11 +220,21 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
   const onSubmit = async (data: FormValues) => {
     const formatLabel = CONTENT_FORMATS.find(f => f.id === data.content_format)?.label || data.content_format
     
+    let contentLengthValue = data.content_length
+    if (isVideoFormat && (videoMinutes || videoSeconds)) {
+      const mins = parseInt(videoMinutes) || 0
+      const secs = parseInt(videoSeconds) || 0
+      if (mins > 0 || secs > 0) {
+        contentLengthValue = `${mins}m ${secs}s`
+      }
+    }
+    
     console.log("[SUBJECT-PANEL] Submitting subject data:", {
       topic: data.topic,
       draft: data.draft,
       target_format: formatLabel,
       content_goal: data.main_goal,
+      content_length: contentLengthValue,
       raw_notes: watchedTopic?.slice(0, 100) + "...",
     })
     
@@ -211,6 +246,7 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
         content_goal: data.main_goal || null,
         raw_notes: watchedTopic || "",
         draft: data.draft || "",
+        content_length: contentLengthValue || null,
       })
       console.log("[SUBJECT-PANEL] Subject saved successfully, invalidating pipeline queries")
       queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] })
@@ -342,6 +378,69 @@ export function SubjectPanel({ projectId }: SubjectPanelProps) {
               <p className="text-xs text-destructive">{errors.content_format.message}</p>
             )}
           </div>
+
+          {watchedContentFormat && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium">
+                Content Length <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              
+              {isVideoFormat ? (
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      min="0"
+                      max="60"
+                      placeholder="Min"
+                      value={videoMinutes}
+                      onChange={(e) => setVideoMinutes(e.target.value)}
+                      className="w-20"
+                    />
+                    <span className="text-muted-foreground">min</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="59"
+                      placeholder="Sec"
+                      value={videoSeconds}
+                      onChange={(e) => setVideoSeconds(e.target.value)}
+                      className="w-20"
+                    />
+                    <span className="text-muted-foreground">sec</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {WRITTEN_LENGTHS.map((length) => {
+                    const isSelected = watchedContentLength === length.id
+                    return (
+                      <button
+                        key={length.id}
+                        type="button"
+                        onClick={() => setValue("content_length", length.id, { shouldValidate: false })}
+                        className={cn(
+                          "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
+                          isSelected
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-muted-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        <File className={cn("h-6 w-6", isSelected ? "text-primary" : "text-muted-foreground")} />
+                        <div className="text-center">
+                          <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{length.label}</p>
+                          <p className="text-xs text-muted-foreground">{length.wordRange}</p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div className="space-y-2">

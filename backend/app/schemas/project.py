@@ -37,6 +37,7 @@ class SubjectUpdateRequest(BaseModel):
     content_goal: str | None = None
     raw_notes: str = Field(default="", max_length=10000)
     draft: str = Field(default="", max_length=10000)
+    content_length: str | None = None
 
 
 class ProjectUpdateRequest(BaseModel):
@@ -47,6 +48,7 @@ class ProjectUpdateRequest(BaseModel):
     cta_purpose: str | None = Field(default=None, max_length=100)
     raw_notes: str | None = Field(default=None, min_length=1, max_length=10000)
     draft: str | None = Field(default=None, max_length=10000)
+    content_length: str | None = Field(default=None, max_length=50)
 
 
 class BranchRequest(BaseModel):
@@ -60,6 +62,7 @@ class ProjectResponse(BaseModel):
     topic: str | None
     target_format: str | None
     content_goal: str | None
+    content_length: str | None
     draft: str
     status: str
     current_step: int
@@ -85,6 +88,7 @@ class ProjectDetailResponse(BaseModel):
     topic: str | None
     target_format: str | None
     content_goal: str | None
+    content_length: str | None
     raw_notes: str | None
     draft: str
     status: str

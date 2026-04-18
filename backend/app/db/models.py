@@ -42,6 +42,7 @@ class Project(Base):
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     notebooklm_notebook_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     piragi_document_paths: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    content_length: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=_now)
     updated_at: Mapped[datetime] = mapped_column(nullable=False, default=_now, onupdate=_now)
 

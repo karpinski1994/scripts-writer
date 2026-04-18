@@ -62,6 +62,7 @@ class ProjectService:
         project.content_goal = data.content_goal
         project.raw_notes = data.raw_notes
         project.draft = data.draft
+        project.content_length = data.content_length
         logger.debug("[PROJECT-SERVICE] Project fields updated")
 
         subject_step = await self.db.execute(
