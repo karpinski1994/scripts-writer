@@ -33,6 +33,37 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
     def step_type(self) -> str:
         return StepType.writer.value
 
+    def _format_content_length_for_prompt(self, content_length: str | None) -> str:
+        if not content_length:
+            return "Not specified"
+
+        cl = content_length.lower().strip()
+
+        if "m" in cl or ":" in cl:
+            import re
+
+            match = re.match(r"(\d+)\s*m(?:in)?(?:utes)?\s*:?\s*(\d+)?\s*s?(?:ec)?", cl)
+            if match:
+                mins = int(match.group(1))
+                secs = int(match.group(2)) if match.group(2) else 0
+                total_seconds = mins * 60 + secs
+                word_count = int(total_seconds * 140)
+                return f"{mins}m {secs}s ({total_seconds} seconds, ~{word_count} words at conversational pace)"
+            match = re.match(r"(\d+):(\d+)", cl)
+            if match:
+                mins = int(match.group(1))
+                secs = int(match.group(2))
+                total_seconds = mins * 60 + secs
+                word_count = int(total_seconds * 140)
+                return f"{mins}m {secs}s ({total_seconds} seconds, ~{word_count} words at conversational pace)"
+
+        length_guide = {
+            "brief": "~100-200 words (very short post)",
+            "standard": "~300-500 words (medium post)",
+            "extended": "~800-1500 words (long post)",
+        }
+        return length_guide.get(cl, content_length)
+
     def build_prompt(self, input_data: WriterAgentInput) -> str:
         retention_data = input_data.selected_retention
         if retention_data is None:
@@ -41,6 +72,8 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
             retention_json = json.dumps([r.model_dump() for r in retention_data], indent=2)
         else:
             retention_json = retention_data.model_dump_json(indent=2)
+
+        content_length_guidance = self._format_content_length_for_prompt(input_data.content_length)
 
         parts = []
         if input_data.draft:
@@ -53,7 +86,8 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
             [
                 f"Topic: {input_data.topic}",
                 f"Target Format: {input_data.target_format}",
-                f"Content Length: {input_data.content_length or 'Not specified'}",
+                f"Target Content Length: {content_length_guidance}",
+                f"IMPORTANT: Write a script that matches the target length above.",
                 f"ICP Summary (auxiliary — shapes tone and style):\n{input_data.icp.model_dump_json(indent=2)}",
                 f"Selected Hook (auxiliary):\n{input_data.selected_hook.model_dump_json(indent=2)}",
                 f"Selected Narrative (auxiliary):\n{input_data.selected_narrative.model_dump_json(indent=2)}",
