@@ -351,26 +351,38 @@ class PipelineOrchestrator:
             logger.info("[ORCHESTRATOR] Building Narrative agent input")
             narrative_context = ""
 
-            project_narrative_dir = docs_base / "narratives"
-            if project_narrative_dir.exists():
-                files = list(project_narrative_dir.glob("*"))
-                if files:
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            narrative_context = f"Project narrative reference:\n{f.read_text()}\n\n"
-
-            playbook_narrative_dir = playbooks_base / "narrative_patterns"
-            if playbook_narrative_dir.exists():
-                files = sorted(
-                    [
-                        f
-                        for f in playbook_narrative_dir.glob("*")
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]
-                    ]
+            icp_summary = ""
+            if icp:
+                demographics = icp.demographics
+                pain_pts = ", ".join(icp.pain_points[:3]) if icp.pain_points else ""
+                desires = ", ".join(icp.desires[:3]) if icp.desires else ""
+                icp_summary = (
+                    f"ICP: age={demographics.age_range}, gender={demographics.gender}, "
+                    f"income={demographics.income_level}, pain_points={pain_pts}, desires={desires}"
                 )
-                if files:
-                    for f in files:
-                        narrative_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
+
+            hook_text = selected_hook.text if selected_hook else ""
+            query = f"{project.topic or ''} {project.draft[:200] if project.draft else ''} {hook_text} {icp_summary}"
+
+            try:
+                from app.rag.faiss_service import (
+                    global_index_exists,
+                    search_global_documents,
+                )
+
+                if global_index_exists("global_narratives"):
+                    results = search_global_documents("global_narratives", query, k=5)
+                    if results:
+                        narrative_chunks = "\n\n".join(
+                            [
+                                f"[Source: {meta['source']}, Distance: {dist:.2f}]\n{text}"
+                                for text, meta, dist in results
+                            ]
+                        )
+                        narrative_context = f"Retrieved narrative templates:\n{narrative_chunks}"
+                        logger.debug(f"[ORCHESTRATOR] FAISS retrieved {len(results)} narrative examples")
+            except Exception as e:
+                logger.warning(f"[ORCHESTRATOR] FAISS narrative search failed: {e}, using empty context")
 
             agent = NarrativeAgent()
             input_data = NarrativeAgentInput(

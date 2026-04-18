@@ -68,9 +68,17 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
             if raw.startswith("json"):
                 raw = raw[4:]
             raw = raw.strip()
+        extracted_json = False
         if not raw.startswith("{") and not raw.startswith("["):
-            logger.error(f"[ICP-AGENT] LLM response is not JSON: {raw[:100]}...")
-            raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
+            logger.warning("[ICP-AGENT] Response doesn't start with JSON, attempting to extract")
+            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            if match:
+                raw = match.group()
+                extracted_json = True
+                logger.debug(f"[ICP-AGENT] Extracted JSON: {raw[:100]}...")
+            else:
+                logger.error(f"[ICP-AGENT] LLM response is not JSON: {raw[:100]}...")
+                raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         try:
             data = json.loads(raw)
             logger.debug(f"[ICP-AGENT] Parsed JSON successfully")

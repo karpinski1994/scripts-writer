@@ -78,6 +78,7 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
             if raw.startswith("json"):
                 raw = raw[4:]
             raw = raw.strip()
+        extracted_json = False
         try:
             data = json.loads(raw)
             logger.debug("[HOOK-AGENT] Parsed JSON successfully")
@@ -85,11 +86,15 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
             logger.warning("[HOOK-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\{.*\}", raw, re.DOTALL)
             if match:
-                data = json.loads(match.group())
+                extracted = match.group()
+                data = json.loads(extracted)
+                raw = extracted
+                extracted_json = True
+                logger.debug(f"[HOOK-AGENT] Extracted JSON successfully: {raw[:100]}...")
             else:
                 logger.error(f"[HOOK-AGENT] Failed to extract valid JSON: {raw[:100]}...")
                 raise ValueError(f"LLM response is not valid JSON: {raw[:100]}...")
-        if not raw.startswith("{") and not raw.startswith("["):
+        if not raw.startswith("{") and not raw.startswith("[") and not extracted_json:
             logger.error(f"[HOOK-AGENT] LLM response is not JSON: {raw[:100]}...")
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         # Handle both array and object responses

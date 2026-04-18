@@ -72,6 +72,7 @@ class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
             if raw.startswith("json"):
                 raw = raw[4:]
             raw = raw.strip()
+        extracted_json = False
         try:
             data = json.loads(raw)
             logger.debug(f"[NARRATIVE-AGENT] Parsed JSON successfully")
@@ -79,11 +80,15 @@ class NarrativeAgent(BaseAgent[NarrativeAgentInput, NarrativeAgentOutput]):
             logger.warning("[NARRATIVE-AGENT] Invalid JSON response, attempting to extract JSON")
             match = re.search(r"\{.*\}", raw, re.DOTALL)
             if match:
-                data = json.loads(match.group())
+                extracted = match.group()
+                data = json.loads(extracted)
+                raw = extracted
+                extracted_json = True
+                logger.debug(f"[NARRATIVE-AGENT] Extracted JSON successfully: {raw[:100]}...")
             else:
                 logger.error(f"[NARRATIVE-AGENT] Failed to extract valid JSON: {raw[:100]}...")
                 raise ValueError(f"LLM response is not valid JSON: {raw[:100]}...")
-        if not raw.startswith("{"):
+        if not raw.startswith("{") and not extracted_json:
             logger.error(f"[NARRATIVE-AGENT] LLM response is not JSON: {raw[:100]}...")
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
         if "confidence" not in data:
