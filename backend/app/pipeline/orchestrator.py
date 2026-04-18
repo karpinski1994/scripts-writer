@@ -1,8 +1,10 @@
 import asyncio
 import json
+import logging
 import time
-from datetime import UTC, datetime
+from datetime import datetime, UTC
 from pathlib import Path
+from sqlalchemy import select
 from uuid import uuid4
 
 import structlog
@@ -167,6 +169,12 @@ class PipelineOrchestrator:
             step.completed_at = datetime.now(UTC).replace(tzinfo=None)
             step.duration_ms = int((time.time() - start_ms) * 1000)
             step.llm_provider = factory._default_provider if hasattr(factory, "_default_provider") else "default"
+
+            result_check = await self.db.execute(select(PipelineStep).where(PipelineStep.id == step.id))
+            db_step = result_check.scalars().one()
+            logger.info(
+                f"[ORCHESTRATOR] DB verification - step.id: {step.id}, output_data length: {len(db_step.output_data or '') if db_step.output_data else 0}, status: {db_step.status}"
+            )
 
             logger.info(
                 "agent_step_completed",
@@ -451,7 +459,7 @@ class PipelineOrchestrator:
             )
 
         if step_type == StepType.cta:
-            logger.info("[ORCHESTRATOR] Building CTA agent input")
+            logger.info(f"[ORCHESTRATOR] Building CTA agent input, cta_purpose from project: {project.cta_purpose}")
             agent = CTAAgent()
             input_data = CTAAgentInput(
                 icp=icp,

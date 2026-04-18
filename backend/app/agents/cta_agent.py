@@ -17,7 +17,10 @@ SYSTEM_PROMPT = (
     "The CTA purpose is the highest-priority instruction and defines the exact action the audience should take. "
     "Every CTA must clearly drive that action and must not substitute a different conversion goal. "
     "The CTA should feel like a natural next step after the draft's content, not an interruption. "
-    "Consider the ICP's objections and motivations. Vary CTA types (direct, soft, urgency, value-driven)."
+    "Consider the ICP's objections and motivations. "
+    "Generate at least 5 varied CTA options (e.g., direct, soft, urgency, value-driven). "
+    "Output ONLY valid JSON format with this exact structure: "
+    '{"ctas": [{"cta_type": "string", "text": "string", "reasoning": "string"}], "confidence": 0.0-1.0}'
 )
 
 
@@ -31,6 +34,7 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         return StepType.cta.value
 
     def build_prompt(self, input_data: CTAAgentInput) -> str:
+        logger.info(f"[CTA-AGENT] build_prompt called, cta_purpose: {input_data.cta_purpose}")
         parts = []
         if input_data.cta_purpose:
             parts.append(
@@ -76,7 +80,7 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         raw = await factory.execute_with_failover(prompt, SYSTEM_PROMPT)
         raw = raw.strip()
         logger.debug(f"[CTA-AGENT] Raw LLM response length: {len(raw)}")
-        logger.debug(f"[CTA-AGENT] Raw response preview: {raw[:200]}...")
+        logger.debug(f"[CTA-AGENT] Raw response preview: {raw[:500]}...")
 
         if raw.startswith("```json"):
             raw = raw[7:]
@@ -85,12 +89,15 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         if raw.endswith("```"):
             raw = raw[:-3]
         raw = raw.strip()
+
         try:
             data = json.loads(raw)
             logger.debug(f"[CTA-AGENT] Parsed JSON successfully")
         except json.JSONDecodeError:
             logger.warning("[CTA-AGENT] Invalid JSON from LLM, text response - attempting to parse as text")
+            logger.info(f"[CTA-AGENT] Full raw response for parsing:\n{raw[:1500]}")
             ctas = self._parse_text_response(raw)
+            logger.info(f"[CTA-AGENT] Parsed CTAs from text: {len(ctas)}, results: {ctas}")
             if ctas:
                 data = {"ctas": ctas, "confidence": 0.7}
             else:
@@ -98,8 +105,10 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
                 end = raw.rfind("}") + 1
                 if start >= 0 and end > start:
                     raw = raw[start:end]
+                    logger.info(f"[CTA-AGENT] Trying fallback JSON parse from positions {start}:{end}")
                     data = json.loads(raw)
                 else:
+                    logger.warning("[CTA-AGENT] No JSON found, returning empty CTAs")
                     data = {"ctas": [], "confidence": 0.5}
         try:
             logger.info(f"[CTA-AGENT] LLM call completed, generated {len(data.get('ctas', []))} CTAs")
@@ -114,12 +123,19 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
         ctas = []
         lines = text.split("\n")
         current_type = "direct"
+        pending_cta_type = None
+        pending_text = []
 
         type_keywords = {
+            "direct cta": "direct",
             "direct ctas": "direct",
+            "soft cta": "soft",
             "soft ctas": "soft",
+            "urgency cta": "urgency",
             "urgency ctas": "urgency",
+            "value-driven cta": "value-driven",
             "value-driven ctas": "value-driven",
+            "value driven": "value-driven",
         }
 
         for line in lines:
@@ -131,21 +147,42 @@ class CTAAgent(BaseAgent[CTAAgentInput, CTAAgentOutput]):
             for kw, ctype in type_keywords.items():
                 if kw in line_lower:
                     current_type = ctype
-                    continue
+                    break
+            else:
+                if "**" in line:
+                    if line.startswith("**") and not line.startswith("** "):
+                        continue
+                    if (
+                        '"' in line
+                        or line.startswith("Direct")
+                        or line.startswith("Soft")
+                        or line.startswith("Urgency")
+                        or line.startswith("Value")
+                    ):
+                        if line.startswith("**"):
+                            line = line.replace("**", "").strip()
+                        if line.endswith("**"):
+                            line = line[:-2].strip()
+                        if len(line) > 10:
+                            ctas.append(
+                                {
+                                    "cta_type": current_type,
+                                    "text": line.strip(),
+                                    "reasoning": "Extracted from bold CTA section",
+                                }
+                            )
+                    elif (
+                        line.startswith("1.") or line.startswith("2.") or line.startswith("3.") or line.startswith("-")
+                    ):
+                        item = line.lstrip("123.- ").strip()
+                        if item and len(item) > 5:
+                            ctas.append(
+                                {
+                                    "cta_type": current_type,
+                                    "text": item.strip(),
+                                    "reasoning": "Extracted from numbered line",
+                                }
+                            )
+                continue
 
-            if line.startswith(("1.", "2.", "3.", "1 ", "2 ", "3 ")) or line.startswith("-"):
-                item = line.lstrip("123.- ").strip()
-                if item and "**" in item:
-                    parts = item.split(":", 1)
-                    if len(parts) >= 2:
-                        name = parts[0].replace("**", "").strip()
-                        desc = parts[1].strip()
-                        ctas.append(
-                            {
-                                "cta_type": current_type,
-                                "text": f"{name}: {desc}",
-                                "reasoning": "Extracted from text response",
-                            }
-                        )
-
-        return ctas
+        return ctas[:4]

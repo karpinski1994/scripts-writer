@@ -264,12 +264,30 @@ if (step?.status === "pending" || !step) {
     try {
       console.log(`[AGENT-PANEL] Sending POST to /api/v1/projects/{projectId}/pipeline/run/${activeStepType}`);
       await api.post(`/api/v1/projects/${projectId}/pipeline/run/${activeStepType}`, {});
-      console.log(`[AGENT-PANEL] Agent triggered successfully for step: ${activeStepType}`);
+      console.log(`[AGENT-PANEL] Agent triggered, waiting for completion...`);
+
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setTimeout(r, 500));
+        await queryClient.cancelQueries({ queryKey: ["pipeline", projectId] });
+        await queryClient.prefetchQuery({
+          queryKey: ["pipeline", projectId],
+          queryFn: () => api.get(`/api/v1/projects/${projectId}/pipeline`),
+        });
+        const pipeline = queryClient.getQueryData<{ steps: PipelineStep[] }>(["pipeline", projectId]);
+        const currentStep = pipeline?.steps?.find((s: PipelineStep) => s.step_type === activeStepType);
+        console.log(`[AGENT-PANEL] Poll ${i + 1}, status: ${currentStep?.status}, output_data: ${currentStep?.output_data?.slice(0, 80) || 'none'}`);
+        if (currentStep?.status === "completed" && currentStep?.output_data) {
+          console.log(`[AGENT-PANEL] Step completed with data, invalidating`);
+          queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
+          return;
+        }
+      }
+      console.log(`[AGENT-PANEL] Timeout, invalidating anyway`);
+      queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
     } catch (err) {
       console.error(`[AGENT-PANEL] Failed to run agent for ${activeStepType}:`, err);
-      // error handled by query invalidation
+      queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
     }
-    queryClient.invalidateQueries({ queryKey: ["pipeline", projectId] });
   };
 
   const handleRerun = () => {

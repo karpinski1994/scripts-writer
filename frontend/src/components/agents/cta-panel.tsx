@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { CTAAgentOutput, CTASuggestion } from "@/types/agents";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +23,11 @@ interface CTAPanelProps {
   stepType?: string;
   initialSelection?: CTASuggestion;
   ctaPurpose?: string;
-  onUpdateCtaPurpose: (purpose: string) => void;
+  onUpdateCtaPurpose: (purpose: string) => Promise<void>;
 }
 
 export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, stepType, initialSelection, ctaPurpose, onUpdateCtaPurpose }: CTAPanelProps) {
+  console.log("[CTA-PANEL] Rendering === isRunning:", isRunning, "data.ctas:", data.ctas?.length, "data:", JSON.stringify(data));
   const [selectedIdx, setSelectedIdx] = useState<number | null>(() => {
     if (initialSelection) {
       return data.ctas.findIndex(c => c.text === initialSelection.text);
@@ -34,7 +35,7 @@ export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, step
     return null;
   });
   const [showTemplates, setShowTemplates] = useState(false);
-  const [localPurpose, setLocalPurpose] = useState(ctaPurpose || "");
+  const [localPurpose, setLocalPurpose] = useState(ctaPurpose ?? "");
 
   function handleContinue() {
     if (selectedIdx !== null && data.ctas[selectedIdx]) {
@@ -42,12 +43,15 @@ export function CTAPanel({ data, onContinue, onRerun, isRunning, projectId, step
     }
   }
 
-  function handleRun() {
+  async function handleRun() {
+    console.log("[CTA-PANEL] handleRun called, localPurpose:", localPurpose);
     if (!localPurpose.trim()) {
       alert("Please specify the CTA purpose before running the agent");
       return;
     }
-    onUpdateCtaPurpose(localPurpose.trim());
+    console.log("[CTA-PANEL] Persisting ctaPurpose to backend:", localPurpose.trim());
+    await onUpdateCtaPurpose(localPurpose.trim());
+    console.log("[CTA-PANEL] Calling onRerun to run agent");
     onRerun();
   }
 

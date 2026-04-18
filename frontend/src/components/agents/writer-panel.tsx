@@ -83,7 +83,7 @@ export function WriterPanel({
 
   if (!data) return null;
 
-  const preview = data.script.content.slice(0, 500);
+  const preview = data.script.content;
 
   return (
     <Card>
@@ -97,7 +97,6 @@ export function WriterPanel({
         <div className="rounded-md border bg-muted/50 p-3">
           <p className="text-sm whitespace-pre-wrap">
             {preview}
-            {data.script.content.length > 500 && "..."}
           </p>
         </div>
         <p className="text-xs text-muted-foreground">

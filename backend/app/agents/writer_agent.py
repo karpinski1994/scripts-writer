@@ -18,7 +18,9 @@ SYSTEM_PROMPT = (
     "Write a complete script that weaves all elements together into a compelling piece. "
     "The script should feel natural and persuasive, not formulaic. "
     "Adapt the tone and language style to the ICP profile. "
-    "The draft's key points and message must be preserved and enhanced, not replaced."
+    "The draft's key points and message must be preserved and enhanced, not replaced. "
+    "IMPORTANT: Output ONLY the final content/script with no preamble, introductions, framing text, or explanations. "
+    "Do NOT include phrases like 'Here is a...' or 'Here is the...' — jump directly into the content."
 )
 
 
