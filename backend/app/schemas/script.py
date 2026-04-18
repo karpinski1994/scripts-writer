@@ -19,3 +19,9 @@ class ScriptVersionResponse(BaseModel):
 
 class ScriptUpdateRequest(BaseModel):
     content: str
+
+
+class RewriteSelectionRequest(BaseModel):
+    full_content: str
+    selected_text: str
+    instruction: str

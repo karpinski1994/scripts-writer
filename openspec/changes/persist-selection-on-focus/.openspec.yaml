@@ -1,0 +1,7 @@
+name: persist-selection-on-focus
+description: Keep blue selection highlight visible when clicking BubbleMenu input
+status: ready
+artifacts:
+  - proposal.md
+  - design.md
+  - tasks.md

@@ -89,7 +89,7 @@ export default function EditorPage() {
           </Button>
         </div>
       ) : (
-        <ScriptEditor />
+        <ScriptEditor projectId={id} />
       )}
     </div>
   );

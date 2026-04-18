@@ -64,7 +64,8 @@ backend/
 │   ├── integrations/
 │   │   └── notebooklm.py       # NotebookLM CLI wrapper
 │   ├── rag/
-│   │   └── config.py           # Piragi RAG configuration per step type
+│   │   ├── config.py           # Piragi RAG configuration per step type
+│   │   └── faiss_service.py   # FAISS RAG service for ICP and Hook generation
 │   └── ws/
 │       ├── connection.py       # WebSocket connection manager
 │       └── handler.py          # WebSocket event handler

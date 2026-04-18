@@ -157,6 +157,16 @@
 .tiptap {
   outline: none;
 }
+
+.persistent-selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+.dark .persistent-selection {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
 .tiptap p.is-editor-empty:first-child::before {
   color: var(--muted-foreground);
   content: attr(data-placeholder);

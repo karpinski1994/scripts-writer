@@ -5,11 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.selection_rewrite_agent import rewrite_selection
+from app.config import get_settings
 from app.db.database import get_db
-from app.db.models import ScriptVersion
+from app.db.models import ICPProfile, ScriptVersion
+from app.llm.provider_factory import ProviderFactory
 from app.pipeline.orchestrator import PipelineOrchestrator
 from app.pipeline.state import StepType
-from app.schemas.script import ScriptUpdateRequest, ScriptVersionResponse
+from app.schemas.script import RewriteSelectionRequest, ScriptUpdateRequest, ScriptVersionResponse
 
 router = APIRouter(prefix="/projects", tags=["scripts"])
 
@@ -93,3 +96,32 @@ async def update_script(version_id: str, body: ScriptUpdateRequest, db: AsyncSes
     await db.commit()
     await db.refresh(version)
     return ScriptVersionResponse.model_validate(version)
+
+
+@router.post("/{project_id}/scripts/rewrite-selection")
+async def rewrite_selection_endpoint(
+    project_id: str,
+    body: RewriteSelectionRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    icp_summary = None
+    result = await db.execute(select(ICPProfile).where(ICPProfile.project_id == project_id))
+    icp = result.scalars().first()
+    if icp:
+        icp_summary = (
+            f"Age range: {icp.demographics.get('age_range', 'N/A')}, "
+            f"Occupation: {', '.join(icp.demographics.get('occupation', []))}, "
+            f"Pain points: {', '.join(icp.pain_points[:3])}, "
+            f"Desires: {', '.join(icp.desires[:3])}, "
+            f"Language style: {icp.language_style}"
+        )
+
+    factory = ProviderFactory(get_settings())
+    rewritten = await rewrite_selection(
+        factory=factory,
+        full_content=body.full_content,
+        selected_text=body.selected_text,
+        instruction=body.instruction,
+        icp_summary=icp_summary,
+    )
+    return {"rewritten_text": rewritten}

@@ -771,6 +771,7 @@ class NarrativeAgentInput(BaseModel):
     topic: str
     target_format: str
     content_goal: str | None = None
+    draft: str | None = None
     notebooklm_context: str | None = None
 
     def icp_summary(self) -> str:
@@ -795,6 +796,7 @@ class RetentionAgentInput(BaseModel):
     selected_hook: str
     selected_narrative: str
     target_format: str
+    draft: str | None = None
     notebooklm_context: str | None = None
 
 class RetentionAgentOutput(BaseModel):
@@ -815,6 +817,8 @@ class CTAAgentInput(BaseModel):
     selected_hook: str
     selected_narrative: str
     content_goal: str | None = None
+    cta_purpose: str | None = None
+    draft: str | None = None
     notebooklm_context: str | None = None
 
 class CTAAgentOutput(BaseModel):
@@ -836,8 +840,10 @@ class WriterAgentInput(BaseModel):
     selected_narrative: str
     selected_retention: list[RetentionTechnique]
     selected_cta: str
-    target_format: str
     topic: str
+    target_format: str
+    content_goal: str | None = None
+    draft: str | None = None
     raw_notes: str
     notebooklm_context: str | None = None
 

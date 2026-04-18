@@ -10,13 +10,13 @@
 
 | Item | Value |
 |------|-------|
-| **Last updated** | 2026-04-13 |
-| **Current phase** | Phase 11: Docker & Deployment next |
-| **Backend** | Full pipeline + Piragi RAG + analysis agents + branch project + structlog JSON logging |
-| **Frontend** | Export panel, re-run confirmation, branch dialog, ICP upload, error handling, loading skeletons, empty states, Piragi RAG |
+| **Last updated** | 2026-04-18 |
+| **Current phase** | Phase 14b: Persistent Selection Highlight (editor UX) |
+| **Backend** | Full pipeline + Piragi RAG + analysis agents + branch project + structlog JSON logging + FAISS RAG (ICP + Hook) + Selection Rewrite Agent |
+| **Frontend** | Export panel, re-run confirmation, branch dialog, ICP upload, error handling, loading skeletons, empty states, Piragi RAG + BubbleMenu selection rewrite + persistent selection highlight |
 | **Database** | Created (SQLite, 5 tables, Alembic migrations) |
 | **LLM connectivity** | Provider layer built (tested via scripts, requires API keys) |
-| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor — all through browser with live status. Piragi RAG integration is next. |
+| **Working end-to-end?** | Create project → run ICP → approve → run Hook → select → run Narrative → select → run Retention → select → run CTA → select → run Writer → open in editor → select text → BubbleMenu appears → click input → selection stays highlighted → rewrite with AI → all through browser with live status. |
 
 ---
 
@@ -895,6 +895,148 @@ scripts-writer/
 
 - [ ] **11.4** Create `README.md` — setup instructions, prerequisites, quickstart (local dev + Docker), environment variables, project structure overview
   - **Verify:** Fresh clone → follow README → app runs
+  - **Date completed:** ___
+
+---
+
+## Phase 12: FAISS RAG for ICP Generation (SRS-F16)
+
+**Goal:** Implement project-specific FAISS-based RAG for ICP document ingestion and retrieval.
+
+**Test criteria for the whole phase:** Upload ICP documents → generate ICP → FAISS index created → retrieved chunks used in ICP agent prompt.
+
+### Steps
+
+- [ ] **12.1** Install `faiss-cpu` and `sklearn` dependencies in backend
+  - **Verify:** `uv add faiss-cpu sklearn` installs successfully
+  - **Date completed:** ___
+
+- [ ] **12.2** Create `backend/app/rag/faiss_service.py` — FAISS service with functions:
+  - `load_documents(docs_path: str)` — load all .txt files from directory
+  - `split_text(text: str, chunk_size=1000, chunk_overlap=200)` — split into overlapping chunks
+  - `create_index(documents: list[dict], project_id: str)` — create FAISS index with TF-IDF, save to `data/faiss_indexes/{project_id}/`
+  - `load_index(project_id: str)` — load FAISS index from disk
+  - `search_project_documents(project_id: str, query: str, k=5)` — search and return top k chunks with metadata
+  - **Verify:** Functions import and have correct signatures
+  - **Date completed:** ___
+
+- [ ] **12.3** Configure FAISS service with exact settings from dummyfiles:
+  - TfidfVectorizer(max_features=5000, stop_words="english", ngram_range=(1, 2))
+  - chunk_size=1000, chunk_overlap=200
+  - faiss.IndexFlatL2(dimension)
+  - **Verify:** Index created with correct configuration
+  - **Date completed:** ___
+
+- [ ] **12.4** Define ICP_QUERY constant:
+  ```python
+  ICP_QUERY = "form an icp (ideal customer profile) from all the documents take most common lead awarness levels, identities, pain points, goals, dreams, desires, internal conficts, doubts, enemies, external barriers, failed attempts, what did not work, the emotional drivers - why now, and what makes them buy and give me detailed report with quotes based on that"
+  ```
+  - **Verify:** Query constant defined in faiss_service.py
+  - **Date completed:** ___
+
+- [ ] **12.5** Modify `backend/app/api/icp.py` — in `generate_icp` endpoint:
+  - Trigger FAISS ingestion before running ICP agent if project has ICP documents
+  - **Verify:** generate endpoint triggers create_index() for project
+  - **Date completed:** ___
+
+- [ ] **12.6** Modify `backend/app/pipeline/orchestrator.py` — in `_build_agent_inputs` for ICP:
+  - Remove existing "read only first file" logic
+  - Add FAISS search using `search_project_documents(project_id, ICP_QUERY, k=5)`
+  - Pass retrieved chunks via FAISS retriever (not piragi_context)
+  - **Verify:** ICP agent receives FAISS-retrieved context
+  - **Date completed:** ___
+
+- [ ] **12.7** Ensure `data/faiss_indexes/` directory exists at runtime
+  - **Verify:** Directory created if not exists
+  - **Date completed:** ___
+
+- [ ] **12.8** Create unit tests for faiss_service
+  - **Verify:** Tests pass for chunking, indexing, search
+  - **Date completed:** ___
+
+---
+
+## Phase 13: FAISS RAG for Hook Generation (SRS-F17)
+
+**Goal:** Implement global FAISS index for hook examples, searchable by topic + draft + ICP.
+
+**Test criteria for the whole phase:** Run Hook Agent → FAISS searches global index → retrieved hook examples passed to agent.
+
+### Steps
+
+- [ ] **13.1** Create hook reference documents in `backend/documents/hook/`
+  - **Verify:** "Best headlines .txt" exists
+  - **Date completed:** ___
+
+- [ ] **13.2** Create `backend/scripts/ingest_hook_data.py` — ingestion script:
+  - Read all files from `backend/documents/hook/`
+  - Create global FAISS index at `data/faiss_indexes/global_hooks/`
+  - **Verify:** Script runs without error, index created
+  - **Date completed:** ___
+
+- [ ] **13.3** Extend `backend/app/rag/faiss_service.py`:
+  - Add `create_global_index(docs_path: str, index_name: str)`
+  - Add `search_global_documents(index_name: str, query: str, k: int = 5)`
+  - **Verify:** Global index functions work
+  - **Date completed:** ___
+
+- [ ] **13.4** Modify `backend/app/pipeline/orchestrator.py` — in `_build_agent_inputs` for Hook:
+  - Remove direct file scanning of `docs_base / "hooks"`
+  - Add FAISS search using `search_global_documents("global_hooks", query, k=5)`
+  - Compose query from: project.topic + first chars of project.draft + ICP summary
+  - **Verify:** Hook agent receives global hook examples
+  - **Date completed:** ___
+
+- [ ] **13.5** Add ingestion command to documentation
+  - **Verify:** Command `python backend/scripts/ingest_hook_data.py` documented
+  - **Date completed:** ___
+
+---
+
+## Phase 14: AI Re-generate Selection Feature
+
+**Goal:** Add inline AI text regeneration to Script Editor via Tiptap BubbleMenu.
+
+**Test criteria for the whole phase:** Select text in editor → bubble menu appears → enter instruction → rewritten text replaces selection.
+
+### Steps
+
+- [ ] **14.1** Create `backend/app/agents/selection_rewrite_agent.py`:
+  - Standalone agent taking: script_content, selected_text, instruction, icp_summary (optional)
+  - System prompt: "You are an expert editor. You will receive the FULL SCRIPT for context, but your ONLY job is to rewrite the EXACT SELECTED PORTION. Output ONLY the rewritten text."
+  - Constraint: Return raw text only — no markdown, JSON, or conversational filler
+  - **Verify:** Agent imports and has correct interface
+  - **Date completed:** ___
+
+- [ ] **14.2** Create `backend/app/api/scripts.py` — add endpoint:
+  - `POST /{project_id}/scripts/rewrite-selection`
+  - Request: `RewriteSelectionRequest(full_content, selected_text, instruction)`
+  - Logic: Fetch project ICP → call SelectionRewriteAgent → return raw rewritten string
+  - **Verify:** Endpoint accepts selection rewrite requests
+  - **Date completed:** ___
+
+- [ ] **14.3** Add BubbleMenu to `frontend/src/components/editor/script-editor.tsx`:
+  - Import `BubbleMenu` from `@tiptap/react`
+  - State: `isRewriting: boolean`, `instruction: string`
+  - Render: Input field + Rewrite button inside BubbleMenu
+  - **Verify:** BubbleMenu appears on text selection
+  - **Date completed:** ___
+
+- [ ] **14.4** Implement `handleRewrite` handler:
+  - Capture selection: `const { from, to } = editor.state.selection;`
+  - Get full content: `editor.getText();`
+  - Call `POST /api/v1/projects/{project_id}/scripts/rewrite-selection`
+  - Replace: `editor.chain().focus().insertContentAt({ from, to }, newText).run()`
+  - Trigger auto-save via existing `onUpdate`
+  - **Verify:** Selected text replaced with rewritten version
+  - **Date completed:** ___
+
+- [ ] **14.5** Add loading state to Rewrite button (Loader2 icon while rewriting)
+  - **Verify:** Button shows spinner during API call
+  - **Date completed:** ___
+
+- [ ] **14.6** Verify latency < 3s for selection rewrites
+  - **Verify:** Rewrite completes within 3 seconds
   - **Date completed:** ___
 
 ---

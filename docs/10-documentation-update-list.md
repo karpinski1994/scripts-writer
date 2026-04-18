@@ -599,6 +599,117 @@ python backend/scripts/ingest_hook_data.py
 
 ---
 
+---
+
+# Feature: AI Re-generate Selection
+
+## Overview
+
+Add inline AI text regeneration to the Script Editor. Users can select text, enter an instruction (e.g., "make this punchier"), and receive a rewritten version of only the selected portion — preserving the surrounding context.
+
+## Rationale
+
+- **Editor workflow:** This is an exploratory, iterative editing action. Users may try dozens of rewrites before settling on the final text. Saving each attempt as a Pipeline Step would bloat the database and create unnecessary friction.
+- **Stateless API:** A lightweight, single-purpose endpoint returns rewritten text immediately. The frontend's existing auto-save mechanism captures the final chosen text.
+- **Tiptap BubbleMenu:** This component natively anchors to the text selection, providing an intuitive UX without fighting focus management or overlay positioning.
+
+## User Flow
+
+1. User selects text in the Script Editor
+2. A floating bubble menu appears above/below the selection
+3. User types instruction (e.g., "make this shorter", "add more emotion")
+4. User clicks "Rewrite"
+5. Backend receives: full script context, selected text, instruction, ICP profile
+6. Backend returns only the rewritten selection
+7. Frontend replaces the selection with the new text
+8. Auto-save captures the change
+
+## Implementation
+
+### 1. Backend: Rewrite Endpoint
+
+**New File:** `backend/app/agents/selection_rewrite_agent.py`
+
+Create a standalone agent that takes:
+- `script_content` (full script for context)
+- `selected_text` (text to rewrite)
+- `instruction` (user's edit request)
+- `icp_summary` (optional, for tone matching)
+
+**System Prompt:**
+> "You are an expert editor. You will receive the FULL SCRIPT for context, but your ONLY job is to rewrite the EXACT SELECTED PORTION. Output ONLY the rewritten text. Ensure the tone matches the surrounding context unless instructed otherwise."
+
+**Constraint:** Strict instruction to return raw text only — no markdown, JSON, or conversational filler.
+
+### 2. Backend: API Endpoint
+
+**File:** `backend/app/api/scripts.py`
+
+**Endpoint:** `POST /{project_id}/scripts/rewrite-selection`
+
+**Request:**
+```python
+class RewriteSelectionRequest(BaseModel):
+    full_content: str
+    selected_text: str
+    instruction: str
+```
+
+**Logic:**
+1. Fetch project ICP (if present) for tone context
+2. Call `SelectionRewriteAgent` with full context
+3. Return raw rewritten string
+
+### 3. Frontend: BubbleMenu UI
+
+**File:** `frontend/src/components/editor/script-editor.tsx`
+
+**Imports:**
+- `BubbleMenu` from `@tiptap/react`
+- `Input`, `Button`, `Loader2` from `lucide-react`
+
+**State:**
+- `isRewriting: boolean` — loading state
+- `instruction: string` — user input
+
+**Render:**
+```tsx
+{editor && (
+  <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className="flex items-center gap-2 p-2 bg-background border rounded-lg shadow-lg">
+    <Input 
+       placeholder="e.g. Make this punchier..." 
+       value={instruction}
+       onChange={(e) => setInstruction(e.target.value)}
+       disabled={isRewriting}
+    />
+    <Button onClick={handleRewrite} disabled={isRewriting || !instruction}>
+      {isRewriting ? <Loader2 className="animate-spin" /> : "Rewrite"}
+    </Button>
+  </BubbleMenu>
+)}
+```
+
+**Handler: handleRewrite**
+1. Capture selection: `const { from, to } = editor.state.selection;`
+2. Get full content: `editor.getText();`
+3. Call `POST /api/v1/projects/{project_id}/scripts/rewrite-selection`
+4. Replace: `editor.chain().focus().insertContentAt({ from, to }, newText).run()`
+5. Trigger auto-save via existing `onUpdate`
+
+## Non-Functional Considerations
+
+- **Latency:** Target < 3s response time. Selection rewrites use lighter prompts than full script generation.
+- **Token efficiency:** Pass only relevant surrounding context (±500 chars) rather than full script if large.
+- **Idempotency:** Each rewrite is a fresh LLM call; no caching of selection rewrites.
+
+## Out of Scope
+
+- Saving individual rewrites as Pipeline Steps (handled by auto-save)
+- Version history for selections (covered by global script versioning)
+- Multi-turn conversation with the editor (stateless per rewrite)
+
+---
+
 Open Questions (from implementation plan):
 1. **Embedding Stack:** Using TF-IDF (dummyfiles). Could upgrade to sentence-transformers later.
 2. **Persistence Location:** Using `backend/data/faiss_indexes/` - confirm in docs? Yes, documented.
