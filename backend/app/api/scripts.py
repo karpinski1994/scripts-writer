@@ -92,7 +92,28 @@ async def update_script(version_id: str, body: ScriptUpdateRequest, db: AsyncSes
     version = await db.get(ScriptVersion, version_id)
     if version is None:
         raise HTTPException(status_code=404, detail="Script version not found")
+    
     version.content = body.content
+    
+    # Update pipeline step output to keep in sync
+    from app.db.models import PipelineStep
+    stmt = select(PipelineStep).where(
+        PipelineStep.project_id == version.project_id,
+        PipelineStep.step_type == "writer"
+    )
+    result = await db.execute(stmt)
+    step = result.scalars().first()
+    
+    if step and step.output_data:
+        try:
+            data = json.loads(step.output_data)
+            if "script" in data:
+                data["script"]["content"] = body.content
+                data["script"]["word_count"] = len(body.content.split())
+                step.output_data = json.dumps(data)
+        except (json.JSONDecodeError, KeyError):
+            pass
+
     await db.commit()
     await db.refresh(version)
     return ScriptVersionResponse.model_validate(version)

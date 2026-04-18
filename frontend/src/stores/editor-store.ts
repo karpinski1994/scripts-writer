@@ -11,6 +11,8 @@ interface EditorStore {
   isSaving: boolean;
   autoSaveTimer: ReturnType<typeof setInterval> | null;
 
+  projectId: string | null;
+  setProjectId: (id: string | null) => void;
   setContent: (content: string) => void;
   setVersionNumber: (n: number) => void;
   setCurrentVersionId: (id: string | null) => void;
@@ -30,8 +32,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   isSaving: false,
   autoSaveTimer: null,
 
+  projectId: null,
+  setProjectId: (id) => set({ projectId: id }),
   setContent: (content) => {
-    set({ content, isDirty: true });
+    const currentContent = get().content;
+    if (content !== currentContent) {
+      set({ content, isDirty: true });
+    }
   },
 
   setVersionNumber: (n) => set({ versionNumber: n }),
@@ -47,12 +54,35 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }
 
     set({ isSaving: true });
+    
+    // Optimistically update pipeline store to keep WriterPanel in sync immediately
+    try {
+      const { usePipelineStore } = await import("./pipeline-store");
+      usePipelineStore.getState().updateStepContent("writer", state.content);
+    } catch (e) {
+      console.warn("Optimistic sync failed:", e);
+    }
+
     try {
       await api.patch(`/api/v1/projects/scripts/${state.currentVersionId}`, {
         content: state.content,
       });
+      
+      const { toast } = await import("sonner");
+      toast.success("Changes saved");
+      
       set({ isDirty: false, isSaving: false });
-    } catch {
+
+      // Invalidate queries to ensure fresh data on navigation
+      if (state.projectId) {
+        const { queryClient } = await import("@/lib/query-client");
+        queryClient.invalidateQueries({ queryKey: ["scripts", state.projectId] });
+        queryClient.invalidateQueries({ queryKey: ["pipeline", state.projectId] });
+      }
+    } catch (e) {
+      console.error("Save failed:", e);
+      const { toast } = await import("sonner");
+      toast.error("Failed to save changes");
       set({ isSaving: false });
     }
   },
@@ -88,6 +118,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       content: "",
       versionNumber: 1,
       currentVersionId: null,
+      projectId: null,
       isDirty: false,
       isSaving: false,
       autoSaveTimer: null,

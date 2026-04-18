@@ -215,10 +215,20 @@ export function ScriptEditor({ projectId, className }: ScriptEditorProps) {
           </Button>
         </BubbleMenu>
       )}
-      <EditorContent
-        editor={editor}
-        className="prose prose-sm max-w-none flex-1 p-4 min-h-[400px] focus:outline-none"
-      />
+      <div className="relative flex-1 flex flex-col min-h-0 min-h-[400px]">
+        {isSaving && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-[1px] rounded-md transition-all duration-200">
+            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-background border shadow-lg border-primary/20 animate-in fade-in zoom-in duration-200">
+              <Loader2 className="size-4 animate-spin text-primary" />
+              <span className="text-sm font-medium">Syncing changes...</span>
+            </div>
+          </div>
+        )}
+        <EditorContent
+          editor={editor}
+          className="prose prose-sm max-w-none flex-1 p-4 focus:outline-none"
+        />
+      </div>
       <div className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
         <span>{wordCount} {wordCount === 1 ? "word" : "words"}</span>
         <span>

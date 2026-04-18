@@ -30,6 +30,7 @@ interface PipelineStore {
   setStepCompleted: (stepType: string, outputData: unknown) => void;
   setStepFailed: (stepType: string) => void;
   setStreamingOutput: (stepType: string, output: string) => void;
+  updateStepContent: (stepType: string, content: string) => void;
   reset: () => void;
 }
 
@@ -67,6 +68,24 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
   setStreamingOutput: (stepType, output) =>
     set((s) => ({
       streamingOutput: { ...s.streamingOutput, [stepType]: output },
+    })),
+  updateStepContent: (stepType, content) =>
+    set((s) => ({
+      steps: s.steps.map((st) => {
+        if (st.step_type === stepType && st.output_data) {
+          try {
+            const data = JSON.parse(st.output_data);
+            if (data.script) {
+              data.script.content = content;
+              data.script.word_count = content.split(/\s+/).filter(Boolean).length;
+              return { ...st, output_data: JSON.stringify(data) };
+            }
+          } catch (e) {
+            console.error("Failed to update step content in store:", e);
+          }
+        }
+        return st;
+      }),
     })),
   reset: () =>
     set({
