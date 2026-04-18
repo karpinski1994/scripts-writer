@@ -17,7 +17,9 @@ router = APIRouter(prefix="/projects", tags=["scripts"])
 @router.get("/{project_id}/scripts", response_model=list[ScriptVersionResponse])
 async def list_scripts(project_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(ScriptVersion).where(ScriptVersion.project_id == project_id).order_by(ScriptVersion.version_number)
+        select(ScriptVersion)
+        .where(ScriptVersion.project_id == project_id)
+        .order_by(ScriptVersion.version_number.desc())
     )
     versions = result.scalars().all()
     return [ScriptVersionResponse.model_validate(v) for v in versions]

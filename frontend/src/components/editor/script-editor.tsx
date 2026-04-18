@@ -18,6 +18,7 @@ interface ScriptEditorProps {
 
 export function ScriptEditor({ className }: ScriptEditorProps) {
   const content = useEditorStore((s) => s.content);
+  console.log('EDITOR CONTENT: ', content)
   const isSaving = useEditorStore((s) => s.isSaving);
   const isDirty = useEditorStore((s) => s.isDirty);
   const startAutoSave = useEditorStore((s) => s.startAutoSave);
