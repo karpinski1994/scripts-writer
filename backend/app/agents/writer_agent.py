@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from pydantic_ai import Agent
 
@@ -33,15 +34,16 @@ class WriterAgent(BaseAgent[WriterAgentInput, WriterAgentOutput]):
     def step_type(self) -> str:
         return StepType.writer.value
 
-def _format_content_length_for_prompt(self, content_length: str | None) -> str:
+    def _format_content_length_for_prompt(self, content_length: str | None) -> str:
         if not content_length:
             return "Not specified"
-        
+
         cl = content_length.lower().strip()
         wpm = 150
-        
+
         if "m" in cl or ":" in cl:
             import re
+
             match = re.match(r"(\d+)\s*m(?:in)?(?:utes)?\s*:?\s*(\d+)?\s*s?(?:ec)?", cl)
             if match:
                 mins = int(match.group(1))
@@ -60,13 +62,13 @@ def _format_content_length_for_prompt(self, content_length: str | None) -> str:
                 word_count_min = int(total_seconds / 60 * 130)
                 word_count_max = int(total_seconds / 60 * 170)
                 return f"{mins}m {secs}s ({total_seconds} seconds, ~{word_count_min}-{word_count_max} words, target {word_count} words at 150 wpm)"
-        
+
         length_guide = {
             "brief": "~100-200 words (very short post)",
             "standard": "~300-500 words (medium post)",
             "extended": "~800-1500 words (long post)",
         }
-        return length_guide.get(cl, content_length)
+        return length_guide.get(cl, cl)
 
     def build_prompt(self, input_data: WriterAgentInput) -> str:
         retention_data = input_data.selected_retention
