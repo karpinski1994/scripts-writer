@@ -247,33 +247,38 @@ class PipelineOrchestrator:
             raw_notes = project.raw_notes or ""
             logger.debug(f"[ORCHESTRATOR] ICP raw_notes length: {len(raw_notes)}")
 
+            faiss_context = ""
             project_icp_dir = docs_base / "icp"
-            if project_icp_dir.exists():
-                files = list(project_icp_dir.glob("*"))
-                if files:
-                    doc_content = []
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            content = f.read_text()
-                            doc_content.append(content)
-                    if doc_content:
-                        raw_notes = (
-                            f"Document content from project files:\n{doc_content[0]}\n\nOriginal notes: {raw_notes}"
-                        )
-                        logger.debug(f"[ORCHESTRATOR] Added project ICP document, new length: {len(raw_notes)}")
 
-            playbook_icp_dir = playbooks_base / "icp"
-            if playbook_icp_dir.exists():
-                files = list(playbook_icp_dir.glob("*"))
-                if files:
-                    doc_content = []
-                    for f in files[:1]:
-                        if f.is_file() and f.suffix in [".txt", ".md", ".json"]:
-                            content = f.read_text()
-                            doc_content.append(content)
-                    if doc_content:
-                        raw_notes = f"Document content from playbook:\n{doc_content[0]}\n\n" + raw_notes
-                        logger.debug(f"[ORCHESTRATOR] Added playbook ICP document, new length: {len(raw_notes)}")
+            try:
+                from app.rag.faiss_service import (
+                    ICP_QUERY,
+                    create_index,
+                    index_exists,
+                    load_documents,
+                    search_project_documents,
+                )
+
+                if project_icp_dir.exists():
+                    txt_files = list(project_icp_dir.glob("*.txt"))
+                    if txt_files and not index_exists(project.id):
+                        documents = load_documents(str(project_icp_dir))
+                        create_index(documents, project.id)
+                        logger.info(f"[ORCHESTRATOR] Created FAISS index for project {project.id}")
+
+                    if index_exists(project.id):
+                        results = search_project_documents(project.id, ICP_QUERY, k=5)
+                        if results:
+                            retrieved_chunks = "\n\n".join(
+                                [
+                                    f"[Source: {meta['source']}, Distance: {dist:.2f}]\n{text}"
+                                    for text, meta, dist in results
+                                ]
+                            )
+                            faiss_context = f"Retrieved context from project documents:\n{retrieved_chunks}"
+                            logger.debug(f"[ORCHESTRATOR] FAISS retrieved {len(results)} chunks")
+            except Exception as e:
+                logger.warning(f"[ORCHESTRATOR] FAISS search failed: {e}, using raw_notes only")
 
             agent = ICPAgent()
             input_data = ICPAgentInput(
@@ -281,7 +286,7 @@ class PipelineOrchestrator:
                 topic=project.topic,
                 target_format=project.target_format,
                 content_goal=project.content_goal,
-                piragi_context=piragi_context,
+                faiss_context=faiss_context,
             )
             logger.info(
                 f"[ORCHESTRATOR] ICP input built - topic: {project.topic}, target_format: {project.target_format}"

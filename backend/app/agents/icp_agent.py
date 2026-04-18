@@ -38,8 +38,8 @@ class ICPAgent(BaseAgent[ICPAgentInput, ICPAgentOutput]):
         ]
         if input_data.content_goal:
             parts.append(f"Content Goal: {input_data.content_goal}")
-        if input_data.piragi_context:
-            parts.append(f"Relevant reference material:\n{input_data.piragi_context}")
+        if input_data.faiss_context:
+            parts.append(f"Relevant reference material from FAISS:\n{input_data.faiss_context}")
         return "\n\n".join(parts)
 
     def _build_agent(self) -> Agent:

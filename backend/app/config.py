@@ -8,6 +8,7 @@ class AppSettings(BaseSettings):
     groq_api_key: str = ""
     gemini_api_key: str = ""
     ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2"
     ollama_enabled: bool = False
     database_url: str = "sqlite+aiosqlite:///./data/scripts_writer.db"
     export_dir: str = "./data/exports"
@@ -22,7 +23,7 @@ class AppSettings(BaseSettings):
     gemini_model: str = "gemini-2.0-flash"
     notebooklm_storage_path: str = ""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 def get_settings() -> AppSettings:

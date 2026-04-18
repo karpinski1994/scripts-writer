@@ -32,7 +32,7 @@ class ICPAgentInput(BaseModel):
     topic: str | None = None
     target_format: str | None = None
     content_goal: str | None = None
-    piragi_context: str | None = None
+    faiss_context: str | None = None
 
 
 class ICPAgentOutput(BaseModel):
