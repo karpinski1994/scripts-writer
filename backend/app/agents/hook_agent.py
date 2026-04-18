@@ -92,9 +92,14 @@ class HookAgent(BaseAgent[HookAgentInput, HookAgentOutput]):
         if not raw.startswith("{") and not raw.startswith("["):
             logger.error(f"[HOOK-AGENT] LLM response is not JSON: {raw[:100]}...")
             raise ValueError(f"LLM response is not JSON: {raw[:100]}...")
-        # Add default confidence if missing
-        if "confidence" not in data:
-            data["confidence"] = 0.8
+        # Handle both array and object responses
+        if isinstance(data, list):
+            # LLM returned a list directly, wrap it
+            data = {"hooks": data, "confidence": 0.8}
+        else:
+            # Add default confidence if missing
+            if "confidence" not in data:
+                data["confidence"] = 0.8
 
         hook_count = len(data.get("hooks", []))
         logger.info(f"[HOOK-AGENT] LLM call completed, generated {hook_count} hooks")

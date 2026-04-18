@@ -1,0 +1,104 @@
+﻿This report provides a data-backed breakdown of what prospects have tried and where they failed, sorted by the most common categories. Each category includes a counter of how many unique prospects mentioned it to ensure transparency and accuracy.
+________________
+
+
+1. CATEGORY 11: WHY PREVIOUS ATTEMPTS FAILED (Analysis of Failure)
+Counter: 25 out of 32 calls
+This is the most pervasive issue. Prospects believe the system is rigged, their value is misunderstood, or they are trapped by intermediaries.
+Sub-Theme: The Middleman/Outsourcing Barrier (14 mentions)
+* Victor: "all those job offers I get from the U.S. basically they come from those companies who are taking the job from a different company and outsourcing." (00:01:12:24)
+* Osmar: "intermediario estaba ahí solo para pasar el dinero de una mano a otra... ¿Entonces para qué un intermediario?" (00:44:04:19)
+* Samuel: "and the thing with the New York charset as en Latinoamérica solo en Latinoamérica es way lower." (00:06:15:09)
+* Miloš: "a company of, I don't know, a hundred deaths, had a single client which had 60 of those... client, you know, said bye bye over the nights." (00:08:27:09)
+* Juan Alcaraz: "the sueldos that were offered were not enough for me to jump... I was not interested in giant contracts, but stable ones." (00:06:32:09)
+Sub-Theme: Failure to Communicate Value/Expertise (11 mentions)
+* Matheus: "it's hard to explain what I do here in Brazil... hard to explain the products... because there are certain types of products here in Brazil that doesn't exist offshore." (00:01:00:29)
+* Misael: "don de me pillan es cuando me dicen que va a ser como preguntas más y con un inglés más técnico." (00:12:43:14)
+* Artur: "Why they rejected him: MORE EXPERIENCE, more advanced English." (Notes)
+* Felipe: "after 16 meetings in a day, I just want to go to sleep." [Analyzing why he can't maintain his technical edge to leave]. (Notes)
+________________
+
+
+2. CATEGORY 7: JOB APPLICATION STRATEGIES (The "Black Hole")
+Counter: 16 out of 32 calls
+The failure of relying on high-volume applying via LinkedIn, Glassdoor, or Upwork.
+Sub-Theme: High Volume, Zero Response (10 mentions)
+* Augusto: "de 500 currículum que tirás quizá una agarra... tienes que competir contra mil candidatos más." (00:22:13:28)
+* Luan: "I was like all day long applying for jobs. And I didn't get any, any interview. So for two years. So I just gave up." (00:19:09:21)
+* Rijad: "I tried, I applied on every company in Europe and every company in Los... But only by sending surveys and things like that." (00:20:11:23)
+* Suman: "I'm searching for so long... I normally used like LinkedIn and Glassdoor... they said that my experience is not enough for the junior person." (00:04:41:17)
+Sub-Theme: Selective/Passive Failure (6 mentions)
+* Andre: "en LinkedIn cuando me Solo vale alguna alguna oferta que me llama la atención ahí postulo." (00:14:40:25)
+* Bojan: "while I was doing that course I sent like maybe 20 to 30 cities... I got to like, I don't know, three callbacks." (00:09:19:46)
+* Enkil: "I have been looking like this for the past... but not landing any formal international role." (00:09:21:27)
+________________
+
+
+3. CATEGORY 12: VIVID FAILURE LANGUAGE & METAPHORS
+Counter: 8 out of 32 calls
+Emotionally charged descriptions of the feeling of being stuck or hitting a wall.
+* Matheus: "It's like a bubble, and, it's hard to get inside of it." (00:00:11:00)
+* Jorge: "me desvinculé completamente de esta lucha [this struggle]." (00:11:22:26)
+* Costas: "contracting freelancer is very abstract... that's like Indian goods working for $20 an hour." (00:04:33:03)
+* Diego Rodriguez: "me genera como ese de pronto desconfianza de si eres demasiado bueno para lo que ofrecen." (00:44:06:08)
+* Santiago Bermudez: "I think the more time for the it. Yeah." [Expressing a sense of professional time running out]. (00:00:29:23)
+________________
+
+
+4. CATEGORY 1: COURSES & TRAINING (Theory Overload)
+Counter: 5 out of 32 calls
+Investing in bootcamps and certifications that didn't change their job status.
+* Luan: "I started a course... Python developer... I was like two years during this course... and I didn't get any, any job even with, with a good portfolio." (00:04:24:25)
+* Osmar: "ya ha pasado por por algo parecido donde te venden curso de cómo vas a encontrar trabajo y al final siempre es lo que ya sé." (00:09:03:05)
+* Ahmed: "started, like two weeks ago on a Google cybersecurity certification. I finished, first, of eight courses." [Trying to learn his way out of saturation]. (00:05:25:20)
+* Suman: "I did a bootcamp." (00:04:41:17)
+* Bojan: "finished... course that I finished. It was like three months education for frontend developer... to test my skills." (00:08:49:55)
+________________
+
+
+5. CATEGORY 8: INTERVIEW PREPARATION (Irrelevance & Fatigue)
+Counter: 5 out of 32 calls
+Spending hundreds of hours on prep that feels disconnected from actual seniority.
+* Omer: "assigning some kind of tax and I'm not doing the tasks... that's the reason why I'm not doing the tasks." [Refusal to do free labor/irrelevant tests]. (00:06:42:13)
+* Ahmed: "for every like... interview... I spent about 4 to 6 hours studying and practicing." (00:15:45:21)
+* Bastian: "ya intenté como ponerme a estudiar sobre algoritmos y todo y lo honestamente lo odié." (00:52:08:06)
+* Victor: "I maybe have gone to maybe three job interviews... the fatigue of the double interview process with middlemen." (00:12:01:15)
+________________
+
+
+6. CATEGORY 6: NETWORKING & OUTREACH ATTEMPTS
+Counter: 3 out of 32 calls
+Manual, unguided attempts to reach out to decision-makers.
+* Ahmed: "messaging directly to hiring managers... which you know don't answer I reach out again after one week." (00:14:13:17)
+* Jorge: "cada vez que intento en LinkedIn no... siempre hay miles y miles y miles ya de postulantes... no tengo ni esperanza." (00:14:06:18)
+* Victor: "Receiving the recruiters messages from LinkedIn." [Passive reliance on inbox leads]. (00:11:51:21)
+________________
+
+
+7. CATEGORY 5: SELF-LEARNING LOOPS
+Counter: 3 out of 32 calls
+Endless consumption of content without a clear exit strategy.
+* Miguel: "I saw a lot of videos, and I was reading a lot." (00:10:21:32)
+* Bastian: "estoy haciendo con las automatizaciones y todo este como poniendo a prueba pequeños conceptos." [Stuck in the "Experimentation" loop]. (00:00:00:01)
+* Luan: "I tried learning to code on these three platforms, like YouTube and all. I think I am not able to make the progress." (00:38:07:06)
+________________
+
+
+8. CATEGORY 2: CV / RESUME TWEAKS
+Counter: 2 out of 32 calls
+Believing that the document itself is the primary point of failure.
+* Augusto: "de 500 currículum que tirás quizá una agarra." (00:22:13:28)
+* Bojan: "I spent a lot of savings just to test the market... my CV wasn't good enough." (00:33:17:52)
+________________
+
+
+SUMMARY SUMMARY:
+1. Why Previous Attempts Failed (Cat 11): 25 People
+2. Job Application Strategies (Cat 7): 16 People
+3. Vivid Failure Language (Cat 12): 8 People
+4. Interview Prep (Cat 8): 5 People
+5. Courses & Training (Cat 1): 5 People
+6. Networking/Outreach (Cat 6): 3 People
+7. Self-Learning Loops (Cat 5): 3 People
+8. CV Tweaks (Cat 2): 2 People
+1.

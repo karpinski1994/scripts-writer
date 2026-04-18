@@ -1,0 +1,123 @@
+﻿Here is the ranked analysis of external blame and obstacles, sorted by frequency and theme across the 32 sales calls.
+BLAME & OBSTACLE RANKING (By Frequency)
+1. CATEGORY 6: COMPANIES & EMPLOYERS (Mentioned in 26 calls)
+   * The biggest enemy. Prospects blame low-paying local companies, exploitative outsourcing middlemen, bad management, and unrealistic expectations.
+2. 3. CATEGORY 4: LOCAL MARKET LIMITATIONS (Mentioned in 16 calls)
+   * The "Geography is Destiny" frustration. Prospects feel trapped by low local salaries, lack of tech scenes, or economic inflation in their home countries.
+4. 5. CATEGORY 1: HR & RECRUITERS (Mentioned in 14 calls)
+   * The "Gatekeeper" frustration. Recruiter ghosting, lack of technical understanding, and arbitrary rejection are major pain points.
+6. 7. CATEGORY 8: THE SYSTEM / PROCESS ITSELF (Mentioned in 11 calls)
+   * The "Broken Game". Complaints about Leetcode interviews, take-home tasks that are unpaid work, and processes that don't measure real skill.
+8. 9. CATEGORY 5: SATURATION & COMPETITION (Mentioned in 9 calls)
+   * The "Crowded Market". Prospects feel drowned out by thousands of applicants and the difficulty of standing out.
+10. 11. CATEGORY 7: THE JOB MARKET / ECONOMY (Mentioned in 7 calls)
+   * The "Macro" problem. Layoffs, inflation, and general economic downturn are cited as reasons for struggle.
+12. 13. CATEGORY 2: JOB BOARDS & APPLICATIONS SYSTEMS (Mentioned in 6 calls)
+   * The "Black Hole". ATS systems and LinkedIn saturation make applying feel futile.
+14. 15. CATEGORY 3: AI & AUTOMATION (Mentioned in 2 calls)
+   * The "Future Threat". A growing but still minority fear that AI is replacing junior roles or devaluing code.
+16. ________________
+
+
+DETAILED BREAKDOWN BY CATEGORY & THEME
+1. COMPANIES & EMPLOYERS (26 Calls)
+The primary villain: Middlemen, cheap bosses, and bad management.
+Theme: Exploitative Outsourcing / Middlemen
+* "Siempre el no, no se puede, que ya estás ganando mucho... Entonces en un intermediario siempre tener ese problema." (Intermediaries always say no, you earn too much... always a problem with them) — Osmar (Call #23)
+* "But I need a lot of consultants. Like those middleman, companies which try to get a piece of your your earnings." — Victor (Call #32)
+* "Era la mitad de mi sueldo... cómo les pueden pagar tan bajo?" (It was half my salary... how can they pay them so low?) — Osmar (Call #23)
+* "El intermediario estaba ahí solo para pasar el dinero de una mano a otra." (The intermediary was there just to pass money from one hand to another) — Osmar (Call #23)
+Theme: Bad Management / Unrealistic Expectations
+* "Management is late sometimes. Like, yeah. So like, why isn't this done yesterday?" — Bojan (Call #7)
+* "If you give the random people the, let's say, power of controlling the team, it can be disastrous." — Ahmed (Call #2)
+* "Sales is a little bit world famous for its... You want entire Instagram and Facebook [in one week]." — Omer (Call #22)
+* "No me gusta cuando hay tanto control sobre mí." (I don't like when there is so much control over me) — Bastian (Call #5)
+Theme: Cheap / Unwilling to Pay
+* "Subirle un dólar más a mil por hora es es todo un problema porque no quieren, eh, dejar de ganar." (Raising my hourly by $1 is a problem because they don't want to earn less) — Osmar (Call #23)
+* "Se me hace muy poco lo que me quieres dar." (It seems very little what you want to give me) — Bogarin (Call #6)
+* "Solo trabajo con mexicanos... el sector mexicano para el mexicano eh barata mucha." (Mexican sector cheapens labor a lot) — Bogarin (Call #6)
+________________
+
+
+2. LOCAL MARKET LIMITATIONS (16 Calls)
+The trap of geography.
+Theme: Low Local Salaries
+* "Acá en Chile es complicado que te paguen eso en Chile, en el local es complicadísimo." — Roger (Call #25)
+* "En Cuba se paga muy poco... fueron 1500." — Jorge (Call #14)
+* "For Europe is much less because this is the market." — Costas (Call #9)
+* "Salary. Es es es actual. Es a doble of a developers everything chile." — Samuel (Call #26)
+* "The waiter, they don't pay too much." — Suman (Call #28)
+Theme: Lack of Opportunity / Tech Scene
+* "My country. No one want to work with us young people. I don't know why." — Rijad (Call #24)
+* "My country isn't even the part of the EU. So it's even harder to to get people jobs." — Bojan (Call #7)
+* "No todos en Baja California o no X o Y no consume productos a la medida." — Bogarin (Call #6)
+* "In Serbia, some of those that approach me, those like I mean I think they were local companies." — Bojan (Call #7)
+Theme: Economic Inflation
+* "Knowing prices are so high... prices of goods are going just crazy up." — Milos (Call #21)
+* "Everything got so, so expensive... now you can live normally without €2,000." — Milos (Call #21)
+________________
+
+
+3. HR & RECRUITERS (14 Calls)
+The gatekeepers who don't understand tech.
+Theme: Lack of Technical Understanding / "Keyword Matching"
+* "It was never about my actual skills, it was about what I want to be paid." — Bojan (Call #7)
+* "They look at a every single possible detail and it's getting harder and harder." — Imran (Call #30)
+* "Las entrevistas están muy enfocadas a preguntas para juniors." (Interviews are very focused on junior questions) — Osmar (Call #23)
+* "They said that my experience is not enough for the junior person." — Suman (Call #28)
+Theme: Ghosting & Poor Communication
+* "I try to talk with a recruiter and say, hey, hello. Can you give me back? And she said, yes... She never sent the." — Unknown (Call #31)
+* "Me hablaron de otras, pero mandé mi se ve y lo dejaron ahí en visto? No." — Andre (Call #3)
+* "When I getting to the process... it doesn't quite follow up, you know." — Fernando (Call #13)
+Theme: Arbitrary Rejection
+* "They didn't get the accent quite right... The questions were very difficult." — Miguel (Call #18)
+* "They found a guy with 22 years of experience. I couldn't imagine that." — Milos (Call #21)
+________________
+
+
+4. THE SYSTEM / PROCESS ITSELF (11 Calls)
+The flawed mechanics of hiring.
+Theme: "The Game" vs. Real Work
+* "It's more of like, playing the interview game than being just like a good coder." — Bojan (Call #7)
+* "Those stuff they ask in those Google interviews, like, you never actually do that stuff at your job." — Bojan (Call #7)
+* "The test. Sometimes they don't represent real life scenarios like I remember giving test and those tests were like, create a snake." — Costas (Call #9)
+Theme: Tedious/Broken Processes
+* "You need to guess what I want to see... I don't want to see you make me say with this whole." — Omer (Call #22)
+* "Then you have the, with, outsourcing company, and then you have the... interviews with the actual client. Which is like double work." — Victor (Call #32)
+* "Cada paso que das es muy burocrático." (Every step is very bureaucratic) — Bastian (Call #5)
+________________
+
+
+5. SATURATION & COMPETITION (9 Calls)
+The crowded marketplace.
+Theme: Too Many Applicants
+* "Usually I see that you have these jobs on LinkedIn and they have like 100 over 100 applicants." — Victor (Call #32)
+* "Y cada vez que intento en LinkedIn no? O sea, es que siempre hay miles y miles y miles ya de postulantes." — Jorge (Call #14)
+* "De esa etapa de examen tenés que competir contra mil candidatos más." — Augusto (Call #4)
+Theme: Difficulty Standing Out
+* "I believe that currently the full stack... is really oversaturated. And I believe that it's really hard to shine about other people." — Ahmed (Call #2)
+* "People that are doing courses... you need to compete with all of them." — Ahmed (Call #2)
+________________
+
+
+6. THE JOB MARKET / ECONOMY (7 Calls)
+Macro forces.
+* "Everyone is telling, eyes here. Nobody needs developers anymore." — Imran (Call #30)
+* "The current market is so tough. It's it's hard to predict." — Ahmed (Call #2)
+* "Layoffs everywhere... People are getting laid off all the time." — Ahmed (Call #2)
+* "Company of... a hundred deaths, had a single client... And then that client, you know, said bye bye over the nights." — Milos (Call #21)
+________________
+
+
+7. JOB BOARDS & APPLICATIONS SYSTEMS (6 Calls)
+The tools are broken.
+* "I didn't have a good experience with LinkedIn because I, I was like all day long applying for. Jobs. And I didn't get any." — Luan (Call #19)
+* "I didn't see the button where I record my screen... that application was free to freeze." — Omer (Call #22)
+* "It looks so fake." (Referring to LinkedIn timeline gap) — Suman (Call #28)
+________________
+
+
+8. AI & AUTOMATION (2 Calls)
+The emerging threat.
+* "La IA no es tan como nos hicieron creer... Más bien está haciendo que los juniors dependan demasiado de la IA." — Osmar (Call #23)
+* "People that are doing courses... you need to compete with all of them [and AI]." — Ahmed (Call #2)

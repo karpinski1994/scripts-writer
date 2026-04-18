@@ -1,0 +1,89 @@
+﻿Based on a meticulous analysis of the 32 call transcripts, here is the summary of career pains and emotional triggers. They are sorted from most common category to least common. Within each category, the most frequent specific complaints are grouped together using the prospects' exact words.
+________________
+
+
+1. JOB SEARCH FRUSTRATION (Ghosting, The "Void," & High Volume Failure)
+Counter: 18 out of 32 calls
+This is the most dominant pain point. Prospects are working the "numbers game" but receiving zero human engagement.
+Sub-Theme: Applying and disappearing into the "Void"
+* Suman: "I apply and just disappear into the void." (00:04:41)
+* Andre: "mandé mi se ve y lo dejaron ahí en visto?" [Sent my CV and they left me on read]. (00:14:25)
+* Enkil: "I haven't got anything, let's say stable so that I can start." (00:06:50)
+Sub-Theme: High volume of applications with no ROI
+* Augusto: "de 500 currículum que tirás quizá una agarra... tenés que competir contra mil candidatos más." (00:22:13)
+* Luan: "I was like all day long applying for jobs. And I didn't get any, any interview. So for two years. So I just gave up." (00:19:09)
+* Rijad/Kristian: "I applied on every company in Europe and every company in Los... no luck." (00:20:11)
+* Ahmed: "I reach out again after one week... still I don't know the, the current market is so tough." (00:14:13)
+________________
+
+
+2. UNDERPAYMENT RESENTMENT (Local Caps & Middleman Cuts)
+Counter: 15 out of 32 calls
+Prospects are angry that local markets or intermediaries are siphoning off their global market value.
+Sub-Theme: The "Middleman" or Outsourcing Cut
+* Victor: "middleman companies which try to get a piece of your your earnings." (00:01:12)
+* Osmar: "intermediario estaba ahí solo para pasar el dinero de una mano a otra... ¿Entonces para qué un intermediario?" (00:44:04)
+* Victor: "they were basically stealing 50% from the money of that company a lot." (00:31:56)
+Sub-Theme: Being underpaid compared to global peers
+* Miguel: "they do, maybe easier things that I do. And they get maybe the, the, double income... I'm being underpaid." (00:08:12)
+* Jose (Chile): "even though the salary is really good... I just live, you know, like paycheck to paycheck." (00:02:52)
+* Kristian: "the paycheck here is some somewhere about €2,000... it's just the survival." (00:37:21)
+* Samuel: "the thing with the New York charset as en Latinoamérica solo en Latinoamérica es way lower." (00:06:15)
+________________
+
+
+3. LIFE, HEALTH, & FAMILY IMPACT (Stress & Time Poverty)
+Counter: 12 out of 32 calls
+The most visceral category, linking career failure to physical and mental health or family strain.
+Sub-Theme: Physical and Mental Exhaustion
+* Felipe: "After 16 meetings in a day, I just want to go to sleep." (Notes)
+* Bastian: "Cuando tengo tanto trabajo que no logro hacerme cargo de mi propia salud... eso me estresa y me deprime." (00:11:00)
+* Omer: "I just wake up this one morning quit... I was off for 4 or 5 months. Basically, I get it out there." (00:15:05)
+Sub-Theme: Fear of the future / Family pressure
+* Jose (Chile): "if for whatever reason, I lose this job, you know, I don't know what I'm going to do because, you know, I don't have any savings, so that's a big problem." (00:04:34)
+* Diego: "It's affecting my family. I'm stressed all the time." (Notes)
+* Andre: "tengo carga. Cargas muy fuertes." [I have a heavy load. Very heavy burdens]. (00:12:01)
+________________
+
+
+4. FEELING STUCK / TRAPPED (Stagnation & Technical Boredom)
+Counter: 10 out of 32 calls
+A sense of career plateauing and loss of professional identity.
+Sub-Theme: The "Boredom" of Legacy or Repetitive work
+* Bastian: "ya me empiezo a deprimir cuando me veo haciendo lo mismo por más de un mes." (00:07:06)
+* Osmar: "Dedicarme solo a eso no, no, no lo veo, me siento atrapado." [Dedicating myself only to that... I feel trapped]. (00:39:13)
+* Fernando: "It's kind of boring to work in a place." (00:06:14)
+Sub-Theme: Lack of growth/autonomy
+* Augusto: "no puedes meter mano en muchas cosas... están como abstraídas... eso no está bueno para un desarrollador." (00:17:53)
+* Andre: "ahora sí me siento un poco como que estancado porque siento que no estoy aprendiendo nada nuevo." (00:09:00)
+________________
+
+
+5. REJECTION FATIGUE (Outcompeted & Irrelevant Hurdles)
+Counter: 8 out of 32 calls
+Frustration with a recruitment process that feels broken or biased.
+* Omer: "on the last interview they hired a guy who had 22 years bro. 22 years." (00:19:18)
+* Ahmed: "They don't check whether you are a good software engineer, but how well you memorize the list of questions." (00:02:28)
+* Misael: "donde me pillan es cuando me dicen que va a ser como preguntas más y con un inglés más técnico." (00:12:43)
+* Maciej: "No i generalnie zawsze się kończyło o tym, że mieli lepszego kandydata." [And generally it always ended with them having a better candidate]. (Notes)
+________________
+
+
+6. EFFORT WITHOUT RESULTS (The "Broken" Learning Loop)
+Counter: 6 out of 32 calls
+Prospects have invested money and time, but remain in the same professional place.
+* Luan: "I started a course... I was like two years during this course... and I didn't get any, any job." (00:04:24)
+* Osmar: "te venden curso de cómo vas a encontrar trabajo y al final siempre es lo que ya sé y no aporta mucho." (00:09:03)
+* Ahmed: "for every interview... I spent about 4 to 6 hours studying... [no result]." (00:15:45)
+________________
+
+
+7. RAW PAIN PHRASE DUMP (High Emotion & Metaphors)
+Counter: Across all calls
+* Miloš: "Nine circles of, of you getting a job in a company." (00:05:10 - Metaphor for hell)
+* Matheus: "It's like a bubble, and, it's hard to get inside of it." (00:00:11)
+* Suman: "The problem is I don't know what I'm missing." (Notes)
+* Bojan: "I spent a lot of savings just to test the market... my CV wasn't good enough." (00:33:17)
+* Victor: "I never went to a client directly because I didn't have the means to actually." (00:32:23)
+* Osmar: "Para ellos un programador es como un técnico." [To them a programmer is just a technician]. (00:14:35)
+* Bogarin: "mi currículum no refleja la cantidad de proyectos en los que he trabajado." (00:01:15)

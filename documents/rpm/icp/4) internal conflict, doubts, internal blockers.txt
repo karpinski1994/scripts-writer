@@ -1,0 +1,374 @@
+﻿CALL #1 (File: 24min miguel opinion video transcript successful.txt)
+Note: This is a testimonial/success interview, but contains past-tense self-doubts.
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+* "I would have been very nervous because I feel like maybe I'm not good enough for this kind of opportunity." (00:14:23)
+* "These interviews should be very hard... well, I'm not I'm not going to pass this, this kind of interviews." (00:15:23)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+* "Sometimes you have, this kind of mentality, or this kind of mindset where you see, a very good income... and... you think that this is a stupid." (00:14:43)
+CATEGORY 9: VIVID SELF-BLAME LANGUAGE & METAPHORS
+* "Normally you have this kind of, a mind barrier where just we're just in that. That's very difficult." (00:19:17)
+________________
+
+
+CALL #2 (File: ahmed transcript sales call person 5.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+* "Maybe I'm undershooting myself regarding my knowledge and everything." (00:11:54)
+CATEGORY 3: CONFUSION & NOT KNOWING
+* "I don't know the, the current market is so tough. It's it's hard to predict." (00:14:13)
+CATEGORY 5: COMPARISON TO OTHERS
+* "I believe that it's really hard to shine about other people in the field." (00:06:22)
+* "People that are doing courses, and just learning programing in you are you need to compete with all of them." (00:06:50)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+* "I believe that I still need some things to be covered, especially the tools that are being used in cyber security engineering." (00:17:30)
+________________
+
+
+CALL #3 (File: andre.txt - Spanish)
+CATEGORY 3: CONFUSION & NOT KNOWING
+* "O el camino que estoy haciendo no es el correcto. No." (00:16:34)
+(Translation: Or the path I'm taking is not the correct one. No.)
+* "Bueno, que tal vez no estoy. No sé, tal vez poniendo un tiempo Esfuerzo, eh?" (00:16:15)
+(Translation: Well, that maybe I'm not... I don't know, maybe putting in the time Effort, eh?)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+   * "Por ahí hay cosas que todavía tal vez no faltan. Mejorar." (00:16:20)
+(Translation: Maybe there are things that are still missing. Improve.)
+   * "Tal vez no tanto. Fue mi idioma. Pienso que fue mis años de experiencia." (00:13:19)
+(Translation: Maybe not so much. It was my language. I think it was my years of experience.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+      * "Ahora sí me siento un poco como que estancado." (00:09:00 - Feeling of stagnation)
+(Translation: Now I do feel a bit like stuck.)
+________________
+
+
+CALL #4 (File: augusto setter and sales call.txt - Spanish)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+         * "Creo que es una cuestión de tiempo, creo yo, más que otra cosa." (00:22:38 - Blaming time/process)
+(Translation: I think it's a matter of time, I think, more than anything else.)
+         * "Lo único que no tengo hoy en día son, ponele, habilidades cloud que piden." (00:42:08 - Specific skill gap)
+(Translation: The only thing I don't have today are, let's say, cloud skills that they ask for.)
+________________
+
+
+CALL #5 (File: bastian sucessful.txt - Spanish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+            * "Siento que no soy el mejor, sino developer." (00:46:25)
+(Translation: I feel that I am not the best, just [a] developer.)
+CATEGORY 2: IMPOSTOR SYNDROME
+               * "Me pone un poco como a la defensiva, a pensar en llegar a un lugar en el que tal vez hay otras personas que ya han hecho más." (00:54:16)
+(Translation: It puts me a bit on the defensive, to think about arriving at a place where maybe there are other people who have already done more.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                  * "Creo que igual hay algunos como GAPS, al menos como en metodología... Creo que los tengo como al 50%." (00:48:53 - Identifying gaps)
+(Translation: I think there are still some GAPS, at least in methodology... I think I have them at about 50%.)
+                  * "Me metí en muchos proyectos y no supe, no supe priorizar." (00:13:03)
+(Translation: I got into many projects and I didn't know, I didn't know how to prioritize.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                     * "Creo que no me gusta cuando hay tanto control sobre mí." (00:09:09 - Self-awareness of weakness)
+(Translation: I think I don't like it when there is so much control over me.)
+________________
+
+
+CALL #6 (File: bogarin part2.txt - Spanish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                        * "A lo mejor no sé mucho, le digo, pero sí me defiendo." (00:18:50)
+(Translation: Maybe I don't know much, I tell him, but I do defend myself.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                           * "Perdí yo el el la habilidad de llevar una conversación o algo en inglés. Yo la verdad es que no manejo actualmente nada el inglés." (00:12:13)
+(Translation: I lost the the ability to hold a conversation or something in English. I honestly don't handle English at all currently.)
+________________
+
+
+CALL #7 (File: bojan transcript sales call person 6.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                              * "I don't think I have the skills for them [Google]." (00:16:38)
+                              * "I don't know if it's a realistic for me to be that ambitious." (00:16:38)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                              * "My CV wasn't good enough." (00:33:37)
+                              * "I really don't find the time to like prepare for Google type interviews." (00:31:56)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                              * "I'm sorry if I was rude." (00:47:01 - Apologizing for skepticism)
+________________
+
+
+CALL #8 (File: cesar setter transcript.txt - Spanish)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                              * "No he tenido directamente la forma de contactar con una empresa o con un proyecto interesante." (00:09:02)
+(Translation: I haven't had a direct way to contact a company or an interesting project.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                 * "No sabemos cómo ganar clientes, estamos aprendiendo a hacer." (00:08:42 - From Juan Alcarzaz file, mislabeled or mixed?)
+(Translation: We don't know how to win clients, we are learning to do it.)
+________________
+
+
+CALL #9 (File: costas 1.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                    * "I had this imposter syndrome using the CMS and not that was not making mine." (00:05:53)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                    * "Even my CV is not that I don't spend time. I spent my time finishing tasks. I don't do marketing." (00:26:24)
+                                    * "People tell me I'm not very diplomatic." (00:23:11)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                    * "I am not good at pretending I can do it for five minutes, but not much." (00:23:10 - Self-judgment on interview skills)
+________________
+
+
+CALL #10 (File: danilo brasil.txt - Broken Italian/Spanish/Portuguese)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                    * "Poco tengo l'introversione. Poco ma vado però tengo molto ma ma deve essere compreso." (00:37:09 - Personality/Introversion)
+(Translation: I have a bit of introversion...)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                       * "Non prego che stava sta passando se almeno se ciò che ero e sta comportando stava anteriormente donde stava." (00:26:03 - Confused regret)
+________________
+
+
+CALL #11 (File: Diego Rodriguez transcript.txt - Spanish)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                       * "Me deja un poco como sin las bases que pensé que podía tener." (00:04:02)
+(Translation: It leaves me a bit like without the bases I thought I could have.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                          * "Estoy dispuesto a a dar lo mejor de mí, aunque soy consciente que puede que a veces no sea suficiente." (00:11:25 - Fear of inadequacy)
+(Translation: I am willing to give my best, although I am aware that sometimes it may not be enough.)
+________________
+
+
+CALL #12 (File: enkil.txt - Spanish)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                             * "No tengo tiempo." (00:21:04)
+(Translation: I don't have time.)
+________________
+
+
+CALL #13 (File: fernando .txt)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                * "I don't actually quite know how to, find these kind of opportunities outside of Brazil." (00:04:03)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                * "I can't, like, prove my work to these, the recruiters... It's hard to explain what I do here in Brazil." (00:01:01)
+                                                * "Comfort is a very bad frame of promise... I am realizing about that and that that the thing." (00:13:28 - Blaming comfort)
+________________
+
+
+CALL #14 (File: jorge transcript.txt - Spanish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                * "Lo que no domino, lo que no domino, son un ejemplo... Las palabras técnicas de de la programación." (00:15:17)
+(Translation: What I don't master... are for example... the technical words of programming.)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                   * "No sé incluso como conseguir trabajo remoto en otros países siendo de Cuba." (00:13:14)
+(Translation: I don't even know how to get remote work in other countries being from Cuba.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                      * "No tengo actualizado el tema del backend." (00:05:06)
+(Translation: I don't have the backend topic updated [in portfolio].)
+                                                      * "Actualmente se ve, no se encuentra actualizado... Lo primero que debería hacer, sentarme y actualizarlo." (00:04:35)
+(Translation: Currently CV is not updated... The first thing I should do is sit down and update it.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                         * "No tengo ni ni ni esperanza con que me eligen." (00:14:06 - Hopelessness)
+(Translation: I have neither hope nor hope that they choose me.)
+________________
+
+
+CALL #15 (File: jose general investigation transcript successful.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                            * "I don't have, the best, best knowledge or, or deep knowledge, in algorithm." (01:23:46)
+                                                            * "I get a little scared because, as I say, if, if compared with my, my teammate, he has a lot of experience... So I'm like, solution, but, I don't know, as a, as a book." (01:25:22)
+                                                            * "If you have, category of the same pattern or algorithm or informative or deeply informative, concept I have or I guess I have between basic." (01:06:46)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                            * "I don't know why I didn't, I didn't do that." (01:17:17 - Regret about not building personal brand)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                            * "I stock my, my portfolio because with the, with the, with that tool work that I have and I lose my time." (00:30:03 - Blaming time management)
+                                                            * "Maybe I wasn't prepared because I was, focused in my father's, responsibility." (00:38:18)
+                                                            * "I don't have the base of computer information informatics or computer Technology. I don't have that, formally." (01:19:43)
+________________
+
+
+CALL #16 (File: jose sales and setter Sequence 01.txt)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                            * "I don't know how to look for the jobs... I really don't know how to get to the US clients directly." (00:07:47)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                            * "I don't have any strategy, to be honest." (00:08:29)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                            * "I don't know what I'm going to do because, you know, I don't know how to... I mean, I don't have any savings." (00:04:34 - Financial fear/responsibility)
+________________
+
+
+CALL #17 (File: juan alcarzaz .txt - Spanish)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                            * "No tenemos el manejo, no conocemos como exponernos afuera, no sabemos cómo ganar clientes, estamos aprendiendo a hacer." (00:08:42)
+(Translation: We don't have the handle, we don't know how to expose ourselves outside, we don't know how to win clients, we are learning to do it.)
+________________
+
+
+CALL #18 (File: last call with miguel successful.txt)
+Note: Mostly technical mock interview.
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                               * "They're going to ask about memory. Maybe they are going to ask about, about I don't know, garbage collector." (00:04:11 - Anxiety about specific topics)
+________________
+
+
+CALL #19 (File: luan setter call.txt)
+CATEGORY 2: IMPOSTOR SYNDROME
+                                                               * "I didn't get any, any job even with, with a good portfolio... So I just gave up." (00:04:25 - Defeat)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                               * "I was not even Entering my LinkedIn account." (00:18:30 - Admission of inaction)
+                                                               * "I think I didn't finish [the course] because I, I was like two years during this course." (00:05:23)
+________________
+
+
+CALL #20 (File: maciej rawicz sales call stary.docx.txt - Polish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                               * "W Fangu mocno cisną z algorytmiki i generalnie z algorytmów, a z tym się czuję na pewno słabo."
+(Translation: In Faang they push hard on algorithmics... and with that I definitely feel weak.)
+                                                               * "Moje doświadczenie się mocno ogranicza do pisania jakichś prostych automatów."
+(Translation: My experience is heavily limited to writing some simple automations.)
+CATEGORY 4: FEAR OF NOT BEING "GOOD ENOUGH"
+                                                                  * "Jeszcze na taką [pozycję seniorską] się na pewno czuję za mało w butach."
+(Translation: I definitely feel too small in my shoes for such a [senior] position yet.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                     * "Nie mam dyplomu wyższej uczelni. To jest wydaje mi się dosyć problematyczne."
+(Translation: I don't have a university degree. That seems quite problematic to me.)
+                                                                     * "Ewentualnie lekki park obycia w jakimś small talku po angielsku."
+(Translation: Possibly a slight lack of familiarity with small talk in English.)
+________________
+
+
+CALL #21 (File: milos unsu transcript sales call person 2 .txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                        * "I failed to demonstrate some skills. Not that big, but... they looking at every single [detail]." (00:08:31)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                                        * "I don't even know what is the problem anymore... I really can't figure it out." (00:09:05)
+                                                                        * "That doesn't make any sense to me. There's another explanation about that." (00:06:02)
+CATEGORY 4: FEAR OF NOT BEING "GOOD ENOUGH"
+                                                                        * "I'm not an optimist... The, motivation is life decreased? Patience as well." (00:10:05)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                        * "My CV wasn't good enough." (00:33:37)
+                                                                        * "I didn't take that seriously. So you didn't prepare that much as well." (00:07:59 - Admitting lack of prep)
+                                                                        * "I didn't do that. So the best way that you can do it so." (00:41:20)
+CATEGORY 8: "PROBABLY DOING SOMETHING WRONG"
+                                                                        * "Maybe I didn't do that. So the best way that you can do it so." (00:41:20)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                                        * "I took the first chance that came my way." (00:10:05 - Regret)
+________________
+
+
+CALL #22 (File: omer transcript sales call person9.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                        * "I'm not doing the tasks... I came to answer, but I'm not. I don't want to see you make me say with this whole." (00:06:42 - Avoidance due to difficulty/ego)
+CATEGORY 4: FEAR OF NOT BEING "GOOD ENOUGH"
+                                                                        * "If you ask me, 30 years ago, I say yes. Now I can say no [to achieving dreams alone]." (00:26:28)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                        * "My brain stopped... I was a little bit exhausted." (00:28:16 - Excuses for failure)
+                                                                        * "I didn't see the button where I record my screen... I lose 6 or 7 minutes for seeking those." (00:28:54 - Technical incompetence excuse)
+                                                                        * "I didn't have a passport in that time." (00:24:57)
+CATEGORY 8: "PROBABLY DOING SOMETHING WRONG"
+                                                                        * "Maybe something is related to my CV. I'm not sure. Is it enough to do that. Write it to me the right way." (00:32:45)
+________________
+
+
+CALL #23 (File: Osmar Setter call and sales call transcript.txt - Spanish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                        * "Abarcar tanto igual no es tan fácil porque las entrevistas están muy enfocadas a preguntas para juniors que siempre quieres que resuelvas eh ejercicios... que haces cuando vas a salir de la carrera." (00:05:38)
+(Translation: Covering so much isn't easy because interviews are very focused on junior questions... exercises you do when leaving college.)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                                           * "No hay una manera de comprobar que lo que voy a pagar realmente me va a dar algo extra." (00:11:13)
+(Translation: There is no way to prove that what I am going to pay will really give me something extra.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                              * "No he pescado." (00:04:01)
+(Translation: I haven't fished [caught anything].)
+                                                                              * "No he intentado [buscar por mi cuenta]." (00:04:11)
+(Translation: I haven't tried [searching on my own].)
+                                                                              * "Siempre va a depender de de mi estado de ánimo o de las ganas que tenga de hacerlo." (00:49:06)
+(Translation: It will always depend on my mood or the desire I have to do it.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                                                 * "No estoy, mmm, haciendo algo por estar mejor." (00:56:20 - Guilt)
+(Translation: I am not... doing something to be better.)
+                                                                                 * "El problema es... que tus gastos eh siempre decrecen... te acostumbras a cosas que no las necesitas." (01:00:13 - Lifestyle creep)
+(Translation: The problem is... your expenses always decrease [increase?]... you get used to things you don't need.)
+________________
+
+
+CALL #24 (File: rijad transcript sales call person 3.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                                    * "On the last, on the last interview they... they hired a guy who had 22 years bro. I couldn't imagine that. That's my experience. I will I don't know." (00:23:00)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                    * "I tried two times [freelancing] and it was not good... I tried, I applied... But only by sending surveys and things like that... Maybe something but I don't know." (00:12:31)
+________________
+
+
+CALL #25 (File: ROger Vennady.txt - Spanish)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                                    * "Donde me pillan es cuando me dicen que va a ser como preguntas más y con un inglés más técnico... ahí como que me empiezo como a a a subir un poco." (00:06:55)
+(Translation: Where they catch me is when they say it will be questions with more technical English... there I start to kind of struggle.)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                       * "Probablemente no he seguido los procesos, probablemente porque quizá hay otro latino probablemente que tenga mejor desplante, probablemente de inglés." (00:07:25)
+(Translation: Probably I haven't followed the processes... maybe there is another Latino who probably has better English poise.)
+                                                                                       * "Claro, yo no tengo eso [3 years management exp], pero es porque no se me ha dado." (00:11:40)
+(Translation: Of course, I don't have that, but it's because it hasn't been given to me.)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                                                          * "Ahí fue donde empezó como a caer." (00:23:02)
+(Translation: That was where I started to fall.)
+________________
+
+
+CALL #26 (File: samuel from chile setter and sales call transcript.txt)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I haven't really sure that because I have an automotivación or maybe I have to get a message for somewhere." (00:09:08)
+                                                                                             * "I don't have that much tanto activity. Look for another." (00:20:04 - Lack of activity)
+________________
+
+
+CALL #27 (File: Sequence mmohamed unsu.txt)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                                                             * "I think I don't have a proper roadmap on how to start my career." (00:02:12)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I need to focus on my skills... I don't have a proper roadmap." (00:03:42)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                                                             * "I am completely new to this." (00:04:12)
+________________
+
+
+CALL #28 (File: succesful suman transcript setter call person 8.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                                             * "They said that my experience is not enough for the junior person." (00:04:00)
+                                                                                             * "Maybe international companies, they are looking for more experienced people than me, myself." (00:07:39)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "Maybe my Spanish was not convincing." (00:09:28)
+                                                                                             * "I didn't have like very good Spanish." (00:08:21)
+                                                                                             * "Maybe I'm right now 38 years old. Maybe because of my age as well." (00:12:12)
+                                                                                             * "Maybe one of the reason is this... maybe this guy need some... sponsorship." (00:07:39)
+CATEGORY 8: "PROBABLY DOING SOMETHING WRONG"
+                                                                                             * "It looks so fake." (00:06:23 - Referring to his own CV experience gap)
+________________
+
+
+CALL #29 (File: suman transcript sales call last person 8.txt)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I realized I didn't have enough, like, quality, project to post in my to put in my, portfolio." (00:17:29)
+                                                                                             * "I don't have any free time because I'm thinking about, like, my time coding." (00:22:25 - Time management)
+                                                                                             * "I used to save it, studied, I used to... I was like, I don't have any any free time." (00:23:08 - Inaction due to time)
+________________
+
+
+CALL #30 (File: transcript sales call person1 imran.txt)
+CATEGORY 1: DOUBTS ABOUT SKILL LEVEL
+                                                                                             * "I failed to demonstrate some skills. Not that big, but... they looking for, for, for for us to go wrong." (00:08:31)
+CATEGORY 3: CONFUSION & NOT KNOWING
+                                                                                             * "I don't even know what is the problem anymore... I really can't figure it out." (00:09:05)
+                                                                                             * "I didn't take that seriously. So you didn't prepare that much as well." (00:07:59)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I didn't take that seriously." (00:07:59)
+                                                                                             * "I'm not an optimist... The, motivation is life decreased? Patience as well." (00:10:05)
+CATEGORY 8: "PROBABLY DOING SOMETHING WRONG"
+                                                                                             * "My CV wasn't good enough." (00:33:37 - Assumption)
+________________
+
+
+CALL #31 (File: unnown person.txt)
+CATEGORY 2: IMPOSTOR SYNDROME
+                                                                                             * "I think the, I think the the problem maybe with that is my English. So I could only I like B1... I don't feel good and laying to the people." (00:09:12 - Integrity/Imposter conflict)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I am apply in in linking in and and sending in son [some?]. Yes." (00:01:41 - Passive action)
+________________
+
+
+CALL #32 (File: victor setter call.txt)
+CATEGORY 6: SELF-IDENTIFIED BLOCKERS
+                                                                                             * "I'm not applying. They are reaching out to me." (00:13:35 - Passive approach)
+                                                                                             * "I think it's just the time. I just started this year to to seriously looking for for something." (00:13:05 - Procrastination)
+CATEGORY 10: RAW SELF-BLAME PHRASE DUMP
+                                                                                             * "I don't know if it's the... uncertainty within the company." (00:11:09 - Fear based inaction)

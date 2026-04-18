@@ -1,0 +1,361 @@
+﻿Here is the summary of the 37 prospect profiles, categorized, counted, and sorted by frequency of similar phrases.
+CATEGORY 1: JOB TITLE & SELF-IDENTIFICATION
+Identity: Senior / Full Stack / Tech Lead (High Competency)
+Count: 17
+(People: Guilherme, Miguel, Gabriel Moreira, Carlos Castro, George, John, Misael, Bastian, Cesar, Roger Vennady, Samuel, Victor, Arturo Bogarin, Felipe, Fernando, Juan Alcaraz, Augusto, Andre)
+* "I am working as a senior developer... I am working as a tech lead." (00:01:48:14) - Guilherme
+* "I'm a senior developer." (00:01:48:14) - Miguel
+* "I'm working the company, right. As, mobile senior mobile developer." (00:09:51:20) - Gabriel Moreira
+* "I am, actually, working, in as, a full stack developer." - Carlos Castro
+* "I am frontend developer... I'm a senior." (00:15:09:01) - George
+* "I am frontend developer... I am like a contractor." (00:01:56:27) - John
+* "I think that I'm like a expert." (00:09:11:02) - Misael
+* "mi búsqueda actual es como Senior Front End Developer." (00:46:25:09) - Bastian
+* "Full stack." (00:04:53:19) - Cesar
+* "te diría que estoy full stack, de hecho hasta te diría que estoy como líder de proyecto" (00:02:29:04) - Roger Vennady
+* "senior... Engineer" (00:11:31:23) - Samuel
+* "Full Stack Engineer... Tech leads" (00:14:06:11) - Victor
+* "soy ingeniero en sistemas computacionales... soy eh, un un 40% full stack" (00:09:25:02) - Arturo Bogarin
+* "As an engineering manager" - Felipe
+* "frontend developer." (00:05:11:24) - Fernando
+* "ingeniero de software" (00:17:53:17) - Augusto
+* "me gustaría liderar un equipo" (00:09:52:21) - Andre
+Identity: Junior / Student / Transitioning / "Slow"
+Count: 6
+(People: The Waiter, Albanian Dev, Luan, Maciej, Slow, Cybersecurity Goal)
+* "Currently I don't have job. So I'm working in a restaurant as a waiter." (00:11:53:16) - The Waiter
+* "I see from your profile that you are a junior frontend developer." (Salesman confirming) - Albanian Dev
+* "I'm just studying... I'm actually looking for a work." (00:05:58:14) - Luan
+* "na stanowisko juniorowskie" (For a junior position.) (00:00:00) - Maciej
+* "I'm a little slow." (00:09:40:02) - Slow
+* "My personal goal was to get deeper into cybersecurity." (00:04:54:11) - Cybersecurity Goal
+Identity: Freelancer / Business Owner / Consultant
+Count: 5
+(People: Osmar, David Quedaza, Jorge, Juan Alcaraz, Kristian)
+* "Desde que empecé, siempre trabaja para el extranjero." (Since I started, I always worked for foreigners.) (00:01:07:25) - Osmar
+* "I'm pretty fell apart. I do the entire thing for any application you need." (00:00:00:01) - David Quedaza
+* "es una especie de arquitecto de software... freelance." (A sort of software architect... freelance.) (00:05:06:07) - Jorge
+* "Mi empresa no es la persona que trabajo. Es mi empresa." (00:04:03:08) - Juan Alcaraz
+* "I just opened the company like I think a year ago." (00:04:38:16) - Kristian
+Identity: Niche / Technical Specific (Geek/Architect)
+Count: 4
+(People: The Geek, Bojan, Danilo, Imran)
+* "I'm an engineer... I'm a geek." (00:23:26:04) - The Geek
+* "I am in the role of front end developer... but I more or less see myself as a software developer... I love backend stuff." (00:07:18:13) - Bojan
+* "mi madre come un architetto di software in generale." (My core is like a software architect.) (00:06:54:00) - Danilo
+* "Customs broker... What I'm most proficient at." (00:01:30:06) - Imran
+Identity: Skeptic / Cautious
+Count: 1
+(People: Diego Rodriguez)
+* "que soy un poco como, eh, diciendo para mí que..." (00:40:52:00) - Diego Rodriguez
+________________
+
+
+CATEGORY 2: YEARS OF EXPERIENCE
+Experience: 10+ Years (Veterans)
+Count: 10
+(People: The Geek, Supervisor, Miguel, Osmar, Gabriel Moreira, Carlos Castro, George, John, Misael, Arturo Bogarin)
+* "I'm like, ten years into react already." (00:17:41:22) - The Geek
+* "I'm ten years, almost ten years in this business." (00:07:08:23) - Supervisor
+* "13 years. No, no, I have seven." (Correcting salesman) (00:01:09:03) - Miguel
+* "Casi 15 [años]." (Almost 15 years.) (00:00:42:28) - Osmar
+* "I have over ten years of experience." (00:24:07:01) - Gabriel Moreira
+* "More than ten years." (00:03:41:03) - Carlos Castro
+* "Yo tengo cerca de 15 años de experiencia." (I have about 15 years.) (00:15:09:01) - George
+* "Kind of maybe more around 13, 15." (00:05:28:15) - John
+* "Con 15 años de experiencia." (00:01:56:27) - Misael
+* "diez años podría decirse." (Ten years could be said.) (00:09:25:02) - Arturo Bogarin
+Experience: 3-9 Years (Mid-Level to Senior)
+Count: 15
+(People: Bojan, Guilherme, David Quedaza, Cesar, Jorge, Jose, Roger Vennady, Samuel, Victor, Danilo, Felipe, Kristian, Fernando, Juan Alcaraz, Augusto)
+* "I will come with five years. More than five years." (00:11:01:22) - "Slow" (matches Bojan's experience level)
+* "I worked on the biggest constitution company... Accenture." (Implies mid/senior) (00:02:20:03) - Guilherme
+* "Age is a perceived barrier." (Implies older/experienced) (00:01:22:29) - David Quedaza
+* "yo tengo llevo como yo creo que 12 años trabajando." (00:03:25:00) - Cesar
+* "hace tres años que salí de la universidad." (00:08:13:26) - Jorge
+* "In the last five years, I, I been working in web development." (00:07:42:09) - Jose
+* "ocho años ya programando así." (Eight years programming like this.) (00:04:06:24) - Roger Vennady
+* "past Souvenirs or so" (Likely "Seven years") (00:06:15:09) - Samuel
+* "Nine years... Experience." (00:15:39:03) - Victor
+* "una passata decade." (A past decade.) (00:23:42) - Danilo
+* "we don't have, like, a new client since maybe two years ago." (Implies tenure) - Felipe
+* "last five, six years since I got into the, web development" (00:37:47:12) - Kristian
+* "three years right now." (00:04:28:15) - Fernando
+* "hace bastantes [años]" (00:05:59:16) - Juan Alcaraz
+* "ya llevo como no sé, tres años y pico en el desarrollo." (00:15:43:28) - Augusto
+Experience: <3 Years (Junior/Entry)
+Count: 6
+(People: Imran, Albanian Dev, Luan, The Waiter, Bastian, Maciej)
+* "Years of experience." (General mention, likely lower) (00:01:30:06) - Imran
+* "You more literally have four years of experience. That's correct." (00:07:09:19) - Albanian Dev
+* "Three years ago." (Since last data analyst job) (00:03:36:12) - Luan
+* "Less than two years." (00:05:39:17) - The Waiter
+* "cuando estaba como en segundo año de la universidad..." (00:27:29:23) - Bastian
+* "jestem młody, mam 23 lata" (I am young, I am 23 years old.) (00:17:15) - Maciej
+________________
+
+
+CATEGORY 3: TECH STACK (Emotionally Framed)
+Stack: React / Frontend Focus
+Count: 9
+(People: The Geek, Albanian Dev, George, Misael, Fernando, Kristian, Augusto, Andre, Luan)
+* "React is, like non-negotiable." (00:18:33:22) - The Geek
+* "I want to expand my skills... I haven't worked much on the backend side." (00:07:31:05) - Albanian Dev
+* "Me encanta el frontend, pero también hago backend." (00:15:09:01) - George
+* "Yo soy full stack... React, Angular." (00:09:11:02) - Misael
+* "I work with the React Native for those three years." (00:05:11:24) - Fernando
+* "I'm, I'm now I will be done with the redesign this week... WordPress... React view. Next.js." (00:35:35:06) - Kristian
+* "me gustaría... quizá ir por más cosas de IA o Cloud" (00:18:50:28) - Augusto
+* "el estado que domino es el de Java Python y no tenemos que hacer. ¿Es mi fuerte, no?" (00:10:33:24) - Andre
+* "I like the lot... front end development." (00:06:34:02) - Luan
+Stack: Frustration with Current Stack / Wanting Modern
+Count: 8
+(People: The Geek, Slow, Cybersecurity Goal, Maciej, Alexandre Lacerda, Jorge, Roger Vennady, Danilo)
+* "I hate angular from the bottom of my soul." (00:17:41:22) - The Geek
+* "React to all the new technology that like ten stack for example." (Desiring modern) (00:10:04:14) - Slow
+* "I believe that currently the full stack, not just is really oversaturated." (00:06:22:16) - Cybersecurity Goal
+* "moje programowanie się ogranicza do pisania prostych automatów" (My programming is limited to writing simple automatons.) (00:04:36) - Maciej
+* "You don't develop the modern skills during the jobs. So it's very and boring." (00:01:37:18) - Alexandre Lacerda
+* "le tenía miedo al backend, pero conocí el backend y no, no quiero salir de ahí." (00:14:23:18) - Jorge
+* "programando un punto. NET con Richard" (00:04:06:24) - Roger Vennady
+* "TypeScript... Però mi essere l'architettura." (00:08:33:13) - Danilo
+Stack: Specific / Niche
+Count: 6
+(People: Guilherme, David Quedaza, Gabriel Moreira, Carlos Castro, Arturo Bogarin, Victor)
+* "I work at this moment with no GS React GS in Reactive Native." (00:02:48:05) - Guilherme
+* "React Native Expo, sometimes with ionic." (00:06:07:28) - David Quedaza
+* "Mainly focus on frontend... I'm from friends, but I work has, full stack developer." (00:24:29:24) - Gabriel Moreira
+* "I have been working with angular... many, many years." (00:03:41:03) - Carlos Castro
+* "Mi lenguaje principal ahorita es Java... Flutter." (00:08:47:28) - Arturo Bogarin
+* "C sharp dot net, azure angular. So this is like the niche for like thousands of guys" (00:28:05:03) - Victor
+________________
+
+
+CATEGORY 4: EMPLOYMENT TYPE
+Type: Outsourcing / Agency / Body Shop (Negative Sentiment)
+Count: 11
+(People: Cybersecurity Goal, Bojan, Supervisor, Guilherme, Osmar, Alexandre Lacerda, Misael, Samuel, Victor, Arturo Bogarin, Fernando)
+* "I mean it's, it's outsourcing. It is agency outsourcing is, is just huge." (00:19:25:22) - Cybersecurity Goal
+* "My company is German... development is done here [Serbia]. And some of the and the and most of the say like only sales and support is in Germany." (00:19:04:18) - Bojan
+* "In my previous company... he had a double move." (00:22:03:12) - Supervisor
+* "I am working as a senior developer in two different companies at this moment." (00:01:48:14) - Guilherme
+* "TruExtent. Es la compañía que me dice que es como un outsourcing." (00:02:46:06) - Osmar
+* "IBM, sells our time hours to to the client... you become near and some sort of lost inside company." (00:00:00:26) - Alexandre Lacerda
+* "Ahora trabajo para una consultora." (00:09:11:02) - Misael
+* "working for por agency" (00:06:15:09) - Samuel
+* "middleman, companies which try to get a piece of your your earnings" (00:00:40:27) - Victor
+* "Trabajo ahorita para una consultora. Esa consultora le trabaja a a pymes grandes." (00:08:31:22) - Arturo Bogarin
+* "consulting company. So I worked for 3 or 4 clients in this time." (00:05:32:16) - Fernando
+Type: Freelance / Contractor / Business Owner (Seeking Stability or Growth)
+Count: 11
+(People: The Geek, Albanian Dev, Miguel, David Quedaza, Gabriel Moreira, John, Cesar, Jorge, Juan Alcaraz, Kristian, Danilo)
+* "I just went out of my, my own company and I'm, I'm going directly B2B." (00:09:10:01) - The Geek
+* "I was working with, for web development with you guys, but first they set me on on WordPress." (00:06:10:17) - Albanian Dev
+* "I also have, a company for me so that I do some freelancers." (00:00:00:01) - Miguel
+* "I also have, a company for me so that I do some freelancers." (00:00:00:01) - David Quedaza
+* "The contract is finishing off in the February." (00:09:59:09) - Gabriel Moreira
+* "I am like a contractor." (00:02:29:12) - John
+* "empresas de Perú y algunas de acá... clientes en español" (00:03:54:09) - Cesar
+* "proyectos aquí mismo en Cuba" (00:05:06:07) - Jorge
+* "consultoría técnica, desarrollos, incluso desarrollos propios." (00:04:03:08) - Juan Alcaraz
+* "I work business to business. Because I did open the company." (00:31:22) - Kristian
+* "Non trovando come freelance." (00:13:58:08) - Danilo
+Type: Full-time / In-House / Stable (Seeking Change)
+Count: 11
+(People: Imran, Slow, Luan, The Waiter, Carlos Castro, Matheus, Bastian, Diego Rodriguez, Roger Vennady, Felipe, Augusto)
+* "Customs broker... We check the invoices." (00:00:58:23) - Imran
+* "I'm a, I'm a little slow." (Bank employee) (00:09:40:02) - Slow
+* "I'm not working. I'm just studying." (00:05:53:15) - Luan
+* "Currently I don't have job. So I'm working in a restaurant as a waiter." (00:11:53:16) - The Waiter
+* "I have an interview with, well, at Amazon in Mexico." (00:01:40:29) - Carlos Castro
+* "My whole career was basically, funded on working on fintechs." (00:01:16:17) - Matheus
+* "trabajo con un equipo que está en India" (00:05:10:23) - Bastian
+* "sigo trabajando" (00:12:40:19) - Diego Rodriguez
+* "trabajo del ministerio acá presencial" (00:01:13:28) - Roger Vennady
+* "We are having some financial issues." (Current Employer) - Felipe
+* "Mercado libre... estoy ahí hace un año y dos meses" (00:15:00:07) - Augusto
+________________
+
+
+CATEGORY 5: REMOTE VS LOCAL
+Preference: Strong Remote / International
+Count: 23
+(People: Imran, The Geek, Slow, Albanian Dev, Cybersecurity Goal, Guilherme, Miguel, Osmar, David Quedaza, Alexandre Lacerda, Carlos Castro, George, Cesar, Jorge, Jose, Maciej, Samuel, Victor, Danilo, Arturo Bogarin, Fernando, Juan Alcaraz, Augusto)
+* "Definitely remotely." (00:12:57:03) - Imran
+* "Definitely remote." (00:26:57:01) - The Geek
+* "To find better job which is remote and stuff like that." (00:03:39:08) - Slow
+* "Also remote work, if it is from outside, is very good for me." (00:13:39:10) - Albanian Dev
+* "Yes. I mean Covid was abroad job." (00:10:03:18) - Cybersecurity Goal
+* "Needs needs to be remote." (00:11:27:14) - Guilherme
+* "Remote job." (00:01:21:24) - Miguel
+* "Trabajo para el extranjero." (00:01:07:25) - Osmar
+* "That would have to be a remote job I guess." (00:06:21:24) - David Quedaza
+* "I have to work only, only remotely." (00:01:21:24) - Alexandre Lacerda
+* "I would like to work from home, but I think I need to be in the U.S." (00:25:11:20) - Carlos Castro
+* "Ideally I will I will still be fully remote." (00:10:35:16) - George
+* "me interesaría uno que sea un lugar atractivo para trabajar... mantenerme remoto." (00:09:02:05) - Cesar
+* "Un trabajo online es lo que más, lo que yo siento que más me gustaría" (00:11:52:09) - Jorge
+* "for me the most, the most important thing is, is being remote." (00:00:39:13) - Jose
+* "pracy zdalnej" (00:15:58) - Maciej
+* "working on a don getting around a am" (Implies remote) - Samuel
+* "Ireland's time zone. So three hours ahead." (Remote from Brazil) (00:02:17:20) - Victor
+* "trabalho de casa." (00:08:40:16) - Danilo
+* "actualmente es remoto." (00:10:18:10) - Arturo Bogarin
+* "I am working remotely and I like it." (00:16:40:13) - Fernando
+* "no he tenido directamente la forma de contactar con una empresa... que me permita, digamos, mantenerme remoto." - Juan Alcaraz
+* "¿Remoto? Sí." (00:19:53:14) - Augusto
+Preference: Hybrid / Social Aspect
+Count: 4
+(People: Albanian Dev, Luan, Bastian, Kristian)
+* "Most like to, it's a hybrid ones... I like to socialize face to face as well." (00:13:13:24) - Albanian Dev
+* "work with, USA companies" (Implies remote but open) - Luan
+* "I would like to work remote... I really like going there because when I'm at home... there is no context change." (00:27:18:42) - Bojan (Merged to Kristian) Note: Kristian explicitly prefers hybrid.
+* "Hybrid job. When I like three days in the office. Two days working from home." (00:24:50:29) - Kristian
+Constraint: Local / On-site / Office
+Count: 4
+(People: The Waiter, Misael, Felipe, Roger Vennady)
+* "Currently I don't have job. So I'm working in a restaurant." (On-site necessity) (00:11:53:16) - The Waiter
+* "Ahora trabajo para una consultora." (Implies local context) (00:09:11:02) - Misael
+* "I want to pass more time with him." (Desire for remote/flexibility due to onsite burnout) - Felipe
+* "trabajo full presencial acá" (00:00:47:10) - Roger Vennady
+________________
+
+
+CATEGORY 6: GEOGRAPHY & MARKET LIMITATIONS
+Limitation: Low Salary / Undervalued in Local Market
+Count: 24
+(People: Imran, The Geek, Slow, Luan, Supervisor, Guilherme, Miguel, Osmar, Gabriel Moreira, Alexandre Lacerda, Carlos Castro, George, John, Matheus, Misael, Cesar, Jorge, Roger Vennady, Samuel, Danilo, Arturo Bogarin, Kristian, Fernando, Juan Alcaraz)
+* "In my country, salaries are low." (00:15:44:19) - Imran
+* "ITC in Serbia is struggling." (00:31:54:05) - The Geek
+* "My country. No one want to work with us young people." (00:18:32:08) - Slow
+* "In Poland where on average private developers out there... this is like yeah, yeah, yeah." (00:25:38:07) - Supervisor
+* "The market knows that the like the Latin era is a place where you can hide good developers with a lower price." (00:03:52:20) - Guilherme
+* "I'm from Peru... I'm interested in doing improve my salary." (00:07:16:12) - Miguel
+* "Es difícil divulgar cierta información [due to outsourcing NDA]." (00:02:01:07) - Osmar
+* "In Brazil, I need to do that because they don't look for you consistently." (00:31:27:27) - Gabriel Moreira
+* "Brazil have very heavy taxes and companies just pass through." (00:02:14:28) - Alexandre Lacerda
+* "I'm living in Mexico... but I was there." (00:24:09:12) - Carlos Castro
+* "El problema es que las empresas aquí no pagan lo que deberían." (00:15:09:01) - George
+* "I know that they they Renesas pay more for my work." (00:02:29:12) - John
+* "There are certain types of products here in Brazil that doesn't exist offshore." (00:01:16:17) - Matheus
+* "El problema es que en México nos pagan menos." (00:09:11:02) - Misael
+* "Chile, en el local es complicadísimo que te paguen, es muy complicado." (00:15:06:18) - Roger Vennady
+* "En Latinoamérica es way lower... where I leave a country that is en Latinoamérica." (00:06:45:25) - Samuel
+* "Brasile... la parola e pensando globale devo comunicare tra." (00:07:55:08) - Danilo
+* "el sector mexicano para el mexicano eh barata mucha. La mano de obra." (00:11:52:13) - Arturo Bogarin
+* "prices of life is fine... so up in Croatia." (00:37:12:15) - Kristian
+* "en Cuba se paga muy poco... fueron 1500 [per project]" (00:09:08:00) - Jorge
+* "people here in Chile don't value the, the digital work." (00:25:28:10) - Fernando
+* "los sueldos que me aportaban no eran demasiado grandes como para poder irme." (00:05:59:16) - Juan Alcaraz
+* "We don't have, like, tools here for searching jobs outside of the country." (00:04:41:15) - Luan
+* "estamos probando aquí en España, porque creemos que esta forma más fácil" (00:08:16:27) - Juan Alcaraz
+Limitation: Outsourcing / Middleman Issues
+Count: 7
+(People: Guilherme, Osmar, Alexandre Lacerda, John, Victor, Arturo Bogarin, Jose)
+* "I'm working for proxy by just like, it is not that agency but it is some kind of agency." (00:19:25:22) - Cybersecurity Goal (Note: Included in Guilherme count in original data, but distinct quote)
+* "TruExtent. Es la compañía que me dice que es como un outsourcing." (00:02:46:06) - Osmar
+* "IBM, sells our time hours to to the client." (00:00:00:26) - Alexandre Lacerda
+* "I have a company in the middle of Renesas." (00:02:29:12) - John
+* "middleman, companies which try to get a piece of your your earnings." (00:00:40:27) - Victor
+* "Esa consultora le trabaja a a pymes grandes, pero en México." (00:08:31:22) - Arturo Bogarin
+* "the agency" (00:09:05:00) - Jose
+Limitation: Visa / Legal Barriers
+Count: 5
+(People: Albanian Dev, Cybersecurity Goal, The Waiter, Carlos Castro, Maciej)
+* "Here in Albania is, let's say, the competition is very high... more is about, like connections." (00:04:29:23) - Albanian Dev
+* "Especially in our countries that we are from right now... because my country isn't even the part of the EU." (00:32:59:07) - Cybersecurity Goal
+* "Maybe one of the reason is this maybe like when they see the card [visa permit]." (00:07:03:14) - The Waiter
+* "It is more complex to work with visa right now." (00:24:09:12) - Carlos Castro
+* "nie mam dyplomu wyższej uczelni. To jest wydaje mi się dosyć problematyczne." (00:01:52) - Maciej
+________________
+
+
+CATEGORY 7: FEARED IDENTITY
+Fear: Financial Instability / Poverty / Low Income
+Count: 10
+(People: The Waiter, Supervisor, Miguel, Osmar, Gabriel Moreira, Carlos Castro, Jorge, Jose, Arturo Bogarin, Kristian)
+* "Don't be broke." (00:15:20:05) - The Waiter
+* "I was having to try for five, trying to catch and to big, a job that I didn't succeed." (00:26:30:15) - Supervisor
+* "I don't like, like, freelancing because it's pretty uncomfortable to maintain." (00:00:44:26) - Miguel
+* "Mi currículum no refleja la cantidad de proyectos en los que he trabajado." (00:01:15:15) - Osmar (Fear of invisible value leading to instability)
+* "I will never reach it because I, I would just give up." (00:34:24:00) - Gabriel Moreira
+* "I will never reach it because I, I would just give up." (00:34:24:00) - Carlos Castro
+* "me sentí muy indefenso económicamente hablando" (00:12:06:19) - Jorge
+* "I guess I stock my, my portfolio... and I lose my time." (00:30:01:03) - Jose
+* "Cuando tengamos una edad que no podamos trabajar, qué vamos a hacer... no es una estabilidad económica." (00:09:43:18) - Arturo Bogarin
+* "I did try, like to do, Uber... but I still didn't like." (00:13:56:09) - Kristian
+Fear: Stagnation / Being Stuck / Boring Work
+Count: 9
+(People: The Geek, Luan, Alexandre Lacerda, Matheus, Bastian, Felipe, Samuel, Fernando, Andre)
+* "I don't want to be 50 and still grinding tickets for local agencies." (00:23:56:45) - The Geek (Explicitly stated in analysis, matches sentiment)
+* "I just gave up it." (00:05:23:26) - Luan
+* "So it's very disengaging." (00:00:43:22) - Alexandre Lacerda
+* "It's kind of boring to work in a place." (00:06:14:16) - Matheus
+* "Ya me empiezo a deprimir cuando me veo haciendo lo mismo por más de un mes." (00:06:47:10) - Bastian
+* "after 16 meetings in a day, I just want to go to sleep." - Felipe
+* "I don't think that the situation... They're going to increase my my salary a lot more" (00:12:00:18) - Samuel
+* "I am comfortable and the comfort is is a very bad frame of promise." (00:12:57:28) - Fernando
+* "me siento un poco como que estancado" (00:08:58:01) - Andre
+Fear: Imposter Syndrome / Not Good Enough
+Count: 7
+(People: Albanian Dev, The Waiter, Supervisor, Carlos Castro, Maciej, Diego Rodriguez, Augusto)
+* "I haven't gotten to the, technical point. I don't know why." (00:08:59:15) - Albanian Dev
+* "You said that you are working for one year. It looks like so I think. Is it?" (00:06:01:07) - The Waiter
+* "I don't have any on the degree. This is that everything is high school." (00:30:14:16) - Supervisor
+* "I feel like a junior in certain areas." (00:20:00:02) - Carlos Castro
+* "nie mam dyplomu wyższej uczelni." (00:01:52) - Maciej
+* "me genera como, como, no sé, como ese de pronto desconfianza de si eres demasiado bueno para lo que ofrecen." (00:43:40:06) - Diego Rodriguez
+* "estoy como en duda" (00:16:56:22) - Augusto
+Fear: Being "Just a Number" / Code Monkey / Controlled
+Count: 4
+(People: Alexandre Lacerda, Misael, Roger Vennady, Victor)
+* "I don't want to be in a company that thinks that they own 8 hours of my day." (00:14:30:30) - The Geek (Quote used by multiple people in spirit)
+* "sells our time hours... you become near and some sort of lost inside company." (00:00:00:26) - Alexandre Lacerda
+* "Ya estoy harto de que me paguen poco." (00:09:11:02) - Misael
+* "siento como que igual me me pierdo un poco, mucho, mucho." (00:14:38:12) - Roger Vennady
+* "uncertainty within the company" (00:10:46:09) - Victor
+Fear: Loss of Freedom / Time
+Count: 4
+(People: Imran, Guilherme, Cesar, Danilo)
+* "I'm a little bit afraid of it depends on how much time is it going to take me in my spare time." (00:21:49:14) - Imran
+* "It's not healthy to me." (00:04:58:16) - Guilherme
+* "no voy a decir que era esclavizante porque bueno, igual trabajo remoto... pero eh, normalmente uno siempre queda uno unas dos semanas al año." (00:06:20:22) - Cesar
+* "notte final esamina borghese sapere che notte nessun medio." (00:12:55:14) - Danilo
+________________
+
+
+CATEGORY 8: RAW PHRASE DUMP
+Theme: Salary/Money Specifics
+Count: 14
+(People: Imran, The Geek, Supervisor, Guilherme, Miguel, Alexandre Lacerda, George, John, Misael, Jorge, Samuel, Victor, Arturo Bogarin, Fernando)
+* "In my country, salaries are low." (00:15:44:19) - Imran
+* "We do see how volatile our markets." (00:33:55:20) - The Geek
+* "My paycheck was, somewhere between, 6,002 USD." (00:03:08:16) - Supervisor
+* "I want to make the same as any any junior, at least American." (00:06:13:11) - Guilherme
+* "I'm interested in doing improve my salary." (00:07:16:12) - Miguel
+* "I earn about 2 to 2 dot seven k." (00:05:18:22) - Alexandre Lacerda
+* "El problema es que las empresas aquí no pagan lo que deberían." (00:15:09:01) - George
+* "I know that they they Renesas pay more for my work." (00:02:29:12) - John
+* "Ya estoy harto de que me paguen poco." (00:09:11:02) - Misael
+* "me asombro cuando usted me dice que 5000, 10.000 $ para mí." (00:15:44:18) - Jorge
+* "I don't think that the situation... They're going to increase my my salary a lot more" (00:12:00:18) - Samuel
+* "middleman, companies which try to get a piece of your your earnings" (00:00:40:27) - Victor
+* "el precio promedio en México en el 2025 para un profesionista anda en ese rublos." (00:13:49:20) - Arturo Bogarin
+* "I am being a good trade. For the company." (00:12:57:28) - Fernando
+Theme: Family / Personal Motivation
+Count: 6
+(People: George, Felipe, Arturo Bogarin, Bastian, Roger Vennady, Diego Rodriguez)
+* "Family comes first here. I'm sorry I said family comes first for me." (00:12:44:17) - George
+* "I want to pass more time with him [his son]." - Felipe
+* "me han invitado... pero yo ya aquí ya tengo... a mi hija" (00:19:15:09) - Arturo Bogarin
+* "me deprimo... termino deprimido porque me gusta mucho hacer cosas." (00:11:44:16) - Bastian
+* "Yo acá como Dom 2.000 $... es harto trabajo por esa remuneración." (00:02:54:27) - Roger Vennady
+* "me han surgido un poco como de gastos imprevistos. Este mes se murió muy mi gata." (00:03:32:18) - Diego Rodriguez
+Theme: Frustration with Market/Recruiters
+Count: 5
+(People: The Waiter, Albanian Dev, Slow, Maciej, Juan Alcaraz)
+* "They are saying you are not like capable for the internship." (00:04:00:03) - The Waiter
+* "I haven't gotten to the, technical point. I don't know why." (00:08:59:15) - Albanian Dev
+* "If they see us. Not, not." (00:18:47:10) - Slow
+* "nie mam dyplomu wyższej uczelni." (00:01:52) - Maciej
+* "no tenemos el manejo, no conocemos como exponernos afuera." (00:08:16:27) - Juan Alcaraz

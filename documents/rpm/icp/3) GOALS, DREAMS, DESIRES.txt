@@ -1,0 +1,120 @@
+﻿Here is the analysis of the most popular goals, dreams, and desires extracted from the 32 calls, ranked by category frequency and then by specific themes within those categories.
+ASPIRATION RANKING (By Frequency)
+1. CATEGORY 2: INCOME GOALS (Mentioned in 26 calls)
+   * The dominant desire. Almost every prospect has a specific financial target, usually seeking to double or triple their current local salary by accessing US/European rates.
+2. 3. CATEGORY 1: PERFECT WORLD VISUALIZATION (Mentioned in 24 calls)
+   * The "Dream Job" vision. Prospects want technically challenging work, modern stacks (often US startups), and direct employment without middlemen.
+4. 5. CATEGORY 4: FREEDOM & FLEXIBILITY (Mentioned in 16 calls)
+   * The "Autonomy" desire. Remote work is non-negotiable for most. Many want to work on their own terms or have the freedom to travel/manage their time.
+6. 7. CATEGORY 9: EMOTIONAL DRIVERS (Mentioned in 16 calls)
+   * The "Why". Family security, proving oneself, and overcoming stagnation are key motivators.
+8. 9. CATEGORY 3: LIFESTYLE CHANGES (Mentioned in 14 calls)
+   * The "Life Upgrade". Saving for a house, traveling, or simply having peace of mind.
+10. 11. CATEGORY 5: STATUS & RESPECT (Mentioned in 11 calls)
+   * The "Recognition" desire. Wanting to be seen as an expert, leader, or strategic partner, not just a "pair of hands."
+12. 13. CATEGORY 8: TIMELINE EXPECTATIONS (Mentioned in 11 calls)
+   * Urgency. Many want results "as soon as possible" or within 3-6 months.
+14. 15. CATEGORY 6: SECURITY & STABILITY (Mentioned in 6 calls)
+   * Safety. Stable income and contracts are prioritized over high-risk freelance gigs for some.
+16. ________________
+
+
+DETAILED BREAKDOWN BY CATEGORY & THEME
+1. INCOME GOALS (26 Calls)
+The universal desire to break local salary ceilings.
+Theme: The $5k - $8k/Month Target (Breaking the Local Ceiling)
+* "I would love to be around let's say 3.5 K to 4.5 K Mark." — Ahmed (Call #2)
+* "Yo creo que con 5000, 6.000 $. Estoy 6.000 $." — Augusto (Call #4)
+* "Yo calculo que entre 6000 y 7.000 $." — Bastian (Call #5)
+* "Pues realmente si quisiera estar en el sueldo que debe de ser, no entre los 7000 a 8000 al al dólares al mes." — Bogarin (Call #6)
+* "3 to 5 K okay. If I'm free lancing." — Mohamed (Call #27)
+* "Idealmente, me gustaría tener una base al menos de 8000 en adelante." — Cesar (Call #8)
+* "At least seven and a half or, and above." — Victor (Call #32)
+Theme: The High-Ticket Aspirations ($10k+/Month)
+* "Es que está un contrato entre los 80 120 sí que he visto, sobre todo en Estados Unidos." — Juan Alcarzaz (Call #17)
+* "100 will be fine for me, I believe... around 120." — Milos (Call #21)
+* "If I could get 15 K per month... I wouldn't need a second client, basically." — Milos (Call #21)
+Theme: "Whatever is Fair/Market Rate"
+* "If it's for us, the project I would definitely ask is called Europe, much less because this is the market." — Costas (Call #9)
+* "I usually ask. There in a range of 2300 to 2700." — Bojan (Call #7)
+________________
+
+
+2. PERFECT WORLD VISUALIZATION (24 Calls)
+The desire for meaningful, modern, and direct work.
+Theme: Working Directly for US/International Companies (No Middlemen)
+* "I would like to be working for U.S. companies directly." — Victor (Call #32)
+* "Sería trabajar para una empresa extranjera... a modo contractor... y me gustaría como tener dos trabajos." — Roger (Call #25)
+* "Lo que me interesa más es el trato directo con los clientes." — Cesar (Call #8)
+* "I want to work from local stores. Is it the fintech or health care or something else? Maybe something related to the 3D, 3D modeling experience." — Omer (Call #22)
+Theme: Technical Challenge & Modern Stack (No Legacy Code)
+* "Me gusta mucho aprender en general, como aprender para hacer como pequeñas pruebas de conceptos." — Bastian (Call #5)
+* "It's not like some no brainer UI. Make a website, marketing blog type stuff, but I want actual challenging stuff." — Bojan (Call #7)
+* "Pierwsze to jest fajny technologicznie projekt, drugi kasa." (First is a technologically cool project, second is cash) — Maciej (Call #20)
+* "Me suele gustar más la parte arquitectura y la la parte de desarrollar un producto desde desde cero." — Juan Alcarzaz (Call #17)
+Theme: Building a Product/Startup
+* "I am open to anything like freelancing or even building my own business." — Mohamed (Call #27)
+* "Una startup también me encantan las veces que he estado en proyectos donde tenido que iniciar básicamente de cero." — Osmar (Call #23)
+* "Basically I want to achieve that. You can sell the your car or buy the to buy a car in all its you was living in countries." (SaaS Idea) — Omer (Call #22)
+________________
+
+
+3. FREEDOM & FLEXIBILITY (16 Calls)
+The desire for remote work and control over time.
+Theme: Remote Work is Non-Negotiable
+* "No, si es remoto, No, nada, no me importa [where the company is]." — Osmar (Call #23)
+* "Right now I am working remotely and I like it. That's the one of the reason that I am now in London." — Fernando (Call #13)
+* "Remoto y ya con un rol de de senior diría yo." — Augusto (Call #4)
+* "I would love to stay for adult, just to have the flexibility." — Milos (Call #21)
+Theme: Time Freedom / Work-Life Balance
+* "Me gusta en general, tener un buen balance entre la vida y el trabajo." — Bastian (Call #5)
+* "My freedom, basically. The flexibility, would, give me the freedom to organize my time so that nobody suffers. The client or the family." — Milos (Call #21)
+* "Respetaban más los horarios de trabajo de trabajador. El haber lunes a viernes de 08:00 a 17:00 de la tarde no te molestan." — Jorge (Call #14)
+________________
+
+
+4. EMOTIONAL DRIVERS (16 Calls)
+The "Why": Family, Pride, and Self-Worth.
+Theme: Family & Future Security
+* "The first reason for that is because I have a promise midwife father. So I am trying to reach first that that goal." — Unknown (Call #31)
+* "Aparte me da más para pensar en el futuro, eh? Trabajando se nota, no tenemos jubilación." — Osmar (Call #23)
+* "As much as I can before I get kids, because when you get kids, you can get a lot of expensive automobile." — Milos (Call #21)
+Theme: Professional Pride / "I Can Do It"
+* "I'm the first person in protected bank history who made internal application for me, for my name." — Rijad (Call #24)
+* "I want to improve in my development too." — Unknown (Call #31)
+* "That thing I am comfortable I think that is not good for my career or myself at the end." — Fernando (Call #13)
+________________
+
+
+5. LIFESTYLE CHANGES (14 Calls)
+Tangible outcomes of success: Travel, Savings, Peace.
+Theme: Financial Peace & Savings
+* "Salimos un kilo. ¿No, no, no estaría tan estresado, no cree? ... No daría mucha más tranquilidad." — Andre (Call #3)
+* "I mean, I can't save money, for example, I just live, you know, like paycheck to paycheck." — Jose (Call #16)
+* "That's why I ask for my rates. That's why I got enough money to buy my first flat now." — Bojan (Call #7)
+Theme: Travel & Experiences
+* "Well, then I have, let's say luxuries, to allow myself like traveling, and so on." — Milos (Call #21)
+* "Tener tiempo para para hacer sus cosas, para viajar." — Cesar (Call #8)
+* "I want to travel, my leaving Maldives." — Milos (Call #21)
+________________
+
+
+6. STATUS & RESPECT (11 Calls)
+Moving from "coder" to "expert/leader".
+Theme: Leadership & Strategy Roles
+* "Me gustaría mucho apoyar. ¿Dar feedback, eh? Mmm. Liderando." — Andre (Call #3)
+* "I like to, you know, take part in management in the future... Google like some, consultant stuff, team leading stuff." — Bojan (Call #7)
+* "O sea, un posición de de directriz." — Bogarin (Call #6)
+* "Para crearme incluso con lo que estoy ganando ahora. Pero crearme un nombre propio y no depender de el currículum de hacer outsourcing." — Osmar (Call #23)
+________________
+
+
+7. TIMELINE EXPECTATIONS (11 Calls)
+Urgency.
+Theme: "As Soon As Possible" / Immediate Action
+* "I mean, if I'm going to do something, I'll do it immediately." — Ahmed (Call #2)
+* "I would like to get started with right away with this community." — Mohamed (Call #27)
+* "Within the next two months or two, like, I like to be able to get a new job." — Milos (Call #21)
+Theme: Strategic Timeline (3-6 Months)
+* "Mas Como un digamos de three meses." — Enkil (Call #12)
+* "I want to finish that development... and after that I started to looking for more." — Fernando (Call #13)

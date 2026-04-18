@@ -1,0 +1,136 @@
+﻿Here is the ranked analysis of failed attempts and investments, sorted by frequency across the 32 calls.
+FAILED ATTEMPTS RANKING (By Frequency)
+1. CATEGORY 7: JOB APPLICATION STRATEGIES (Mentioned in 17 calls)
+   * The dominant failure. Almost every prospect has tried applying online, sending CVs, or using job boards like LinkedIn, usually with little to no success (ghosting or rejection).
+2. 3. CATEGORY 1: COURSES & TRAINING (Mentioned in 10 calls)
+   * The "Education Trap". Many prospects have taken courses (Udemy, bootcamps, etc.) hoping for a job, only to find themselves still unemployed or underpaid.
+4. 5. CATEGORY 11: WHY PREVIOUS ATTEMPTS FAILED (Mentioned in 6 calls)
+   * Self-Diagnosis. Prospects realizing their approach (e.g., CV quality, lack of experience, local market focus) was the problem.
+6. 7. CATEGORY 6: NETWORKING & OUTREACH ATTEMPTS (Mentioned in 5 calls)
+   * Failed Outreach. Trying to message recruiters or managers directly but getting ignored.
+8. 9. CATEGORY 8: INTERVIEW PREPARATION (Mentioned in 5 calls)
+   * The "Exam" Failure. Preparing for technical interviews (Leetcode, etc.) but failing the actual tests or finding them irrelevant to the job.
+10. 11. CATEGORY 2: CV / RESUME TWEAKS (Mentioned in 5 calls)
+   * Polishing the Turd. Endless rewriting of CVs or cover letters without changing the outcome.
+12. 13. CATEGORY 3: PORTFOLIO & GITHUB EFFORTS (Mentioned in 4 calls)
+   * The "Invisible Work". Building projects and portfolios that no one looks at or cares about.
+14. 15. CATEGORY 5: SELF-LEARNING LOOPS (Mentioned in 2 calls)
+   * The "Tutorial Hell". Spending hours daily studying without a clear path to employment.
+16. 17. CATEGORY 9: PAID SERVICES & COACHING (Mentioned in 2 calls)
+   * Bad Investments. Buying courses or services that turned out to be scams or low-value.
+18. 19. CATEGORY 10: "EVERYTHING" STATEMENTS (Mentioned in 2 calls)
+   * Exhaustion. "I've tried everything."
+20. ________________
+
+
+DETAILED BREAKDOWN BY CATEGORY & THEME
+1. JOB APPLICATION STRATEGIES (17 Calls)
+The definition of insanity: doing the same thing (applying online) and expecting different results.
+Theme: LinkedIn & Job Boards (The "Black Hole")
+* "Currently I'm applying only for jobs... And I'm writing cover letters. Occupational letters. Again which you know don't answer." — Ahmed (Call #2)
+* "Usually I see that you have these jobs on LinkedIn and they have like 100 over 100 applicants. So it's very hard to find those jobs." — Victor (Call #32)
+* "I didn't have a good experience with LinkedIn because I, I was like all day long applying for. Jobs. And I didn't get any." — Luan (Call #19)
+* "Siempre estoy viendo en LinkedIn... pero casi nunca a uno le va bien." (I'm always looking on LinkedIn... but it almost never goes well) — Roger (Call #25)
+* "Cada vez que intento en LinkedIn no? O sea, es que siempre hay miles y miles y miles ya de postulantes... no tengo ni ni ni esperanza." — Jorge (Call #14)
+* "I go to LinkedIn and if there is any Offer, whatever I apply. But most of the offers... are or outsourcing companies." — Jose (Call #16)
+* "O sea, en LinkedIn cuando me Solo vale alguna alguna oferta... ahí postulo." — Andre (Call #3)
+* "I normally used like LinkedIn and Glassdoor... and after that like so difficult to find a job." — Suman (Call #28)
+* "I tried, I applied... But only by sending surveys and things like that." — Rijad (Call #24)
+* "I am apply in in linking in and and sending in son [some?]. Yes." — Unknown (Call #31)
+Theme: High Volume, Low Return
+* "I spent a lot of savings just to test the market... I actually got no callbacks." — Bojan (Call #7)
+* "I think I have applied for more than 20, 25 to 30... I applied for almost 7 to 10 in the last month." — Mohamed (Call #27)
+* "I've gone to maybe three job interviews... I'm waiting for the next steps." — Victor (Call #32)
+* "Try Turing.com try tried again... And, yeah, that's pretty much it that I tried." — Ahmed (Call #2)
+Theme: Passive Waiting / "Hope Strategy"
+* "I'm not applying. They are reaching out to me." — Victor (Call #32)
+* "Some recruiters does message me, but... It doesn't quite follow up." — Fernando (Call #13)
+* "Sinceramente lo que me ha llegado nunca ha ido a a buscar nada afuera." (Honestly what arrived, I never went to look for anything outside) — Juan Alcarzaz (Call #17)
+________________
+
+
+2. COURSES & TRAINING (10 Calls)
+Buying knowledge that doesn't translate to money.
+Theme: Bootcamps & Courses
+* "I started doing courses doing preparations on Hackerrank." — Ahmed (Call #2)
+* "I saw a lot of videos, and I was reading a lot." — Miguel (Call #1)
+* "I started a course... Full stack. Python developer. And I think I didn't finish because I, I was like two years during this course... and I didn't get any job." — Luan (Call #19)
+* "I did a bootcamp." — Suman (Call #28)
+* "I buy online courses, online course of TypeScript." — Suman (Call #29)
+Theme: Bad Experiences / Scams
+* "Ya ha pasado por por algo parecido donde te venden curso de cómo vas a encontrar trabajo y al final siempre es lo que ya sé y no aporta mucho." — Osmar (Call #23)
+* "Fue un curso y. ¿Y ya de entrada era te venden como te vamos a ayudar? ¿Es gratuito...? Lo que te ofrecen es lo mismo que puedes hacer tú solo." — Osmar (Call #23)
+* "Estaba yo aprendiendo sobre Web tres y igual un un diplomado de España... eran proyectos fracasados." — Osmar (Call #23)
+Theme: Upskilling without ROI
+* "Estoy estudiando haciendo un envíe un MVA acá en Chile." — Roger (Call #25)
+* "I tried learning to code on these three platforms, like YouTube and all. I think I am not able to make the progress." — Mohamed (Call #27)
+________________
+
+
+3. WHY PREVIOUS ATTEMPTS FAILED (6 Calls)
+Realization.
+* "It's hard to explain what I do here in Brazil and try to convince the recruiter." — Fernando (Call #13)
+* "We don't have, like, tools here for searching jobs outside of the country." — Fernando (Call #13)
+* "First couple of interviews, which I didn't take that seriously. So you didn't prepare that much as well." — Imran (Call #30)
+* "I don't spent my time finishing tasks. I don't do marketing." — Costas (Call #9)
+* "No estoy hace mucho, digamos, en el mercado con, digamos, con mi nivel de seniority." — Augusto (Call #4)
+________________
+
+
+4. NETWORKING & OUTREACH ATTEMPTS (5 Calls)
+Trying to connect.
+* "Messaging directly to hiring managers." — Ahmed (Call #2)
+* "Reach out again after one week." — Ahmed (Call #2)
+* "The only strategy is to contact, for example, this friend of mine that I just mentioned that worked for a US company." — Jose (Call #16)
+* "I did try, like, just sending emails on LinkedIn and stuff like that, but it didn't work out so well." — Imran (Call #30)
+* "Lo que se estila para obtener plazas de trabajo... es por grupos de Telegram." — Jorge (Call #14)
+________________
+
+
+5. INTERVIEW PREPARATION (5 Calls)
+The "Leetcode Grind".
+* "Doing preparations on Hackerrank." — Ahmed (Call #2)
+* "I've done some leetcode, but there is a lot of... playing the interview game." — Bojan (Call #7)
+* "I really don't find the time to like prepare for Google type interviews." — Bojan (Call #7)
+* "I didn't see the button where I record my screen... I lose 6 or 7 minutes... and they never answered me on that." — Omer (Call #22)
+* "I think it is time for me to sharpen my skills and my LinkedIn as well." — Mohamed (Call #27)
+________________
+
+
+6. CV / RESUME TWEAKS (5 Calls)
+The endless edit.
+* "My CV wasn't good enough." — Bojan (Call #7)
+* "Actualmente se ve, no se encuentra actualizado... Lo primero que debería hacer, sentarme y actualizarlo." — Jorge (Call #14)
+* "I did create like in, in Canva template and it looks nice... but maybe, I don't know, maybe I don't say enough in it." — Imran (Call #30)
+* "I have different versions of CV. I don't think it can get any better." — Imran (Call #30)
+* "Cuando he subido un currículum mejorado... las ofertas que recibido han sido tecnologías que ni siquiera están en mi currículum." — Osmar (Call #23)
+________________
+
+
+7. PORTFOLIO & GITHUB EFFORTS (4 Calls)
+The unseen work.
+* "I want to make like four projects. So I make one, one project... So ultimate goal was to finish the portfolio." — Suman (Call #29)
+* "With a good portfolio with a lot of projects in GitHub. I was not getting any. Not even job interview." — Luan (Call #19)
+* "I just opened the company like I think a year ago and I did create like, company website." — Imran (Call #30)
+* "I stock my, my portfolio because with the, with the, with that tool work that I have and I lose my time." — Jose (Call #15)
+________________
+
+
+8. SELF-LEARNING LOOPS (2 Calls)
+The "Grind".
+* "I spent about 4 to 6 hours studying and practicing for [each interview]... and currently on, inside, I think three application processes." — Ahmed (Call #2)
+* "I'm working on this this project. So I'm going to finish this one maybe today." — Suman (Call #29)
+________________
+
+
+9. PAID SERVICES & COACHING (2 Calls)
+Getting burned.
+* "Ya ha pasado por por algo parecido donde te venden curso de cómo vas a encontrar trabajo." — Osmar (Call #23)
+* "I put my CV in 2015 [LinkedIn date?], and I was like, what's wrong with this?" (Implied automated check failure) — Suman (Call #28)
+________________
+
+
+10. "EVERYTHING" STATEMENTS (2 Calls)
+Exhaustion.
+* "So I'm trying everything, but still I don't know." — Ahmed (Call #2)
+* "I've tried my best... proving technical, soft skills... that doesn't make any sense to me." — Imran (Call #30)
