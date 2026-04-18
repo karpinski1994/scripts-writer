@@ -300,23 +300,37 @@ class PipelineOrchestrator:
             logger.info("[ORCHESTRATOR] Building Hook agent input")
             hook_context = ""
 
-            project_hook_dir = docs_base / "hooks"
-            if project_hook_dir.exists():
-                files = sorted(
-                    [f for f in project_hook_dir.glob("*") if f.is_file() and f.suffix in [".txt", ".md", ".json"]]
+            icp_summary = ""
+            if icp:
+                demographics = icp.demographics
+                pain_pts = ", ".join(icp.pain_points[:3]) if icp.pain_points else ""
+                desires = ", ".join(icp.desires[:3]) if icp.desires else ""
+                icp_summary = (
+                    f"ICP: age={demographics.age_range}, gender={demographics.gender}, "
+                    f"income={demographics.income_level}, pain_points={pain_pts}, desires={desires}"
                 )
-                if files:
-                    for f in files:
-                        hook_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
 
-            playbook_hook_dir = playbooks_base / "hooks"
-            if playbook_hook_dir.exists():
-                files = sorted(
-                    [f for f in playbook_hook_dir.glob("*") if f.is_file() and f.suffix in [".txt", ".md", ".json"]]
+            query = f"{project.topic or ''} {project.draft[:200] if project.draft else ''} {icp_summary}"
+
+            try:
+                from app.rag.faiss_service import (
+                    global_index_exists,
+                    search_global_documents,
                 )
-                if files:
-                    for f in files:
-                        hook_context += f"=== {f.name} ===\n{f.read_text()}\n\n"
+
+                if global_index_exists("global_hooks"):
+                    results = search_global_documents("global_hooks", query, k=5)
+                    if results:
+                        hook_chunks = "\n\n".join(
+                            [
+                                f"[Source: {meta['source']}, Distance: {dist:.2f}]\n{text}"
+                                for text, meta, dist in results
+                            ]
+                        )
+                        hook_context = f"Retrieved hook examples:\n{hook_chunks}"
+                        logger.debug(f"[ORCHESTRATOR] FAISS retrieved {len(results)} hook examples")
+            except Exception as e:
+                logger.warning(f"[ORCHESTRATOR] FAISS hook search failed: {e}, using empty context")
 
             agent = HookAgent()
             input_data = HookAgentInput(

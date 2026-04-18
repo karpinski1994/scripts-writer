@@ -264,6 +264,18 @@ The system is not part of a larger product suite. It is a self-contained tool de
 | SRS-F16.7 | The system shall include retrieved document chunks in ICP agent prompts via FAISS retriever (distinct from piragi_context) | Must |
 | SRS-F16.8 | The system shall retrieve contextual chunks based on the exact query: "form an icp (ideal customer profile) from all the documents take most common lead awarness levels, identities, pain points, goals, dreams, desires, internal conficts, doubts, enemies, external barriers, failed attempts, what did not work, the emotional drivers - why now, and what makes them buy and give me detailed report with quotes based on that" | Must |
 
+### SRS-F17: Global FAISS RAG for Hook Generation
+
+| ID | Requirement | Priority |
+|----|------------|----------|
+| SRS-F17.1 | The system shall support a global FAISS index for hook examples (separate from project-specific indexes) | Must |
+| SRS-F17.2 | The system shall index hook documents from `backend/documents/hook/` directory | Must |
+| SRS-F17.3 | The system shall create global FAISS index via a standalone ingestion script | Must |
+| SRS-F17.4 | The system shall persist global FAISS index to `data/faiss_indexes/global_hooks/` | Must |
+| SRS-F17.5 | The system shall formulate retrieval query using project topic + draft excerpt + ICP profile | Must |
+| SRS-F17.6 | The system shall search global index using FAISS IndexFlatL2 and return top k hook examples | Must |
+| SRS-F17.7 | The system shall pass retrieved hook examples to Hook agent as context | Must |
+
 ---
 
 ## 4. External Interface Requirements

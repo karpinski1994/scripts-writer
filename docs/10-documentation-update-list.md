@@ -539,6 +539,66 @@ Optionally add explicit ingestion endpoint:
 
 ---
 
+# New: Global FAISS RAG for Hook Generation
+
+This plan extends FAISS RAG to power the Hook Agent using a global index (not project-specific uploads).
+
+## Overview
+
+- Hook Agent will search against a global database of best-practice hooks (from `backend/documents/hook/`)
+- No project-specific upload for hooks - data is pre-loaded via ingestion script
+- Uses draft, topic, and ICP profile to formulate retrieval query
+
+## Workflow
+
+```
+1. User generates ICP (unchanged)
+2. User adds subject/draft (unchanged)
+3. User clicks "Run Hook Agent"
+4. Orchestrator formulates query from topic + draft + ICP
+5. FAISS searches global index for best matching hooks
+6. Retrieved hook examples passed to Hook agent
+7. Agent generates hooks displayed in hook-panel.tsx (unchanged)
+```
+
+## Changes
+
+### 1. [NEW] Ingestion Script: `backend/scripts/ingest_hook_data.py`
+- Reads all files from `backend/documents/hook/`
+- Creates global FAISS index at `data/faiss_indexes/global_hooks/`
+- Run manually when hook templates are updated
+
+### 2. [MODIFY] `backend/app/rag/faiss_service.py`
+- Add `create_global_index(docs_path: str, index_name: str)`
+- Add `search_global_documents(index_name: str, query: str, k: int = 5)`
+
+### 3. [MODIFY] `backend/app/pipeline/orchestrator.py`
+- In `_build_agent_inputs` for `StepType.hook`:
+  - Remove: Direct file scanning of `docs_base / "hooks"`
+  - Add: FAISS search using `search_global_documents("global_hooks", query, k=5)`
+  - Query composed from: `project.topic` + first chars of `project.draft` + ICP summary
+
+### 4. [NO CHANGE] `backend/app/agents/hook_agent.py`
+- Already accepts context via existing field
+
+## Data Location
+
+- Source: `backend/documents/hook/` (e.g., "Best headlines .txt")
+- Index: `backend/data/faiss_indexes/global_hooks/`
+
+## Ingestion Command
+
+```bash
+python backend/scripts/ingest_hook_data.py
+```
+
+## Open Questions
+
+1. **Query Composition:** Use `project.topic` + excerpt from `project.draft`. Confirm?
+2. **Hook Directory:** Use `backend/documents/hook/` only, or also `documents/playbooks/hooks`?
+
+---
+
 Open Questions (from implementation plan):
 1. **Embedding Stack:** Using TF-IDF (dummyfiles). Could upgrade to sentence-transformers later.
 2. **Persistence Location:** Using `backend/data/faiss_indexes/` - confirm in docs? Yes, documented.

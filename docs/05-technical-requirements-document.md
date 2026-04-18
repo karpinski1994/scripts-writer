@@ -362,8 +362,16 @@ Project 1──* AnalysisResult
 |----------|-------------|-------------|
 | `ingest_project_documents(project_id, docs_path)` | Loads docs, chunks (1000 chars, 200 overlap), fits TfidfVectorizer, creates FAISS L2 index | `project_id: str`, `docs_path: str` |
 | `search_project_documents(project_id, query, k=5)` | Loads persisted index, searches with L2 distance, returns top k chunks | `project_id: str`, `query: str`, `k: int = 5` |
+| `create_global_index(docs_path, index_name)` | Creates global FAISS index for non-project data (e.g., hooks) | `docs_path: str`, `index_name: str` |
+| `search_global_documents(index_name, query, k=5)` | Searches global FAISS index, returns top k chunks | `index_name: str`, `query: str`, `k: int = 5` |
 
-Persistence: `data/faiss_indexes/{project_id}/` containing `index.faiss` and `metadata.pkl`
+Persistence: `data/faiss_indexes/{project_id}/` for project indexes, `data/faiss_indexes/{index_name}/` for global indexes
+
+#### Ingestion Scripts
+
+| Script | Description | Command |
+|--------|-------------|---------|
+| `backend/scripts/ingest_hook_data.py` | Ingests hook documents from `backend/documents/hook/` to global index | `python backend/scripts/ingest_hook_data.py` |
 
 #### Settings
 
